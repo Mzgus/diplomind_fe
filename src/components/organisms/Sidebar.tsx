@@ -4,8 +4,8 @@ import {
   BookOpenIcon,
   RocketLaunchIcon,
   FlagIcon,
-  ShieldCheckIcon,
   UsersIcon,
+  TrophyIcon,
   DocumentTextIcon,
   UserIcon,
 } from '@heroicons/react/24/solid';
@@ -19,7 +19,7 @@ const navigationGroup1 = [
 ];
 
 const navigationGroup2 = [
-  { name: 'Compétence', href: '/skills', icon: ShieldCheckIcon },
+  { name: 'Compétence', href: '/skills', icon: TrophyIcon},
   { name: 'Classes', href: '/classes', icon: UsersIcon },
   { name: 'Fiches utilisateur', href: '/user-sheets', icon: DocumentTextIcon },
   { name: 'Utilisateurs', href: '/users', icon: UserIcon },
