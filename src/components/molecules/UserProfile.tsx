@@ -1,27 +1,54 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import Avatar from '../atoms/Avatar';
-import { UserCircleIcon, ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import Avatar from "../atoms/Avatar";
+import Badge from "../atoms/Badge";
+import {
+  UserCircleIcon,
+  ArrowLeftOnRectangleIcon,
+} from "@heroicons/react/24/outline";
 
 interface UserProfileProps {
   userName: string;
   avatarUrl: string;
+  profileType: string;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ userName, avatarUrl }) => {
+const getBadgeColor = (
+  profileType: string
+): "blue" | "green" | "yellow" | "red" => {
+  switch (profileType.toLowerCase()) {
+    case "admin":
+      return "red";
+    case "professeur":
+      return "yellow";
+    case "etudiant":
+      return "green";
+    default:
+      return "blue";
+  }
+};
+
+const UserProfile: React.FC<UserProfileProps> = ({
+  userName,
+  avatarUrl,
+  profileType,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Ferme le menu si on clique en dehors
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -31,7 +58,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ userName, avatarUrl }) => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-4 focus:outline-none"
       >
-        <span className="hidden sm:block font-medium text-gray-800">{userName}</span>
+        <div className="hidden sm:flex items-center gap-2">
+          <span className="font-medium text-gray-800">{userName}</span>
+          <Badge color={getBadgeColor(profileType)}>{profileType}</Badge>
+        </div>
         <Avatar src={avatarUrl} alt={`Avatar de ${userName}`} />
       </button>
 
@@ -46,7 +76,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ userName, avatarUrl }) => {
             Mon Compte
           </Link>
           <hr className="border-gray-200" />
-          <a href="/login" className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 capitalize transition-colors duration-300 transform hover:bg-gray-100">
+          <a
+            href="/login"
+            className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 capitalize transition-colors duration-300 transform hover:bg-gray-100"
+          >
             <ArrowLeftOnRectangleIcon className="w-5 h-5" />
             Déconnexion
           </a>
