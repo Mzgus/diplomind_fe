@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
+import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 
 // Données et colonnes fictives pour les compétences
 const skillColumns = [
@@ -18,6 +19,27 @@ const skillData = [
 const Skills: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // State pour la modale de suppression
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
+    null
+  );
+
+  const handleOpenDeleteModal = (skill: Record<string, any>) => {
+    setItemToDelete(skill);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setItemToDelete(null);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log("Suppression confirmée pour:", itemToDelete?.name);
+    handleCloseModal();
+  };
+
   // Logique de filtrage pour les compétences
   const filteredSkills = skillData.filter(
     (skill) =>
@@ -26,16 +48,26 @@ const Skills: React.FC = () => {
   );
 
   return (
-    <PageLayout
-      title="Compétences"
-      searchQuery={searchQuery}
-      onSearchChange={(e) => setSearchQuery(e.target.value)}
-      searchPlaceholder="Rechercher une compétence..."
-      buttonText="Ajouter une compétence"
-      onButtonClick={() => console.log("Ajouter une compétence cliqué")}
-      columns={skillColumns}
-      data={filteredSkills}
-    />
+    <>
+      <PageLayout
+        title="Compétences"
+        searchQuery={searchQuery}
+        onSearchChange={(e) => setSearchQuery(e.target.value)}
+        searchPlaceholder="Rechercher une compétence..."
+        buttonText="Ajouter une compétence"
+        onButtonClick={() => console.log("Ajouter une compétence cliqué")}
+        columns={skillColumns}
+        data={filteredSkills}
+        onDeleteRow={handleOpenDeleteModal}
+      />
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmDelete}
+        itemName={itemToDelete?.name || ""}
+        itemType="la compétence"
+      />
+    </>
   );
 };
 

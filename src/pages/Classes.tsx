@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
+import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 
 // Données et colonnes fictives pour les classes
 const classColumns = [
@@ -33,22 +34,53 @@ const classData = [
 const Classes: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // State pour la modale de suppression
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
+    null
+  );
+
+  const handleOpenDeleteModal = (classe: Record<string, any>) => {
+    setItemToDelete(classe);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setItemToDelete(null);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log("Suppression confirmée pour:", itemToDelete?.name);
+    handleCloseModal();
+  };
+
   // Logique de filtrage pour les classes
   const filteredClasses = classData.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <PageLayout
-      title="Classes"
-      searchQuery={searchQuery}
-      onSearchChange={(e) => setSearchQuery(e.target.value)}
-      searchPlaceholder="Rechercher une classe..."
-      buttonText="Ajouter une classe"
-      onButtonClick={() => console.log("Ajouter une classe cliqué")}
-      columns={classColumns}
-      data={filteredClasses}
-    />
+    <>
+      <PageLayout
+        title="Classes"
+        searchQuery={searchQuery}
+        onSearchChange={(e) => setSearchQuery(e.target.value)}
+        searchPlaceholder="Rechercher une classe..."
+        buttonText="Ajouter une classe"
+        onButtonClick={() => console.log("Ajouter une classe cliqué")}
+        columns={classColumns}
+        data={filteredClasses}
+        onDeleteRow={handleOpenDeleteModal}
+      />
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmDelete}
+        itemName={itemToDelete?.name || ""}
+        itemType="la classe"
+      />
+    </>
   );
 };
 

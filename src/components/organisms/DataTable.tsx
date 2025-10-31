@@ -10,9 +10,16 @@ interface DataTableProps {
   columns: ColumnDefinition[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any>[];
+  onEditRow?: (row: Record<string, any>) => void;
+  onDeleteRow?: (row: Record<string, any>) => void;
 }
 
-const DataTable: React.FC<DataTableProps> = ({ columns, data }) => {
+const DataTable: React.FC<DataTableProps> = ({
+  columns,
+  data,
+  onEditRow,
+  onDeleteRow,
+}) => {
   return (
     <div className="w-full rounded-lg shadow-md border border-gray-200">
       <div className="w-full overflow-auto max-h-[60vh]">
@@ -36,7 +43,10 @@ const DataTable: React.FC<DataTableProps> = ({ columns, data }) => {
                   </td>
                 ))}
                 <td className="px-4 py-3 text-sm">
-                  <ActionMenu />
+                  <ActionMenu
+                    onEdit={onEditRow ? () => onEditRow(row) : undefined}
+                    onDelete={onDeleteRow ? () => onDeleteRow(row) : undefined}
+                  />
                 </td>
               </tr>
             ))}

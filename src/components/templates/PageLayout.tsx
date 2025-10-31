@@ -17,6 +17,8 @@ interface PageLayoutProps {
   onButtonClick?: () => void;
   columns: ColumnDefinition[];
   data: Record<string, any>[];
+  onEditRow?: (row: Record<string, any>) => void;
+  onDeleteRow?: (row: Record<string, any>) => void;
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
@@ -28,6 +30,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   onButtonClick,
   columns,
   data,
+  onEditRow,
+  onDeleteRow,
 }) => {
   return (
     <div className="p-6">
@@ -46,7 +50,12 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           </Button>
         </div>
       </div>
-      <DataTable columns={columns} data={data} />
+      <DataTable
+        columns={columns}
+        data={data}
+        onEditRow={onEditRow}
+        onDeleteRow={onDeleteRow}
+      />
     </div>
   );
 };

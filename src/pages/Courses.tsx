@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
+import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 
 // Données et colonnes fictives pour les cours
 const courseColumns = [
@@ -39,6 +40,27 @@ const courseData = [
 const Courses: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // State pour la modale de suppression
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
+    null
+  );
+
+  const handleOpenDeleteModal = (course: Record<string, any>) => {
+    setItemToDelete(course);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setItemToDelete(null);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log("Suppression confirmée pour:", itemToDelete?.title);
+    handleCloseModal();
+  };
+
   // Logique de filtrage pour les cours
   const filteredCourses = courseData.filter(
     (course) =>
@@ -47,16 +69,26 @@ const Courses: React.FC = () => {
   );
 
   return (
-    <PageLayout
-      title="Cours"
-      searchQuery={searchQuery}
-      onSearchChange={(e) => setSearchQuery(e.target.value)}
-      searchPlaceholder="Rechercher un cours..."
-      buttonText="Ajouter un cours"
-      onButtonClick={() => console.log("Ajouter un cours cliqué")}
-      columns={courseColumns}
-      data={filteredCourses}
-    />
+    <>
+      <PageLayout
+        title="Cours"
+        searchQuery={searchQuery}
+        onSearchChange={(e) => setSearchQuery(e.target.value)}
+        searchPlaceholder="Rechercher un cours..."
+        buttonText="Ajouter un cours"
+        onButtonClick={() => console.log("Ajouter un cours cliqué")}
+        columns={courseColumns}
+        data={filteredCourses}
+        onDeleteRow={handleOpenDeleteModal}
+      />
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmDelete}
+        itemName={itemToDelete?.title || ""}
+        itemType="le cours"
+      />
+    </>
   );
 };
 

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
+import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 
 // Données et colonnes fictives pour les fiches utilisateur
 const userSheetColumns = [
@@ -33,22 +34,53 @@ const userSheetData = [
 const UserSheets: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // State pour la modale de suppression
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
+    null
+  );
+
+  const handleOpenDeleteModal = (sheet: Record<string, any>) => {
+    setItemToDelete(sheet);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setItemToDelete(null);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log("Suppression confirmée pour:", itemToDelete?.userName);
+    handleCloseModal();
+  };
+
   // Logique de filtrage pour les fiches
   const filteredUserSheets = userSheetData.filter((sheet) =>
     sheet.userName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <PageLayout
-      title="Fiches Utilisateur"
-      searchQuery={searchQuery}
-      onSearchChange={(e) => setSearchQuery(e.target.value)}
-      searchPlaceholder="Rechercher une fiche..."
-      buttonText="Ajouter une fiche"
-      onButtonClick={() => console.log("Ajouter une fiche cliqué")}
-      columns={userSheetColumns}
-      data={filteredUserSheets}
-    />
+    <>
+      <PageLayout
+        title="Fiches Utilisateur"
+        searchQuery={searchQuery}
+        onSearchChange={(e) => setSearchQuery(e.target.value)}
+        searchPlaceholder="Rechercher une fiche..."
+        buttonText="Ajouter une fiche"
+        onButtonClick={() => console.log("Ajouter une fiche cliqué")}
+        columns={userSheetColumns}
+        data={filteredUserSheets}
+        onDeleteRow={handleOpenDeleteModal}
+      />
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmDelete}
+        itemName={itemToDelete?.userName || ""}
+        itemType="la fiche utilisateur"
+      />
+    </>
   );
 };
 

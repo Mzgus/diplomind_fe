@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
+import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 
 // Données et colonnes fictives pour l'exemple
 const userColumns = [
@@ -34,46 +35,31 @@ const userData = [
     role: "Editeur",
     status: "Actif",
   },
-  {
-    name: "Sophie Lambert",
-    email: "sophie.lambert@example.com",
-    role: "Editeur",
-    status: "Actif",
-  },
-  {
-    name: "Sophie Lambert",
-    email: "sophie.lambert@example.com",
-    role: "Editeur",
-    status: "Actif",
-  },
-  {
-    name: "Sophie Lambert",
-    email: "sophie.lambert@example.com",
-    role: "Editeur",
-    status: "Actif",
-  },
-  {
-    name: "Sophie Lambert",
-    email: "sophie.lambert@example.com",
-    role: "Editeur",
-    status: "Actif",
-  },
-  {
-    name: "Sophie Lambert",
-    email: "sophie.lambert@example.com",
-    role: "Editeur",
-    status: "Actif",
-  },
-  {
-    name: "Sophie Lambert",
-    email: "sophie.lambert@example.com",
-    role: "Editeur",
-    status: "Actif",
-  },
 ];
 
 const Users: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
+
+  // State pour la modale de suppression
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
+    null
+  );
+
+  const handleOpenDeleteModal = (user: Record<string, any>) => {
+    setItemToDelete(user);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setItemToDelete(null);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log("Suppression confirmée pour:", itemToDelete?.name);
+    handleCloseModal();
+  };
 
   // Logique de filtrage (sera utile plus tard)
   const filteredUsers = userData.filter(
@@ -83,16 +69,26 @@ const Users: React.FC = () => {
   );
 
   return (
-    <PageLayout
-      title="Utilisateurs"
-      searchQuery={searchQuery}
-      onSearchChange={(e) => setSearchQuery(e.target.value)}
-      searchPlaceholder="Rechercher un utilisateur..."
-      buttonText="Ajouter un utilisateur"
-      onButtonClick={() => console.log("Ajouter un utilisateur cliqué")}
-      columns={userColumns}
-      data={filteredUsers}
-    />
+    <>
+      <PageLayout
+        title="Utilisateurs"
+        searchQuery={searchQuery}
+        onSearchChange={(e) => setSearchQuery(e.target.value)}
+        searchPlaceholder="Rechercher un utilisateur..."
+        buttonText="Ajouter un utilisateur"
+        onButtonClick={() => console.log("Ajouter un utilisateur cliqué")}
+        columns={userColumns}
+        data={filteredUsers}
+        onDeleteRow={handleOpenDeleteModal}
+      />
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmDelete}
+        itemName={itemToDelete?.name || ""}
+        itemType="l'utilisateur"
+      />
+    </>
   );
 };
 

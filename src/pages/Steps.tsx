@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
+import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 
 // Données et colonnes fictives pour les étapes
 const stepColumns = [
@@ -39,22 +40,53 @@ const stepData = [
 const Steps: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // State pour la modale de suppression
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
+    null
+  );
+
+  const handleOpenDeleteModal = (step: Record<string, any>) => {
+    setItemToDelete(step);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setItemToDelete(null);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log("Suppression confirmée pour:", itemToDelete?.name);
+    handleCloseModal();
+  };
+
   // Logique de filtrage pour les étapes
   const filteredSteps = stepData.filter((step) =>
     step.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <PageLayout
-      title="Étapes"
-      searchQuery={searchQuery}
-      onSearchChange={(e) => setSearchQuery(e.target.value)}
-      searchPlaceholder="Rechercher une étape..."
-      buttonText="Ajouter une étape"
-      onButtonClick={() => console.log("Ajouter une étape cliqué")}
-      columns={stepColumns}
-      data={filteredSteps}
-    />
+    <>
+      <PageLayout
+        title="Étapes"
+        searchQuery={searchQuery}
+        onSearchChange={(e) => setSearchQuery(e.target.value)}
+        searchPlaceholder="Rechercher une étape..."
+        buttonText="Ajouter une étape"
+        onButtonClick={() => console.log("Ajouter une étape cliqué")}
+        columns={stepColumns}
+        data={filteredSteps}
+        onDeleteRow={handleOpenDeleteModal}
+      />
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmDelete}
+        itemName={itemToDelete?.name || ""}
+        itemType="l'étape"
+      />
+    </>
   );
 };
 

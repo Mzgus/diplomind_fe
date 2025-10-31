@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
+import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 
 // Données et colonnes fictives pour les projets
 const projectColumns = [
@@ -39,6 +40,27 @@ const projectData = [
 const Project: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // State pour la modale de suppression
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
+    null
+  );
+
+  const handleOpenDeleteModal = (project: Record<string, any>) => {
+    setItemToDelete(project);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setItemToDelete(null);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log("Suppression confirmée pour:", itemToDelete?.name);
+    handleCloseModal();
+  };
+
   // Logique de filtrage pour les projets
   const filteredProjects = projectData.filter(
     (project) =>
@@ -47,16 +69,26 @@ const Project: React.FC = () => {
   );
 
   return (
-    <PageLayout
-      title="Projets"
-      searchQuery={searchQuery}
-      onSearchChange={(e) => setSearchQuery(e.target.value)}
-      searchPlaceholder="Rechercher un projet..."
-      buttonText="Ajouter un projet"
-      onButtonClick={() => console.log("Ajouter un projet cliqué")}
-      columns={projectColumns}
-      data={filteredProjects}
-    />
+    <>
+      <PageLayout
+        title="Projets"
+        searchQuery={searchQuery}
+        onSearchChange={(e) => setSearchQuery(e.target.value)}
+        searchPlaceholder="Rechercher un projet..."
+        buttonText="Ajouter un projet"
+        onButtonClick={() => console.log("Ajouter un projet cliqué")}
+        columns={projectColumns}
+        data={filteredProjects}
+        onDeleteRow={handleOpenDeleteModal}
+      />
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onConfirm={handleConfirmDelete}
+        itemName={itemToDelete?.name || ""}
+        itemType="le projet"
+      />
+    </>
   );
 };
 
