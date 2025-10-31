@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
+import FormModal from "../components/organisms/FormModal";
+import FormField from "../components/molecules/FormField";
 
 // Données et colonnes fictives pour l'exemple
 const userColumns = [
@@ -40,6 +42,15 @@ const userData = [
 const Users: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // State pour la modale de création
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    name: "",
+    email: "",
+    role: "",
+    status: "Actif",
+  });
+
   // State pour la modale de suppression
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
@@ -61,6 +72,12 @@ const Users: React.FC = () => {
     handleCloseModal();
   };
 
+  const handleSaveNewUser = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    console.log("Sauvegarde du nouvel utilisateur:", newUser);
+    setIsCreateModalOpen(false);
+  };
+
   // Logique de filtrage (sera utile plus tard)
   const filteredUsers = userData.filter(
     (user) =>
@@ -76,7 +93,7 @@ const Users: React.FC = () => {
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher un utilisateur..."
         buttonText="Ajouter un utilisateur"
-        onButtonClick={() => console.log("Ajouter un utilisateur cliqué")}
+        onButtonClick={() => setIsCreateModalOpen(true)}
         columns={userColumns}
         data={filteredUsers}
         onDeleteRow={handleOpenDeleteModal}
@@ -88,6 +105,30 @@ const Users: React.FC = () => {
         itemName={itemToDelete?.name || ""}
         itemType="l'utilisateur"
       />
+      <FormModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSave={handleSaveNewUser}
+        title="Créer un nouvel utilisateur"
+      >
+        <FormField
+          label="Nom complet"
+          type="text"
+          id="new-user-name"
+          value={newUser.name}
+          onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+          required
+        />
+        <FormField
+          label="Email"
+          type="email"
+          id="new-user-email"
+          value={newUser.email}
+          onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+          required
+        />
+        {/* Ajoutez d'autres champs ici (rôle, statut, etc.) */}
+      </FormModal>
     </>
   );
 };

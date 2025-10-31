@@ -16,27 +16,22 @@ const Account: React.FC = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Mon Compte</h1>
-      <div className="bg-white p-8 rounded-xl shadow-md max-w-2xl mx-auto">
+      <div className="bg-white p-8 pt-5 rounded-xl shadow-md max-w-2xl mx-auto">
+        <div className="mb-4">
+            <Badge color="red">{userAccount.profileType}</Badge>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
           <InfoField label="Nom" value={userAccount.lastName} />
           <InfoField label="Prénom" value={userAccount.firstName} />
         </div>
         <InfoField label="Email" value={userAccount.email} />
-        <div className="mb-4">
-          <Label className="text-sm font-medium text-gray-600">
-            Type de profil
-          </Label>
-          <div className="mt-2">
-            <Badge color="red">{userAccount.profileType}</Badge>
-          </div>
-        </div>
 
         <div className="mt-8 flex justify-end">
           <Button
             onClick={() => console.log("Modification du compte")}
             className="w-full md:w-auto"
           >
-            Modifier mes informations
+            Modifier mon mot de passe
           </Button>
         </div>
       </div>
