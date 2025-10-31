@@ -1,27 +1,41 @@
 import React, { useState } from "react";
-import SearchBar from "../components/molecules/SearchBar";
-import Button from "../components/atoms/Button";
+import PageLayout from "../components/templates/PageLayout";
+
+// Données et colonnes fictives pour les compétences
+const skillColumns = [
+  { key: "name", header: "Compétence" },
+  { key: "category", header: "Catégorie" },
+  { key: "level", header: "Niveau Requis" },
+];
+
+const skillData = [
+  { name: "React", category: "Frontend", level: "Intermédiaire" },
+  { name: "Node.js", category: "Backend", level: "Intermédiaire" },
+  { name: "Figma", category: "Design", level: "Débutant" },
+  { name: "SQL", category: "Base de données", level: "Avancé" },
+];
 
 const Skills: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Logique de filtrage pour les compétences
+  const filteredSkills = skillData.filter(
+    (skill) =>
+      skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      skill.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4 text-gray-800">Compétences</h1>
-      <div className="flex items-center justify-between mb-8">
-        <div className="w-3/4 mr-4">
-          <SearchBar
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher une compétence..."
-          />
-        </div>
-        <div className="w-1/4">
-          <Button className="w-full">Ajouter une compétence</Button>
-        </div>
-      </div>
-      {/* Le contenu de votre page (liste des compétences, etc.) viendra ici */}
-    </div>
+    <PageLayout
+      title="Compétences"
+      searchQuery={searchQuery}
+      onSearchChange={(e) => setSearchQuery(e.target.value)}
+      searchPlaceholder="Rechercher une compétence..."
+      buttonText="Ajouter une compétence"
+      onButtonClick={() => console.log("Ajouter une compétence cliqué")}
+      columns={skillColumns}
+      data={filteredSkills}
+    />
   );
 };
 

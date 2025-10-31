@@ -1,27 +1,63 @@
 import React, { useState } from "react";
-import SearchBar from "../components/molecules/SearchBar";
-import Button from "../components/atoms/Button";
+import PageLayout from "../components/templates/PageLayout";
+import DataTable from "../components/organisms/DataTable";
+
+// Données et colonnes fictives pour l'exemple
+const userColumns = [
+  { key: "name", header: "Nom" },
+  { key: "email", header: "Email" },
+  { key: "role", header: "Rôle" },
+  { key: "status", header: "Statut" },
+];
+
+const userData = [
+  {
+    name: "Jean Dupont",
+    email: "jean.dupont@example.com",
+    role: "Admin",
+    status: "Actif",
+  },
+  {
+    name: "Marie Curie",
+    email: "marie.curie@example.com",
+    role: "Utilisateur",
+    status: "Actif",
+  },
+  {
+    name: "Pierre Martin",
+    email: "pierre.martin@example.com",
+    role: "Utilisateur",
+    status: "Inactif",
+  },
+  {
+    name: "Sophie Lambert",
+    email: "sophie.lambert@example.com",
+    role: "Editeur",
+    status: "Actif",
+  },
+];
 
 const Users: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Logique de filtrage (sera utile plus tard)
+  const filteredUsers = userData.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4 text-gray-800">Utilisateurs</h1>
-      <div className="flex items-center justify-between mb-8">
-        <div className="w-3/4 mr-4">
-          <SearchBar
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher un utilisateur..."
-          />
-        </div>
-        <div className="w-1/4">
-          <Button className="w-full">Ajouter un utilisateur</Button>
-        </div>
-      </div>
-      {/* Le contenu de votre page (liste des utilisateurs, etc.) viendra ici */}
-    </div>
+    <PageLayout
+      title="Utilisateurs"
+      searchQuery={searchQuery}
+      onSearchChange={(e) => setSearchQuery(e.target.value)}
+      searchPlaceholder="Rechercher un utilisateur..."
+      buttonText="Ajouter un utilisateur"
+      onButtonClick={() => console.log("Ajouter un utilisateur cliqué")}
+      columns={userColumns}
+      data={filteredUsers}
+    />
   );
 };
 

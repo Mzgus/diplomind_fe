@@ -1,28 +1,63 @@
 import React, { useState } from "react";
-import SearchBar from "../components/molecules/SearchBar";
-import Button from "../components/atoms/Button";
+import PageLayout from "../components/templates/PageLayout";
+import DataTable from "../components/organisms/DataTable";
+
+// Données et colonnes fictives pour les cours
+const courseColumns = [
+  { key: "title", header: "Titre du Cours" },
+  { key: "category", header: "Catégorie" },
+  { key: "instructor", header: "Instructeur" },
+  { key: "status", header: "Statut" },
+];
+
+const courseData = [
+  {
+    title: "Introduction à React",
+    category: "Développement Web",
+    instructor: "Sophie Lambert",
+    status: "Publié",
+  },
+  {
+    title: "TypeScript pour les pros",
+    category: "Développement Web",
+    instructor: "Jean Dupont",
+    status: "Publié",
+  },
+  {
+    title: "Bases de données SQL",
+    category: "Backend",
+    instructor: "Pierre Martin",
+    status: "Brouillon",
+  },
+  {
+    title: "Design UI/UX",
+    category: "Design",
+    instructor: "Marie Curie",
+    status: "Publié",
+  },
+];
 
 const Courses: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Logique de filtrage pour les cours
+  const filteredCourses = courseData.filter(
+    (course) =>
+      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      course.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4 text-gray-800">Cours</h1>
-      <div className="flex items-center justify-between mb-8">
-        <div className="w-3/4 mr-4">
-          <SearchBar
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher un cours..."
-          />
-        </div>
-        <div className="w-1/4">
-          <Button className="w-full">Ajouter un cours</Button>
-        </div>
-      </div>
-      {/* Le contenu de votre page (liste des cours, etc.) viendra ici */}
-      <p>Contenu de la page des cours.</p>
-    </div>
+    <PageLayout
+      title="Cours"
+      searchQuery={searchQuery}
+      onSearchChange={(e) => setSearchQuery(e.target.value)}
+      searchPlaceholder="Rechercher un cours..."
+      buttonText="Ajouter un cours"
+      onButtonClick={() => console.log("Ajouter un cours cliqué")}
+      columns={courseColumns}
+      data={filteredCourses}
+    />
   );
 };
 

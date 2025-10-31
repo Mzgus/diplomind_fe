@@ -1,29 +1,54 @@
 import React, { useState } from "react";
-import SearchBar from "../components/molecules/SearchBar";
-import Button from "../components/atoms/Button";
+import PageLayout from "../components/templates/PageLayout";
+
+  // Données et colonnes fictives pour les fiches utilisateur
+const userSheetColumns = [
+  { key: "userName", header: "Utilisateur" },
+  { key: "className", header: "Classe" },
+  { key: "completion", header: "Complétion" },
+  { key: "lastUpdate", header: "Dernière MàJ" },
+];
+
+const userSheetData = [
+  {
+    userName: "Alice Martin",
+    className: "Développeur Web - 2024",
+    completion: "80%",
+    lastUpdate: "10/07/2024",
+  },
+  {
+    userName: "Bob Garcia",
+    className: "Développeur Web - 2024",
+    completion: "65%",
+    lastUpdate: "08/07/2024",
+  },
+  {
+    userName: "Charlie Brown",
+    className: "Designer UI/UX - 2024",
+    completion: "95%",
+    lastUpdate: "11/07/2024",
+  },
+];
 
 const UserSheets: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Logique de filtrage pour les fiches
+  const filteredUserSheets = userSheetData.filter((sheet) =>
+    sheet.userName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4 text-gray-800">
-        Fiches Utilisateur
-      </h1>
-      <div className="flex items-center justify-between mb-8">
-        <div className="w-3/4 mr-4">
-          <SearchBar
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Rechercher une fiche..."
-          />
-        </div>
-        <div className="w-1/4">
-          <Button className="w-full">Ajouter une fiche</Button>
-        </div>
-      </div>
-      {/* Le contenu de votre page (liste des fiches, etc.) viendra ici */}
-    </div>
+    <PageLayout
+      title="Fiches Utilisateur"
+      searchQuery={searchQuery}
+      onSearchChange={(e) => setSearchQuery(e.target.value)}
+      searchPlaceholder="Rechercher une fiche..."
+      buttonText="Ajouter une fiche"
+      onButtonClick={() => console.log("Ajouter une fiche cliqué")}
+      columns={userSheetColumns}
+      data={filteredUserSheets}
+    />
   );
 };
 
