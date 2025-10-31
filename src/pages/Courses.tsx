@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
-import DataTable from "../components/organisms/DataTable";
 
 // Données et colonnes fictives pour les cours
 const courseColumns = [

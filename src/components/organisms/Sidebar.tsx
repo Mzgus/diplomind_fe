@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Squares2X2Icon,
   BookOpenIcon,
@@ -8,21 +8,21 @@ import {
   TrophyIcon,
   DocumentTextIcon,
   UserIcon,
-} from '@heroicons/react/24/solid';
-import SidebarNavItem from '../molecules/SidebarNavItem';
+} from "@heroicons/react/24/solid";
+import SidebarNavItem from "../molecules/SidebarNavItem";
 
 const navigationGroup1 = [
-  { name: 'Dashboard', href: '/', icon: Squares2X2Icon },
-  { name: 'Cours', href: '/courses', icon: BookOpenIcon },
-  { name: 'Projet', href: '/project', icon: RocketLaunchIcon },
-  { name: 'Étape', href: '/steps', icon: FlagIcon },
+  { name: "Dashboard", href: "/", icon: Squares2X2Icon },
+  { name: "Cours", href: "/courses", icon: BookOpenIcon },
+  { name: "Projet", href: "/project", icon: RocketLaunchIcon },
+  { name: "Étape", href: "/steps", icon: FlagIcon },
 ];
 
 const navigationGroup2 = [
-  { name: 'Compétence', href: '/skills', icon: TrophyIcon},
-  { name: 'Classes', href: '/classes', icon: UsersIcon },
-  { name: 'Fiches utilisateur', href: '/user-sheets', icon: DocumentTextIcon },
-  { name: 'Utilisateurs', href: '/users', icon: UserIcon },
+  { name: "Compétence", href: "/skills", icon: TrophyIcon },
+  { name: "Classes", href: "/classes", icon: UsersIcon },
+  { name: "Fiches utilisateur", href: "/user-sheets", icon: DocumentTextIcon },
+  { name: "Utilisateurs", href: "/users", icon: UserIcon },
 ];
 
 const Sidebar: React.FC = () => {

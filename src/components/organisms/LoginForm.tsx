@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import Button from '../atoms/Button';
-import FormField from '../molecules/FormField';
+import React, { useState } from "react";
+import Button from "../atoms/Button";
+import FormField from "../molecules/FormField";
 
 const LoginForm: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); // Empêche le rechargement de la page
     // Ici, vous ajouteriez votre logique de connexion (ex: appel API)
-    console.log('Tentative de connexion avec:', { email, password });
+    console.log("Tentative de connexion avec:", { email, password });
   };
 
   return (
@@ -20,7 +20,9 @@ const LoginForm: React.FC = () => {
         // Style du formulaire (repris de la v2)
         className="w-full max-w-sm rounded-xl bg-[#2d3e4f] p-8 shadow-lg"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center text-white">Connexion</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-white">
+          Connexion
+        </h2>
         <FormField
           label="Email :"
           type="email"

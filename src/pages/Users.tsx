@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
-import DataTable from "../components/organisms/DataTable";
 
 // Données et colonnes fictives pour l'exemple
 const userColumns = [
@@ -35,34 +34,37 @@ const userData = [
     role: "Editeur",
     status: "Actif",
   },
-    {
+  {
     name: "Sophie Lambert",
     email: "sophie.lambert@example.com",
     role: "Editeur",
     status: "Actif",
   },
-    {
+  {
     name: "Sophie Lambert",
     email: "sophie.lambert@example.com",
     role: "Editeur",
     status: "Actif",
   },
-    {
+  {
     name: "Sophie Lambert",
     email: "sophie.lambert@example.com",
     role: "Editeur",
     status: "Actif",
-  },  {
+  },
+  {
     name: "Sophie Lambert",
     email: "sophie.lambert@example.com",
     role: "Editeur",
     status: "Actif",
-  },  {
+  },
+  {
     name: "Sophie Lambert",
     email: "sophie.lambert@example.com",
     role: "Editeur",
     status: "Actif",
-  },  {
+  },
+  {
     name: "Sophie Lambert",
     email: "sophie.lambert@example.com",
     role: "Editeur",

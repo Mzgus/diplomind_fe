@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
 
-  // Données et colonnes fictives pour les fiches utilisateur
+// Données et colonnes fictives pour les fiches utilisateur
 const userSheetColumns = [
   { key: "userName", header: "Utilisateur" },
   { key: "className", header: "Classe" },
