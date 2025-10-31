@@ -35,6 +35,39 @@ const userData = [
     role: "Editeur",
     status: "Actif",
   },
+    {
+    name: "Sophie Lambert",
+    email: "sophie.lambert@example.com",
+    role: "Editeur",
+    status: "Actif",
+  },
+    {
+    name: "Sophie Lambert",
+    email: "sophie.lambert@example.com",
+    role: "Editeur",
+    status: "Actif",
+  },
+    {
+    name: "Sophie Lambert",
+    email: "sophie.lambert@example.com",
+    role: "Editeur",
+    status: "Actif",
+  },  {
+    name: "Sophie Lambert",
+    email: "sophie.lambert@example.com",
+    role: "Editeur",
+    status: "Actif",
+  },  {
+    name: "Sophie Lambert",
+    email: "sophie.lambert@example.com",
+    role: "Editeur",
+    status: "Actif",
+  },  {
+    name: "Sophie Lambert",
+    email: "sophie.lambert@example.com",
+    role: "Editeur",
+    status: "Actif",
+  },
 ];
 
 const Users: React.FC = () => {
