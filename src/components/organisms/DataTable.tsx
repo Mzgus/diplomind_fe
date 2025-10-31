@@ -14,8 +14,8 @@ interface DataTableProps {
 
 const DataTable: React.FC<DataTableProps> = ({ columns, data }) => {
   return (
-    <div className="w-full overflow-hidden rounded-lg shadow-md">
-      <div className="w-full overflow-x-auto">
+    <div className="w-full rounded-lg shadow-md border border-gray-200">
+      <div className="w-full overflow-auto max-h-[60vh]">
         <table className="w-full whitespace-no-wrap">
           <thead>
             <tr className="text-xs font-semibold tracking-wide text-left text-black uppercase bg-[#EDF0F3] sticky top-0 z-10">

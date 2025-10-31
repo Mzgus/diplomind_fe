@@ -31,10 +31,12 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDelete }) => {
   };
 
   useEffect(() => {
+    const closeMenu = () => setIsOpen(false);
+
     if (isOpen) {
       calculatePosition();
-      window.addEventListener("resize", calculatePosition, true);
-      window.addEventListener("scroll", calculatePosition, true);
+      window.addEventListener("resize", closeMenu, true);
+      window.addEventListener("scroll", closeMenu, true);
     }
 
     const handleClickOutside = (event: MouseEvent) => {
@@ -50,8 +52,8 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDelete }) => {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      window.removeEventListener("resize", calculatePosition, true);
-      window.removeEventListener("scroll", calculatePosition, true);
+      window.removeEventListener("resize", closeMenu, true);
+      window.removeEventListener("scroll", closeMenu, true);
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
