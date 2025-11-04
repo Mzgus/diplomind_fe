@@ -6,7 +6,10 @@ interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const Checkbox: React.FC<CheckboxProps> = ({ label, ...props }) => {
   return (
-    <label className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-[#4a6e78]">
+    <label
+      className="group flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-[#4DA7C8]
+"
+    >
       <input
         type="checkbox"
         className="
@@ -18,7 +21,9 @@ const Checkbox: React.FC<CheckboxProps> = ({ label, ...props }) => {
         "
         {...props}
       />
-      <span className="text-white font-medium">{label}</span>
+      <span className="text-stone-700 font-medium group-hover:text-white">
+        {label}
+      </span>
     </label>
   );
 };

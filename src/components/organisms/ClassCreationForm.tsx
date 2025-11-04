@@ -65,6 +65,8 @@ const ClassCreationForm: React.FC<ClassCreationFormProps> = ({
           options={studentOptions}
           selectedValues={selectedStudents}
           onChange={setSelectedStudents}
+          placeholder="Sélectionner des élèves"
+          itemName="élève"
         />
       </div>
       <div className="flex justify-end gap-4 mt-8">

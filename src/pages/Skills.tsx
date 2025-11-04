@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
+import Modal from "../components/organisms/Modal";
+import SkillCreationForm from "../components/organisms/SkillCreationForm";
 
 // Données et colonnes fictives pour les compétences
 const skillColumns = [
@@ -24,6 +26,17 @@ const Skills: React.FC = () => {
   const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
     null
   );
+
+  // State pour la modale de CRÉATION
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const handleOpenCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
+  };
 
   const handleOpenDeleteModal = (skill: Record<string, any>) => {
     setItemToDelete(skill);
@@ -55,7 +68,7 @@ const Skills: React.FC = () => {
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher une compétence..."
         buttonText="Ajouter une compétence"
-        onButtonClick={() => console.log("Ajouter une compétence cliqué")}
+        onButtonClick={handleOpenCreateModal}
         columns={skillColumns}
         data={filteredSkills}
         onDeleteRow={handleOpenDeleteModal}
@@ -67,6 +80,13 @@ const Skills: React.FC = () => {
         itemName={itemToDelete?.name || ""}
         itemType="la compétence"
       />
+      {/* Modale de création (nouvelle) */}
+      <Modal isOpen={isCreateModalOpen} onClose={handleCloseCreateModal}>
+        <SkillCreationForm
+          onClose={handleCloseCreateModal}
+          onSubmit={(data) => console.log("Nouvelle classe créée:", data)}
+        />
+      </Modal>
     </>
   );
 };
