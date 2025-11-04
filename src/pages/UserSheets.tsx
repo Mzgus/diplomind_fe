@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
+import Modal from "../components/organisms/Modal";
+import UserSheetCreationForm from "../components/organisms/UserSheetCreationForm";
 
 // Données et colonnes fictives pour les fiches utilisateur
 const userSheetColumns = [
@@ -34,20 +36,31 @@ const userSheetData = [
 const UserSheets: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  // State pour la modale de suppression
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // State pour la modale de SUPPRESSION
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
     null
   );
 
+  // State pour la modale de CRÉATION
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const handleOpenDeleteModal = (sheet: Record<string, any>) => {
     setItemToDelete(sheet);
-    setIsModalOpen(true);
+    setIsDeleteModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    setIsDeleteModalOpen(false);
     setItemToDelete(null);
+  };
+
+  const handleOpenCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
   };
 
   const handleConfirmDelete = () => {
@@ -68,18 +81,27 @@ const UserSheets: React.FC = () => {
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher une fiche..."
         buttonText="Ajouter une fiche"
-        onButtonClick={() => console.log("Ajouter une fiche cliqué")}
+        onButtonClick={handleOpenCreateModal}
         columns={userSheetColumns}
         data={filteredUserSheets}
         onDeleteRow={handleOpenDeleteModal}
       />
       <DeleteConfirmationModal
-        isOpen={isModalOpen}
+        isOpen={isDeleteModalOpen}
         onClose={handleCloseModal}
         onConfirm={handleConfirmDelete}
         itemName={itemToDelete?.userName || ""}
         itemType="la fiche utilisateur"
       />
+      {/* Modale de création */}
+      <Modal isOpen={isCreateModalOpen} onClose={handleCloseCreateModal}>
+        <UserSheetCreationForm
+          onClose={handleCloseCreateModal}
+          onSubmit={(data) =>
+            console.log("Nouvelle fiche utilisateur créée:", data)
+          }
+        />
+      </Modal>
     </>
   );
 };

@@ -14,6 +14,7 @@ interface DropdownProps {
   onChange: (selected: string[]) => void;
   placeholder: string;
   itemName: string;
+  disabled?: boolean;
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -23,11 +24,14 @@ const Dropdown: React.FC<DropdownProps> = ({
   onChange,
   placeholder,
   itemName,
+  disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleToggle = () => setIsOpen(!isOpen);
+  const handleToggle = () => {
+    if (!disabled) setIsOpen(!isOpen);
+  };
 
   const handleCheckboxChange = (value: string) => {
     const newSelection = selectedValues.includes(value)
@@ -58,7 +62,8 @@ const Dropdown: React.FC<DropdownProps> = ({
       <button
         type="button"
         onClick={handleToggle}
-        className="flex items-center justify-between w-full px-4 py-2 text-left bg-white border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#277da1]"
+        disabled={disabled}
+        className="flex items-center justify-between w-full px-4 py-2 text-left bg-white border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#277da1] disabled:bg-gray-200 disabled:cursor-not-allowed"
       >
         <span className="text-black">
           {selectedValues.length > 0
