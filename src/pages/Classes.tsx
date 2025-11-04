@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
+import Modal from "../components/organisms/Modal";
+import ClassCreationForm from "../components/organisms/ClassCreationForm";
 
 // Données et colonnes fictives pour les classes
 const classColumns = [
@@ -34,20 +36,31 @@ const classData = [
 const Classes: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
-  // State pour la modale de suppression
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // State pour la modale de SUPPRESSION
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
     null
   );
 
+  // State pour la modale de CRÉATION
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const handleOpenDeleteModal = (classe: Record<string, any>) => {
     setItemToDelete(classe);
-    setIsModalOpen(true);
+    setIsDeleteModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    setIsDeleteModalOpen(false);
     setItemToDelete(null);
+  };
+
+  const handleOpenCreateModal = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    setIsCreateModalOpen(false);
   };
 
   const handleConfirmDelete = () => {
@@ -68,18 +81,24 @@ const Classes: React.FC = () => {
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher une classe..."
         buttonText="Ajouter une classe"
-        onButtonClick={() => console.log("Ajouter une classe cliqué")}
+        onButtonClick={handleOpenCreateModal}
         columns={classColumns}
         data={filteredClasses}
         onDeleteRow={handleOpenDeleteModal}
       />
+
+      {/* Modale de suppression (existante) */}
       <DeleteConfirmationModal
-        isOpen={isModalOpen}
+        isOpen={isDeleteModalOpen}
         onClose={handleCloseModal}
         onConfirm={handleConfirmDelete}
         itemName={itemToDelete?.name || ""}
         itemType="la classe"
       />
+      {/* Modale de création (nouvelle) */}
+      <Modal isOpen={isCreateModalOpen} onClose={handleCloseCreateModal} >
+        <ClassCreationForm onClose={handleCloseCreateModal} onSubmit={(data) => console.log("Nouvelle classe créée:", data)} />
+      </Modal>
     </>
   );
 };

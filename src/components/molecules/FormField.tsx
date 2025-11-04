@@ -9,7 +9,7 @@ interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const FormField: React.FC<FormFieldProps> = ({ label, id, ...inputProps }) => {
   return (
-    <div className="mb-6">
+    <div className="mb-6 w-full">
       <Label htmlFor={id} className="block text-white font-medium mb-2">
         {label}
       </Label>
