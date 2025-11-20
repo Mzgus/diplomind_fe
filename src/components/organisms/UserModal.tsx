@@ -114,7 +114,7 @@ const UserModal: React.FC<UserModalProps> = ({
                         {/* Colonne Gauche : Info Utilisateur */}
                         <div className="flex-1">
                             <InputGroup
-                                id="user-email"
+                                id="user-name"
                                 label="Email de l'utilisateur"
                                 placeholder="Email de l'utilisateur..."
                                 value={userName}
@@ -161,7 +161,16 @@ const UserModal: React.FC<UserModalProps> = ({
                                         )}
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="flex flex-inline gap-4">
+                                        <InputGroup
+                                            id="sheet-firstname"
+                                            label="Prénom"
+                                            placeholder="Prénom..."
+                                            value={sheetFirstName}
+                                            onChange={(e) => setSheetFirstName(e.target.value)}
+                                            required
+                                            disabled={isSheetConfirmed}
+                                        />
                                         <InputGroup
                                             id="sheet-lastname"
                                             label="Nom"
@@ -171,27 +180,18 @@ const UserModal: React.FC<UserModalProps> = ({
                                             required
                                             disabled={isSheetConfirmed}
                                         />
-                                        <SelectGroup
-                                            id="sheet-type"
-                                            label="Type de fiche"
-                                            value={sheetType}
-                                            onChange={(e) => setSheetType(e.target.value)}
-                                            disabled={isSheetConfirmed}
-                                        >
-                                            <option value="eleve">Eleve</option>
-                                            <option value="professeur">Professeur</option>
-                                            <option value="admin">Admin</option>
-                                        </SelectGroup>
                                     </div>
-                                    <InputGroup
-                                        id="sheet-firstname"
-                                        label="Prenom"
-                                        placeholder="Prenom..."
-                                        value={sheetFirstName}
-                                        onChange={(e) => setSheetFirstName(e.target.value)}
-                                        required
+                                    <SelectGroup
+                                        id="sheet-type"
+                                        label="Type de fiche"
+                                        value={sheetType}
+                                        onChange={(e) => setSheetType(e.target.value)}
                                         disabled={isSheetConfirmed}
-                                    />
+                                    >
+                                        <option value="eleve">Eleve</option>
+                                        <option value="professeur">Professeur</option>
+                                        <option value="admin">Admin</option>
+                                    </SelectGroup>
                                     <div className="flex justify-center gap-4 mt-4">
                                         {!isSheetConfirmed ? (
                                             <>

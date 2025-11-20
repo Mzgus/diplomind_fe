@@ -46,18 +46,18 @@ const Classes: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // State pour la modale de suppression
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
     null
   );
 
   const handleOpenDeleteModal = (classe: Record<string, any>) => {
     setItemToDelete(classe);
-    setIsModalOpen(true);
+    setIsDeleteModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    setIsDeleteModalOpen(false);
     setItemToDelete(null);
   };
 
@@ -90,7 +90,7 @@ const Classes: React.FC = () => {
         onDeleteRow={handleOpenDeleteModal}
       />
       <DeleteConfirmationModal
-        isOpen={isModalOpen}
+        isOpen={isDeleteModalOpen}
         onClose={handleCloseModal}
         onConfirm={handleConfirmDelete}
         itemName={itemToDelete?.name || ""}

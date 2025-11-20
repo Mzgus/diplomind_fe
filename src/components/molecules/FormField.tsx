@@ -1,23 +1,38 @@
 import React from "react";
-import Input from "../atoms/Input";
-import Label from "../atoms/Label";
 
-interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+// Types pour les props d'un input et d'un textarea
+type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
+type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>;
+
+interface FormFieldProps extends Omit<InputProps & TextareaProps, "id"> {
   label: string;
   id: string;
+  as?: "input" | "textarea";
 }
 
-const FormField: React.FC<FormFieldProps> = ({ label, id, ...inputProps }) => {
+const FormField: React.FC<FormFieldProps> = ({
+  label,
+  id,
+  as = "input",
+  ...props
+}) => {
+  const commonClasses =
+    "mt-1 block w-full px-3 py-2 bg-white border border-gray-600 rounded-md text-black shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#277da1] focus:border-[#277da1] sm:text-sm";
+
   return (
-    <div className="mb-6">
-      <Label htmlFor={id} className="block text-white font-medium mb-2">
+    <div className="w-full">
+      <label htmlFor={id} className="block text-sm font-medium text-white">
         {label}
-      </Label>
-      <Input
-        id={id}
-        {...inputProps}
-        className="w-full rounded-lg border-gray-300 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-      />
+      </label>
+      {as === "textarea" ? (
+        <textarea
+          id={id}
+          className={commonClasses}
+          {...(props as TextareaProps)}
+        />
+      ) : (
+        <input id={id} className={commonClasses} {...(props as InputProps)} />
+      )}
     </div>
   );
 };

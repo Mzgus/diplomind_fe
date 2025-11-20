@@ -49,18 +49,18 @@ const UserSheets: React.FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // State pour la modale de suppression
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
     null
   );
 
   const handleOpenDeleteModal = (sheet: Record<string, any>) => {
     setItemToDelete(sheet);
-    setIsModalOpen(true);
+    setIsDeleteModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    setIsDeleteModalOpen(false);
     setItemToDelete(null);
   };
   const handleConfirmDelete = () => {
@@ -97,7 +97,7 @@ const UserSheets: React.FC = () => {
         onDeleteRow={handleOpenDeleteModal}
       />
       <DeleteConfirmationModal
-        isOpen={isModalOpen}
+        isOpen={isDeleteModalOpen}
         onClose={handleCloseModal}
         onConfirm={handleConfirmDelete}
         itemName={itemToDelete?.userName || ""}
