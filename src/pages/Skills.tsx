@@ -75,6 +75,10 @@ const Skills: React.FC = () => {
         searchPlaceholder="Rechercher une compétence..."
         buttonText="Ajouter une compétence"
         onButtonClick={() => setIsCreateModalOpen(true)}
+        extraButtonText="Valider des compétences"
+        onExtraButtonClick={() =>
+          (window.location.href = "/project-skills-validation")
+        }
         columns={skillColumns}
         data={filteredSkills}
         onDeleteRow={handleOpenDeleteModal}

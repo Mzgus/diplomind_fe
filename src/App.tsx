@@ -11,6 +11,7 @@ import Classes from "./pages/Classes";
 import UserSheets from "./pages/UserSheets";
 import Users from "./pages/Users";
 import Account from "./pages/Account";
+import ProjectSkillsValidation from "./pages/ProjectSkillsValidation";
 
 function App() {
   return (
@@ -30,6 +31,10 @@ function App() {
           <Route path="/user-sheets" element={<UserSheets />} />
           <Route path="/users" element={<Users />} />
           <Route path="/account" element={<Account />} />
+          <Route
+            path="/project-skills-validation"
+            element={<ProjectSkillsValidation />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>

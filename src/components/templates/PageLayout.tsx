@@ -15,6 +15,8 @@ interface PageLayoutProps {
   searchPlaceholder: string;
   buttonText: string;
   onButtonClick?: () => void;
+  extraButtonText?: string;
+  onExtraButtonClick?: () => void;
   columns: ColumnDefinition[];
   data: Record<string, any>[];
   onEditRow?: (row: Record<string, any>) => void;
@@ -28,6 +30,8 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   searchPlaceholder,
   buttonText,
   onButtonClick,
+  extraButtonText,
+  onExtraButtonClick,
   columns,
   data,
   onEditRow,
@@ -44,10 +48,15 @@ const PageLayout: React.FC<PageLayoutProps> = ({
             placeholder={searchPlaceholder}
           />
         </div>
-        <div className="w-1/4">
-          <Button className="w-full" onClick={onButtonClick}>
+        <div className="w-1/4 flex gap-2">
+          <Button className="flex-1" onClick={onButtonClick}>
             {buttonText}
           </Button>
+          {extraButtonText && onExtraButtonClick && (
+            <Button className="flex-1" onClick={onExtraButtonClick}>
+              {extraButtonText}
+            </Button>
+          )}
         </div>
       </div>
       <DataTable
