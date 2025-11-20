@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
+import StepModal from "../components/organisms/StepModal";
 
 // Données et colonnes fictives pour les étapes
 const stepColumns = [
@@ -40,6 +41,19 @@ const stepData = [
 const Steps: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Données fictives pour les listes déroulantes
+  const existingProjects = [
+    { id: "1", name: "Refonte Site E-commerce" },
+    { id: "2", name: "Application Mobile" },
+  ];
+  const existingSkills = [
+    { id: "1", name: "React" },
+    { id: "2", name: "Figma" },
+  ];
+
+  // State pour la modale de création
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   // State pour la modale de suppression
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
@@ -61,6 +75,14 @@ const Steps: React.FC = () => {
     handleCloseModal();
   };
 
+  const handleSaveNewStep = (stepData: any, skillData: any | null) => {
+    console.log("Sauvegarde de la nouvelle étape:", {
+      step: stepData,
+      skill: skillData,
+    });
+    setIsCreateModalOpen(false);
+  };
+
   // Logique de filtrage pour les étapes
   const filteredSteps = stepData.filter((step) =>
     step.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -74,7 +96,7 @@ const Steps: React.FC = () => {
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher une étape..."
         buttonText="Ajouter une étape"
-        onButtonClick={() => console.log("Ajouter une étape cliqué")}
+        onButtonClick={() => setIsCreateModalOpen(true)}
         columns={stepColumns}
         data={filteredSteps}
         onDeleteRow={handleOpenDeleteModal}
@@ -85,6 +107,13 @@ const Steps: React.FC = () => {
         onConfirm={handleConfirmDelete}
         itemName={itemToDelete?.name || ""}
         itemType="l'étape"
+      />
+      <StepModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSave={handleSaveNewStep}
+        existingProjects={existingProjects}
+        existingSkills={existingSkills}
       />
     </>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
+import ClassModal from "../components/organisms/ClassModal";
 
 // Données et colonnes fictives pour les classes
 const classColumns = [
@@ -34,6 +35,16 @@ const classData = [
 const Classes: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Données fictives pour les étudiants
+  const existingStudents = [
+    { id: "1", name: "Alice Martin" },
+    { id: "2", name: "Bob Garcia" },
+    { id: "3", name: "Charlie Davis" },
+  ];
+
+  // State pour la modale de création
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   // State pour la modale de suppression
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
@@ -55,6 +66,11 @@ const Classes: React.FC = () => {
     handleCloseModal();
   };
 
+  const handleSaveNewClass = (classData: any) => {
+    console.log("Sauvegarde de la nouvelle classe:", classData);
+    setIsCreateModalOpen(false);
+  };
+
   // Logique de filtrage pour les classes
   const filteredClasses = classData.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -68,7 +84,7 @@ const Classes: React.FC = () => {
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher une classe..."
         buttonText="Ajouter une classe"
-        onButtonClick={() => console.log("Ajouter une classe cliqué")}
+        onButtonClick={() => setIsCreateModalOpen(true)}
         columns={classColumns}
         data={filteredClasses}
         onDeleteRow={handleOpenDeleteModal}
@@ -79,6 +95,12 @@ const Classes: React.FC = () => {
         onConfirm={handleConfirmDelete}
         itemName={itemToDelete?.name || ""}
         itemType="la classe"
+      />
+      <ClassModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSave={handleSaveNewClass}
+        existingStudents={existingStudents}
       />
     </>
   );

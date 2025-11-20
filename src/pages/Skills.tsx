@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
+import SkillModal from "../components/organisms/SkillModal";
 
 // Données et colonnes fictives pour les compétences
 const skillColumns = [
@@ -13,11 +14,24 @@ const skillData = [
   { name: "React", category: "Frontend", level: "Intermédiaire" },
   { name: "Node.js", category: "Backend", level: "Intermédiaire" },
   { name: "Figma", category: "Design", level: "Débutant" },
-  { name: "SQL", category: "Base de données", level: "Avancé" },
+  { name: "PostgreSQL", category: "Database", level: "Avancé" },
 ];
 
 const Skills: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Données fictives pour les listes déroulantes
+  const existingCourses = [
+    { id: "1", name: "Développement Web" },
+    { id: "2", name: "Design UI/UX" },
+  ];
+  const existingSteps = [
+    { id: "1", name: "Maquettage" },
+    { id: "2", name: "Intégration" },
+  ];
+
+  // State pour la modale de création
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // State pour la modale de suppression
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,6 +54,11 @@ const Skills: React.FC = () => {
     handleCloseModal();
   };
 
+  const handleSaveNewSkill = (skillData: any) => {
+    console.log("Sauvegarde de la nouvelle compétence:", skillData);
+    setIsCreateModalOpen(false);
+  };
+
   // Logique de filtrage pour les compétences
   const filteredSkills = skillData.filter(
     (skill) =>
@@ -55,7 +74,7 @@ const Skills: React.FC = () => {
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher une compétence..."
         buttonText="Ajouter une compétence"
-        onButtonClick={() => console.log("Ajouter une compétence cliqué")}
+        onButtonClick={() => setIsCreateModalOpen(true)}
         columns={skillColumns}
         data={filteredSkills}
         onDeleteRow={handleOpenDeleteModal}
@@ -66,6 +85,13 @@ const Skills: React.FC = () => {
         onConfirm={handleConfirmDelete}
         itemName={itemToDelete?.name || ""}
         itemType="la compétence"
+      />
+      <SkillModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSave={handleSaveNewSkill}
+        existingCourses={existingCourses}
+        existingSteps={existingSteps}
       />
     </>
   );

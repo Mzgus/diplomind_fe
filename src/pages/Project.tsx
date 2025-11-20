@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
+import ProjectModal from "../components/organisms/ProjectModal";
 
 // Données et colonnes fictives pour les projets
 const projectColumns = [
@@ -40,6 +41,19 @@ const projectData = [
 const Project: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Données fictives pour les listes déroulantes
+  const existingCourses = [
+    { id: "1", name: "Développement Web" },
+    { id: "2", name: "Design UI/UX" },
+  ];
+  const existingSteps = [
+    { id: "1", name: "Maquettage" },
+    { id: "2", name: "Intégration" },
+  ];
+
+  // State pour la modale de création
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   // State pour la modale de suppression
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
@@ -61,6 +75,14 @@ const Project: React.FC = () => {
     handleCloseModal();
   };
 
+  const handleSaveNewProject = (projectData: any, stepData: any | null) => {
+    console.log("Sauvegarde du nouveau projet:", {
+      project: projectData,
+      step: stepData,
+    });
+    setIsCreateModalOpen(false);
+  };
+
   // Logique de filtrage pour les projets
   const filteredProjects = projectData.filter(
     (project) =>
@@ -76,7 +98,7 @@ const Project: React.FC = () => {
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher un projet..."
         buttonText="Ajouter un projet"
-        onButtonClick={() => console.log("Ajouter un projet cliqué")}
+        onButtonClick={() => setIsCreateModalOpen(true)}
         columns={projectColumns}
         data={filteredProjects}
         onDeleteRow={handleOpenDeleteModal}
@@ -87,6 +109,13 @@ const Project: React.FC = () => {
         onConfirm={handleConfirmDelete}
         itemName={itemToDelete?.name || ""}
         itemType="le projet"
+      />
+      <ProjectModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSave={handleSaveNewProject}
+        existingCourses={existingCourses}
+        existingSteps={existingSteps}
       />
     </>
   );

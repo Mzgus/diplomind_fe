@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
+import CourseModal from "../components/organisms/CourseModal";
 
 // Données et colonnes fictives pour les cours
 const courseColumns = [
@@ -40,6 +41,15 @@ const courseData = [
 const Courses: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Données fictives pour les projets existants
+  const existingProjects = [
+    { id: "1", name: "Projet E-commerce" },
+    { id: "2", name: "Projet Portfolio" },
+  ];
+
+  // State pour la modale de création
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   // State pour la modale de suppression
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
@@ -61,6 +71,14 @@ const Courses: React.FC = () => {
     handleCloseModal();
   };
 
+  const handleSaveNewCourse = (courseData: any, projectData: any | null) => {
+    console.log("Sauvegarde du nouveau cours:", {
+      course: courseData,
+      project: projectData,
+    });
+    setIsCreateModalOpen(false);
+  };
+
   // Logique de filtrage pour les cours
   const filteredCourses = courseData.filter(
     (course) =>
@@ -76,7 +94,7 @@ const Courses: React.FC = () => {
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher un cours..."
         buttonText="Ajouter un cours"
-        onButtonClick={() => console.log("Ajouter un cours cliqué")}
+        onButtonClick={() => setIsCreateModalOpen(true)}
         columns={courseColumns}
         data={filteredCourses}
         onDeleteRow={handleOpenDeleteModal}
@@ -87,6 +105,12 @@ const Courses: React.FC = () => {
         onConfirm={handleConfirmDelete}
         itemName={itemToDelete?.title || ""}
         itemType="le cours"
+      />
+      <CourseModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSave={handleSaveNewCourse}
+        existingProjects={existingProjects}
       />
     </>
   );
