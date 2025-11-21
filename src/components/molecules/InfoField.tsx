@@ -9,8 +9,8 @@ interface InfoFieldProps {
 const InfoField: React.FC<InfoFieldProps> = ({ label, value }) => {
   return (
     <div className="mb-4">
-      <Label className="text-sm font-medium text-gray-600">{label}</Label>
-      <div className="mt-1 p-3 w-full bg-gray-100 border border-gray-200 rounded-lg text-gray-800">
+      <Label className="text-sm font-medium text-text-muted">{label}</Label>
+      <div className="mt-1 p-3 w-full bg-background border border-border rounded-lg text-text-main">
         {value}
       </div>
     </div>

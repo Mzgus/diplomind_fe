@@ -81,13 +81,13 @@ const ProjectSkillsValidation: React.FC = () => {
     const getStatusStyle = (status?: string) => {
         switch (status) {
             case "Validé":
-                return "bg-green-100 text-green-700 border-green-200 hover:bg-green-200";
+                return "bg-success-bg text-success-text border-success-border hover:bg-success-border";
             case "Non validé":
-                return "bg-red-100 text-red-700 border-red-200 hover:bg-red-200";
+                return "bg-danger-bg text-danger-text border-danger-border hover:bg-danger-border";
             case "Partiellement validé":
-                return "bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-200";
+                return "bg-warning-bg text-warning-text border-warning-border hover:bg-warning-border";
             default:
-                return "bg-gray-50 text-gray-400 border-gray-100 hover:bg-gray-100";
+                return "bg-background text-text-muted border-border hover:bg-border";
         }
     };
 
@@ -112,7 +112,7 @@ const ProjectSkillsValidation: React.FC = () => {
                     </svg>
                 );
             default:
-                return <div className="w-2 h-2 rounded-full bg-gray-300" />;
+                return <div className="w-2 h-2 rounded-full bg-text-muted/30" />;
         }
     };
 
@@ -131,20 +131,20 @@ const ProjectSkillsValidation: React.FC = () => {
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 p-8 font-sans text-gray-900">
+        <div className="min-h-screen bg-background p-8 font-sans text-text-main">
             {/* Header Section */}
             <div className="max-w-full mx-auto mb-8">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+                        <h1 className="text-3xl font-bold text-text-main tracking-tight">
                             Validation des Compétences
                         </h1>
                         <div className="flex items-center gap-2 mt-2">
-                            <span className="text-gray-500">Projet :</span>
+                            <span className="text-text-muted">Projet :</span>
                             <select
                                 value={selectedProject}
                                 onChange={(e) => setSelectedProject(e.target.value)}
-                                className="bg-transparent font-medium text-gray-800 border-b border-gray-300 focus:border-blue-500 focus:outline-none py-1 pr-8 cursor-pointer hover:border-gray-400 transition-colors"
+                                className="bg-transparent font-medium text-text-main border-b border-border focus:border-primary focus:outline-none py-1 pr-8 cursor-pointer hover:border-text-muted transition-colors"
                             >
                                 {projects.map((project) => (
                                     <option key={project} value={project}>
@@ -164,10 +164,10 @@ const ProjectSkillsValidation: React.FC = () => {
                                 placeholder="Rechercher un étudiant..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                                className="pl-10 pr-4 py-2 bg-surface border border-border rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-64 text-text-main"
                             />
                             <svg
-                                className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
+                                className="w-5 h-5 text-text-muted absolute left-3 top-1/2 transform -translate-y-1/2"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -181,11 +181,11 @@ const ProjectSkillsValidation: React.FC = () => {
                             </svg>
                         </div>
 
-                        <select className="px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer hover:bg-gray-50 transition-colors">
+                        <select className="px-4 py-2 bg-surface border border-border rounded-lg shadow-sm text-sm font-medium text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer hover:bg-background transition-colors">
                             <option>Classe: B3 Dev Web</option>
                             <option>Classe: B3 Design</option>
                         </select>
-                        <select className="px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer hover:bg-gray-50 transition-colors">
+                        <select className="px-4 py-2 bg-surface border border-border rounded-lg shadow-sm text-sm font-medium text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer hover:bg-background transition-colors">
                             <option>Cours: Développement Front</option>
                             <option>Cours: UX Design</option>
                         </select>
@@ -193,14 +193,14 @@ const ProjectSkillsValidation: React.FC = () => {
                 </div>
 
                 {/* Matrix Container */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-[calc(100vh-200px)]">
+                <div className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden flex flex-col h-[calc(100vh-200px)]">
                     <div className="overflow-auto flex-1 relative custom-scrollbar">
                         <table className="border-separate border-spacing-0">
                             <thead>
                                 {/* Steps Header */}
                                 <tr>
-                                    <th className="sticky top-0 left-0 z-30 bg-white p-4 border-b border-r border-gray-200 whitespace-nowrap h-16 min-w-[250px]">
-                                        <div className="flex items-center justify-end h-full text-gray-500 font-bold text-sm uppercase tracking-wider">
+                                    <th className="sticky top-0 left-0 z-30 bg-surface p-4 border-b border-r border-border whitespace-nowrap h-16 min-w-[250px]">
+                                        <div className="flex items-center justify-end h-full text-text-muted font-bold text-sm uppercase tracking-wider">
                                             Étapes &rarr;
                                         </div>
                                     </th>
@@ -208,7 +208,7 @@ const ProjectSkillsValidation: React.FC = () => {
                                         <th
                                             key={step.id}
                                             colSpan={step.skills.length}
-                                            className="sticky top-0 z-20 bg-gray-50 p-3 border-b border-r border-gray-200 text-center text-xs font-bold text-gray-500 uppercase tracking-wider"
+                                            className="sticky top-0 z-20 bg-background p-3 border-b border-r border-border text-center text-xs font-bold text-text-muted uppercase tracking-wider"
                                         >
                                             {step.name}
                                         </th>
@@ -216,9 +216,9 @@ const ProjectSkillsValidation: React.FC = () => {
                                 </tr>
                                 {/* Skills Header */}
                                 <tr>
-                                    <th className="sticky top-16 left-0 z-30 bg-white p-4 border-b border-r border-gray-200 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">
+                                    <th className="sticky top-16 left-0 z-30 bg-surface p-4 border-b border-r border-border shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">
                                         <div className="flex flex-col justify-between h-full">
-                                            <div className="flex items-center justify-end h-full text-gray-500 font-bold text-sm uppercase tracking-wider">
+                                            <div className="flex items-center justify-end h-full text-text-muted font-bold text-sm uppercase tracking-wider">
                                                 Compétences &rarr;
                                             </div>
                                         </div>
@@ -226,12 +226,12 @@ const ProjectSkillsValidation: React.FC = () => {
                                     {allSkills.map((skill) => (
                                         <th
                                             key={skill.id}
-                                            className="sticky top-16 z-20 bg-white border-b border-r border-gray-200 min-w-[60px] w-[60px] h-[180px] align-bottom hover:bg-gray-50 transition-colors group cursor-help pb-2"
+                                            className="sticky top-16 z-20 bg-surface border-b border-r border-border min-w-[60px] w-[60px] h-[180px] align-bottom hover:bg-background transition-colors group cursor-help pb-2"
                                             title={skill.description}
                                         >
                                             <div className="flex items-center justify-center h-full">
                                                 <div className="transform -rotate-45 w-[160px]  mb-2 text-left">
-                                                    <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors block">
+                                                    <span className="text-sm font-medium text-text-main group-hover:text-primary transition-colors block">
                                                         {skill.name}
                                                     </span>
                                                 </div>
@@ -244,14 +244,14 @@ const ProjectSkillsValidation: React.FC = () => {
                                 {filteredStudents.map((student) => (
                                     <tr key={student.id} className="group">
                                         {/* Student Row Header */}
-                                        <td className="sticky left-0 z-10 bg-white p-4 border-b border-r border-gray-200 group-hover:bg-blue-50/30 transition-colors shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)] whitespace-nowrap">
+                                        <td className="sticky left-0 z-10 bg-surface p-4 border-b border-r border-border group-hover:bg-primary/10 transition-colors shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)] whitespace-nowrap">
                                             <div className="flex items-center gap-3">
                                                 <img
                                                     src={student.avatar}
                                                     alt={student.name}
-                                                    className="w-8 h-8 rounded-full bg-gray-200 object-cover border border-gray-100"
+                                                    className="w-8 h-8 rounded-full bg-background object-cover border border-border"
                                                 />
-                                                <span className="font-medium text-gray-700 text-sm group-hover:text-blue-700 transition-colors">
+                                                <span className="font-medium text-text-main text-sm group-hover:text-primary-hover transition-colors">
                                                     {student.name}
                                                 </span>
                                             </div>
@@ -264,7 +264,7 @@ const ProjectSkillsValidation: React.FC = () => {
                                                 <td
                                                     key={skill.id}
                                                     onClick={() => handleCellClick(student.id, skill.id)}
-                                                    className="p-2 border-b border-r border-gray-100 bg-white hover:bg-gray-50 transition-all cursor-pointer text-center relative min-w-[60px]"
+                                                    className="p-2 border-b border-r border-border bg-surface hover:bg-background transition-all cursor-pointer text-center relative min-w-[60px]"
                                                 >
                                                     <div
                                                         className={`w-full h-full min-h-[50px] rounded-md flex items-center justify-center border transition-all duration-200 ${getStatusStyle(

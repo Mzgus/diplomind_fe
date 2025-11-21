@@ -21,11 +21,11 @@ const DataTable: React.FC<DataTableProps> = ({
   onDeleteRow,
 }) => {
   return (
-    <div className="w-full rounded-lg shadow-md border border-gray-200">
+    <div className="w-full rounded-lg shadow-md border border-border bg-surface">
       <div className="w-full overflow-auto max-h-[60vh]">
         <table className="w-full whitespace-no-wrap">
           <thead>
-            <tr className="text-xs font-semibold tracking-wide text-left text-black uppercase bg-[#EDF0F3] sticky top-0 z-10">
+            <tr className="text-xs font-semibold tracking-wide text-left text-text-main uppercase bg-background sticky top-0 z-10">
               {columns.map((col) => (
                 <th key={col.key} className="px-4 py-3">
                   {col.header}
@@ -34,9 +34,9 @@ const DataTable: React.FC<DataTableProps> = ({
               <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-surface divide-y divide-border">
             {data.map((row, rowIndex) => (
-              <tr key={rowIndex} className="text-gray-700">
+              <tr key={rowIndex} className="text-text-muted hover:bg-background/50 transition-colors">
                 {columns.map((col) => (
                   <td key={col.key} className="px-4 py-3 text-sm">
                     {row[col.key]}

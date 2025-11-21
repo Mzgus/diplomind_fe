@@ -27,7 +27,7 @@ const navigationGroup2 = [
 
 const Sidebar: React.FC = () => {
   return (
-    <aside className="flex h-full w-72 flex-col bg-[#374F5E] p-4">
+    <aside className="flex h-full w-72 flex-col bg-sidebar p-4">
       <nav className="flex flex-col gap-1">
         {/* Groupe 1 */}
         <ul className="flex flex-col gap-1">

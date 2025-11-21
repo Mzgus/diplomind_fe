@@ -51,7 +51,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <div className="w-full max-w-5xl rounded-xl bg-[#2D525B] text-white shadow-2xl overflow-hidden flex flex-col">
+            <div className="w-full max-w-5xl rounded-xl bg-surface text-text-main shadow-2xl overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 pb-0">
                     <h2 className="text-2xl font-bold">
@@ -59,7 +59,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-300 hover:text-white focus:outline-none"
+                        className="text-text-muted hover:text-text-main focus:outline-none"
                     >
                         <svg
                             className="h-6 w-6"
@@ -136,17 +136,17 @@ const SkillModal: React.FC<SkillModalProps> = ({
                     </div>
 
                     {/* Footer */}
-                    <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-white/10">
+                    <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-border">
                         <Button
                             type="submit"
-                            className="bg-[#4DA7C8] hover:bg-[#3b8da6] px-8 py-2 rounded-full"
+                            className="bg-primary hover:bg-primary-hover text-white px-8 py-2 rounded-full"
                         >
                             Confirmer
                         </Button>
                         <Button
                             type="button"
                             onClick={onClose}
-                            className="bg-[#4DA7C8] hover:bg-[#3b8da6] px-8 py-2 rounded-full"
+                            className="bg-secondary hover:bg-secondary-hover text-white px-8 py-2 rounded-full"
                         >
                             Annuler
                         </Button>

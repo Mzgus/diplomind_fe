@@ -90,7 +90,7 @@ const StepModal: React.FC<StepModalProps> = ({
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <div className="w-full max-w-5xl rounded-xl bg-[#2D525B] text-white shadow-2xl overflow-hidden flex flex-col">
+            <div className="w-full max-w-5xl rounded-xl bg-surface text-text-main shadow-2xl overflow-hidden flex flex-col border border-border">
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 pb-0">
                     <h2 className="text-2xl font-bold">
@@ -98,7 +98,7 @@ const StepModal: React.FC<StepModalProps> = ({
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-300 hover:text-white focus:outline-none"
+                        className="text-text-muted hover:text-text-main focus:outline-none"
                     >
                         <svg
                             className="h-6 w-6"
@@ -140,17 +140,17 @@ const StepModal: React.FC<StepModalProps> = ({
                             {/* Panneau Nouvelle Compétence */}
                             {showNewSkillForm && (
                                 <div
-                                    className={`mt-6 bg-[#4DA7C8] rounded-xl p-6 shadow-inner animate-fade-in transition-all duration-300 ${isSkillConfirmed
-                                        ? "opacity-75 border-2 border-green-400"
+                                    className={`mt-6 bg-background rounded-xl p-6 shadow-inner animate-fade-in transition-all duration-300 ${isSkillConfirmed
+                                        ? "opacity-75 border-2 border-success-border"
                                         : ""
                                         }`}
                                 >
                                     <div className="flex justify-between items-center mb-4">
-                                        <h3 className="text-lg font-bold text-white">
+                                        <h3 className="text-lg font-bold text-text-main">
                                             Création d'une compétence
                                         </h3>
                                         {isSkillConfirmed && (
-                                            <span className="text-green-200 font-bold text-sm flex items-center">
+                                            <span className="text-success-text font-bold text-sm flex items-center">
                                                 <svg
                                                     className="w-5 h-5 mr-1"
                                                     fill="none"
@@ -194,7 +194,7 @@ const StepModal: React.FC<StepModalProps> = ({
                                                 <Button
                                                     type="button"
                                                     onClick={handleConfirmSkill}
-                                                    className="bg-[#2D6A85] hover:bg-[#24566c] px-8"
+                                                    className="bg-primary hover:bg-primary-hover px-8 text-white"
                                                 >
                                                     Confirmer
                                                 </Button>
@@ -205,7 +205,7 @@ const StepModal: React.FC<StepModalProps> = ({
                                                         setSelectedSkillId("");
                                                         setIsSkillConfirmed(false);
                                                     }}
-                                                    className="bg-[#2D6A85] hover:bg-[#24566c] px-8"
+                                                    className="bg-primary hover:bg-primary-hover px-8 text-white"
                                                 >
                                                     Annuler
                                                 </Button>
@@ -214,7 +214,7 @@ const StepModal: React.FC<StepModalProps> = ({
                                             <Button
                                                 type="button"
                                                 onClick={() => setIsSkillConfirmed(false)}
-                                                className="bg-white/20 hover:bg-white/30 px-8 text-sm"
+                                                className="bg-background/20 hover:bg-background/30 px-8 text-sm text-text-main"
                                             >
                                                 Modifier
                                             </Button>
@@ -262,10 +262,10 @@ const StepModal: React.FC<StepModalProps> = ({
                     </div>
 
                     {/* Footer */}
-                    <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-white/10">
+                    <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-border">
                         <Button
                             type="submit"
-                            className={`bg-[#4DA7C8] hover:bg-[#3b8da6] px-8 py-2 rounded-full ${showNewSkillForm && !isSkillConfirmed
+                            className={`bg-primary hover:bg-primary-hover px-8 py-2 rounded-full text-white ${showNewSkillForm && !isSkillConfirmed
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""
                                 }`}
@@ -276,7 +276,7 @@ const StepModal: React.FC<StepModalProps> = ({
                         <Button
                             type="button"
                             onClick={onClose}
-                            className="bg-[#4DA7C8] hover:bg-[#3b8da6] px-8 py-2 rounded-full"
+                            className="bg-primary hover:bg-primary-hover px-8 py-2 rounded-full text-white"
                         >
                             Annuler
                         </Button>

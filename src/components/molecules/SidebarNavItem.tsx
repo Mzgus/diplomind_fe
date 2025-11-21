@@ -14,8 +14,7 @@ const SidebarNavItem: React.FC<SidebarNavItemProps> = ({ to, icon, label }) => {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex items-center gap-4 px-4 py-3 text-white transition-colors hover:bg-[#4A90A4]/50 rounded-lg ${
-          isActive ? "bg-[#4A90A4]" : "bg-transparent"
+        `flex items-center gap-4 px-4 py-3 text-white transition-colors hover:bg-sidebar-active/50 rounded-lg ${isActive ? "bg-sidebar-active" : "bg-transparent"
         }`
       }
     >

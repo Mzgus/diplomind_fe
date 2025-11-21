@@ -68,7 +68,7 @@ const UserSheetCreationForm: React.FC<UserSheetCreationFormProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full rounded-xl bg-[#2D525B] p-8 shadow-lg text-white"
+      className="w-full rounded-xl bg-surface p-8 shadow-lg text-text-main"
     >
       <h2 className="text-2xl font-bold mb-6 text-center">
         Créer une nouvelle fiche utilisateur
@@ -93,7 +93,7 @@ const UserSheetCreationForm: React.FC<UserSheetCreationFormProps> = ({
             itemName="rôle"
           />
           {isCreatingUser && (
-            <div className="border-t border-gray-500 pt-4 mt-4">
+            <div className="border-t border-border pt-4 mt-4">
               <h3 className="text-lg font-semibold mb-3">
                 Créer un nouvel utilisateur
               </h3>
@@ -120,11 +120,11 @@ const UserSheetCreationForm: React.FC<UserSheetCreationFormProps> = ({
               <Button
                 type="button"
                 onClick={() => setIsCreatingUser(false)}
-                className="bg-gray-500 hover:bg-gray-600"
+                className="bg-secondary hover:bg-secondary-hover text-white"
               >
                 Annuler
               </Button>
-              <Button type="button" className="bg-[#277da1] hover:bg-[#216b8a]">
+              <Button type="button" className="bg-primary hover:bg-primary-hover text-white">
                 Valider
               </Button>
             </div>
@@ -158,7 +158,7 @@ const UserSheetCreationForm: React.FC<UserSheetCreationFormProps> = ({
               <button
                 type="button"
                 onClick={() => setIsCreatingUser(true)}
-                className="text-sm text-[#4DA7C8] hover:text-white mt-2"
+                className="text-sm text-primary hover:text-text-main mt-2"
               >
                 + Créer un nouvel utilisateur
               </button>
@@ -170,11 +170,11 @@ const UserSheetCreationForm: React.FC<UserSheetCreationFormProps> = ({
         <Button
           type="button"
           onClick={onClose}
-          className="bg-gray-500 hover:bg-gray-600"
+          className="bg-secondary hover:bg-secondary-hover text-white"
         >
           Annuler
         </Button>
-        <Button type="submit" className="bg-[#277da1] hover:bg-[#216b8a]">
+        <Button type="submit" className="bg-primary hover:bg-primary-hover text-white">
           Créer la fiche
         </Button>
       </div>

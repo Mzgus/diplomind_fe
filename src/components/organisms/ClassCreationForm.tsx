@@ -28,7 +28,7 @@ const ClassCreationForm: React.FC<ClassCreationFormProps> = ({
   onSubmit,
 }) => {
   const [className, setClassName] = useState("");
-  const [level, setLevel] = useState("");
+  const [level] = useState("");
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -45,7 +45,7 @@ const ClassCreationForm: React.FC<ClassCreationFormProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full rounded-xl bg-[#2D525B] p-8 shadow-lg text-white"
+      className="w-full rounded-xl bg-surface p-8 shadow-lg text-text-main"
     >
       <h2 className="text-2xl font-bold mb-6 text-center">
         Créer une nouvelle classe
@@ -73,11 +73,11 @@ const ClassCreationForm: React.FC<ClassCreationFormProps> = ({
         <Button
           type="button"
           onClick={onClose}
-          className="bg-gray-500 hover:bg-gray-600"
+          className="bg-secondary hover:bg-secondary-hover text-white"
         >
           Annuler
         </Button>
-        <Button type="submit" className="bg-[#277da1] hover:bg-[#216b8a]">
+        <Button type="submit" className="bg-primary hover:bg-primary-hover text-white">
           Créer la classe
         </Button>
       </div>

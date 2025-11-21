@@ -69,16 +69,16 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDelete }) => {
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400"
+        className="p-2 rounded-full hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary"
       >
-        <EllipsisVerticalIcon className="w-5 h-5 text-gray-500" />
+        <EllipsisVerticalIcon className="w-5 h-5 text-text-muted" />
       </button>
 
       {isOpen &&
         ReactDOM.createPortal(
           <div
             ref={dropdownRef}
-            className="absolute w-40 bg-white rounded-md shadow-lg z-50"
+            className="absolute w-40 bg-surface rounded-md shadow-lg z-50 border border-border"
             style={{
               top: `${position.top}px`,
               left: `${position.left}px`,
@@ -87,7 +87,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDelete }) => {
             <a
               href="#"
               onClick={(e) => handleActionClick(e, onEdit)}
-              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-text-main hover:bg-background"
             >
               <PencilIcon className="w-4 h-4" />
               Modifier
@@ -95,7 +95,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDelete }) => {
             <a
               href="#"
               onClick={(e) => handleActionClick(e, onDelete)}
-              className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-danger-text hover:bg-background"
             >
               <TrashIcon className="w-4 h-4" />
               Supprimer

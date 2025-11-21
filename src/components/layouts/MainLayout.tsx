@@ -13,7 +13,7 @@ const MainLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-background">
       <TopNavbar
         userName={userData.name}
         avatarUrl={userData.avatar}

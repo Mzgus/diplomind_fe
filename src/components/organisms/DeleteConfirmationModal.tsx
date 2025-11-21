@@ -19,7 +19,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="w-full max-w-md rounded-xl bg-[#2D525B] p-8 shadow-lg text-white">
+      <div className="w-full max-w-md rounded-xl bg-surface p-8 shadow-lg text-text-main border border-border">
         <h3 className="text-xl font-bold text-center mb-4">
           Confirmation de suppression
         </h3>
@@ -29,13 +29,13 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
         <div className="flex justify-center gap-4">
           <Button
             onClick={onClose}
-            className="bg-gray-500 hover:bg-gray-600 w-1/2"
+            className="bg-secondary hover:bg-secondary-hover text-white w-1/2"
           >
             Annuler
           </Button>
           <Button
             onClick={onConfirm}
-            className="bg-red-600 hover:bg-red-700 w-1/2"
+            className="bg-danger-bg hover:bg-danger-border text-white w-1/2"
           >
             Confirmer
           </Button>
