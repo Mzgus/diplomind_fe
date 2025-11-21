@@ -21,17 +21,20 @@ const DataTable: React.FC<DataTableProps> = ({
   onDeleteRow,
 }) => {
   return (
-    <div className="w-full rounded-lg shadow-md border border-border bg-surface">
+    <div className="w-full rounded-lg shadow-md border border-border bg-surface overflow-hidden">
       <div className="w-full overflow-auto max-h-[60vh]">
         <table className="w-full whitespace-no-wrap">
           <thead>
             <tr className="text-xs font-semibold tracking-wide text-left text-text-main uppercase bg-background sticky top-0 z-10">
-              {columns.map((col) => (
-                <th key={col.key} className="px-4 py-3">
+              {columns.map((col, index) => (
+                <th 
+                  key={col.key} 
+                  className={`px-4 py-3 ${index === 0 ? 'rounded-tl-lg' : ''}`}
+                >
                   {col.header}
                 </th>
               ))}
-              <th className="px-4 py-3">Actions</th>
+              <th className="px-4 py-3 rounded-tr-lg">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-surface divide-y divide-border">
