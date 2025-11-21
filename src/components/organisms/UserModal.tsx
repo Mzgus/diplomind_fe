@@ -209,7 +209,7 @@ const UserModal: React.FC<UserModalProps> = ({
                                                         setSelectedSheetId("");
                                                         setIsSheetConfirmed(false);
                                                     }}
-                                                    className="bg-[#2D6A85] hover:bg-[#24566c] px-8"
+                                                    className="bg-secondary hover:bg-secondary-hover px-8 text-white"
                                                 >
                                                     Annuler
                                                 </Button>
@@ -274,7 +274,7 @@ const UserModal: React.FC<UserModalProps> = ({
                         <Button
                             type="button"
                             onClick={onClose}
-                            className="bg-primary hover:bg-primary-hover px-8 py-2 rounded-full text-white"
+                            className="bg-secondary hover:bg-secondary-hover px-8 py-2 rounded-full text-white"
                         >
                             Annuler
                         </Button>

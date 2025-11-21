@@ -14,7 +14,7 @@ const LoginForm: React.FC = () => {
 
   return (
     // Conteneur pour centrer le formulaire sur la page (repris de la v1)
-    <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="flex  items-center justify-center min-h-screen bg-background">
       <form
         onSubmit={handleSubmit}
         // Style du formulaire (repris de la v2)
@@ -23,30 +23,32 @@ const LoginForm: React.FC = () => {
         <h2 className="text-2xl font-bold mb-6 text-center text-text-main">
           Connexion
         </h2>
-        <FormField
-          label="Email :"
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email..."
-          required
-        />
-        <FormField
-          label="Mot de passe :"
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Mot de passe..."
-          required
-        />
-        <Button
-          type="submit"
-          className="w-full rounded-lg bg-primary py-3 font-bold text-white transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-        >
-          Se connecter
-        </Button>
+        <div className="space-y-5">
+          <FormField
+            label="Email :"
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email..."
+            required
+          />
+          <FormField
+            label="Mot de passe :"
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Mot de passe..."
+            required
+          />
+          <Button
+            type="submit"
+            className="mt-3 w-full rounded-lg bg-primary py-3 font-bold text-white transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          >
+            Se connecter
+          </Button>
+        </div>
       </form>
     </div>
   );

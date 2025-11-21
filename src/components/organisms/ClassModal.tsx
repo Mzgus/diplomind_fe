@@ -197,7 +197,7 @@ const ClassModal: React.FC<ClassModalProps> = ({
                         <Button
                             type="button"
                             onClick={onClose}
-                            className="bg-primary hover:bg-primary-hover px-8 py-2 rounded-full text-white"
+                            className="bg-secondary hover:bg-secondary-hover px-8 py-2 rounded-full text-white"
                         >
                             Annuler
                         </Button>

@@ -131,7 +131,7 @@ const SkillValidationModal: React.FC<SkillValidationModalProps> = ({
                         <button
                             type="button"
                             onClick={onClose}
-                            className="py-2.5 px-5 text-sm font-medium text-text-main focus:outline-none bg-surface rounded-lg border border-border hover:bg-background hover:text-primary focus:z-10 focus:ring-4 focus:ring-background"
+                            className="py-2.5 px-5 text-sm font-medium text-white focus:outline-none bg-secondary rounded-lg border border-secondary hover:bg-secondary-hover focus:z-10 focus:ring-4 focus:ring-secondary/30"
                         >
                             Annuler
                         </button>

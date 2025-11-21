@@ -16,7 +16,14 @@
   --background: #f3f4f6;
   --surface: #ffffff;
   --border: #e5e7eb;
-  --input: #ffffff;
+  --input: #e5e7eb;
+  /* gray-200 - slightly darker than white but lighter than background */
+
+  /* Button Colors */
+  --secondary: #6b7280;
+  /* gray-500 */
+  --secondary-hover: #4b5563;
+  /* gray-600 */
 
   /* Text Colors */
   --text-main: #111827;
@@ -56,8 +63,14 @@
 
   --border: #374151;
   /* gray-700 */
-  --input: #1f2937;
-  /* gray-800 - same as surface for dark mode */
+  --input: #374151;
+  /* gray-700 - lighter for better contrast */
+
+  /* Button Colors */
+  --secondary: #6b7280;
+  /* gray-500 */
+  --secondary-hover: #9ca3af;
+  /* gray-400 - lighter on hover in dark mode */
 
   /* Text Colors */
   --text-main: #f9fafb;
@@ -103,6 +116,10 @@
   --color-surface: var(--surface);
   --color-border: var(--border);
   --color-input: var(--input);
+
+  /* Button Colors */
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
 
   /* Text Colors */
   --color-text-main: var(--text-main);
