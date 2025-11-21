@@ -83,6 +83,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
             <ArrowLeftOnRectangleIcon className="w-5 h-5" />
             Déconnexion
           </a>
+
         </div>
       )}
     </div>
