@@ -1,12 +1,15 @@
 import React from "react";
-import SkillCraftIcon from "../atoms/SkillCraftIcon";
+import logo from "../../assets/diplomind_logo_compressed.png";
 
 const BrandLogo: React.FC = () => {
   return (
     <a href="/">
-      <div className="flex items-center gap-2 cursor-pointer">
-        <SkillCraftIcon />
-        <span className="text-2xl font-bold text-blue-600">SKILLCRAFT</span>
+      <div className="flex items-center cursor-pointer">
+        <img
+          src={logo}
+          alt="Diplomind Logo"
+          className="h-12 w-auto object-contain"
+        />
       </div>
     </a>
   );
