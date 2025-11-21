@@ -17,11 +17,11 @@ const FormField: React.FC<FormFieldProps> = ({
   ...props
 }) => {
   const commonClasses =
-    "mt-1 block w-full px-3 py-2 bg-white border border-gray-600 rounded-md text-black shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#277da1] focus:border-[#277da1] sm:text-sm";
+    "mt-1 block w-full px-3 py-2 bg-input border border-border rounded-md text-text-main shadow-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm";
 
   return (
     <div className="w-full">
-      <label htmlFor={id} className="block text-sm font-medium text-white">
+      <label htmlFor={id} className="block text-sm font-medium text-text-main">
         {label}
       </label>
       {as === "textarea" ? (

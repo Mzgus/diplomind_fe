@@ -52,7 +52,7 @@ const SkillCreationForm: React.FC<SkillCreationFormProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full rounded-xl bg-[#2D525B] p-8 shadow-lg text-white"
+      className="w-full rounded-xl bg-surface p-8 shadow-lg text-text-main"
     >
       <h2 className="text-2xl font-bold mb-6 text-center">
         Créer une nouvelle compétence
@@ -100,11 +100,11 @@ const SkillCreationForm: React.FC<SkillCreationFormProps> = ({
         <Button
           type="button"
           onClick={onClose}
-          className="bg-gray-500 hover:bg-gray-600"
+          className="bg-secondary hover:bg-secondary-hover text-white"
         >
           Annuler
         </Button>
-        <Button type="submit" className="bg-[#277da1] hover:bg-[#216b8a]">
+        <Button type="submit" className="bg-primary hover:bg-primary-hover text-white">
           Créer la compétence
         </Button>
       </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import InfoField from "../components/molecules/InfoField";
 import Button from "../components/atoms/Button";
-import Label from "../components/atoms/Label";
+
 import Badge from "../components/atoms/Badge";
 
 const Account: React.FC = () => {
@@ -15,10 +15,10 @@ const Account: React.FC = () => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Mon Compte</h1>
-      <div className="bg-white p-8 pt-5 rounded-xl shadow-md max-w-2xl mx-auto">
+      <h1 className="text-3xl font-bold text-text-main mb-6">Mon Compte</h1>
+      <div className="bg-surface p-8 pt-5 rounded-xl shadow-md max-w-2xl mx-auto border border-border">
         <div className="mb-4">
-            <Badge color="red">{userAccount.profileType}</Badge>
+          <Badge color="red">{userAccount.profileType}</Badge>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
           <InfoField label="Nom" value={userAccount.lastName} />

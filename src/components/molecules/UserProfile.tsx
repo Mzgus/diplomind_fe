@@ -59,30 +59,31 @@ const UserProfile: React.FC<UserProfileProps> = ({
         className="flex items-center gap-4 focus:outline-none"
       >
         <div className="hidden sm:flex items-center gap-2">
-          <span className="font-medium text-gray-800">{userName}</span>
+          <span className="font-medium text-text-main">{userName}</span>
           <Badge color={getBadgeColor(profileType)}>{profileType}</Badge>
         </div>
         <Avatar src={avatarUrl} alt={`Avatar de ${userName}`} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-20">
+        <div className="absolute right-0 mt-2 w-48 bg-surface rounded-md shadow-xl z-20 border border-border">
           <Link
             to="/account"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 px-4 py-3 text-sm text-gray-600 capitalize transition-colors duration-300 transform hover:bg-gray-100"
+            className="flex items-center gap-3 px-4 py-3 text-sm text-text-muted capitalize transition-colors duration-300 transform hover:bg-background"
           >
             <UserCircleIcon className="w-5 h-5" />
             Mon Compte
           </Link>
-          <hr className="border-gray-200" />
+          <hr className="border-border" />
           <a
             href="/login"
-            className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 capitalize transition-colors duration-300 transform hover:bg-gray-100"
+            className="flex items-center gap-3 px-4 py-3 text-sm text-danger-text capitalize transition-colors duration-300 transform hover:bg-background"
           >
             <ArrowLeftOnRectangleIcon className="w-5 h-5" />
             Déconnexion
           </a>
+
         </div>
       )}
     </div>

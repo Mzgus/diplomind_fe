@@ -56,31 +56,29 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
-      <label className="block text-sm font-medium text-gray-200 mb-1">
+      <label className="block text-sm font-medium text-text-main mb-1">
         {label}
       </label>
       <button
         type="button"
         onClick={handleToggle}
         disabled={disabled}
-        className="flex items-center justify-between w-full px-4 py-2 text-left bg-white border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#277da1] disabled:bg-gray-200 disabled:cursor-not-allowed"
+        className="flex items-center justify-between w-full px-4 py-2 text-left bg-input border border-border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <span className="text-black">
+        <span className="text-text-main">
           {selectedValues.length > 0
-            ? `${selectedValues.length} ${itemName}${
-                selectedValues.length > 1 ? "s" : ""
-              } sélectionné(s)`
+            ? `${selectedValues.length} ${itemName}${selectedValues.length > 1 ? "s" : ""
+            } sélectionné(s)`
             : placeholder}
         </span>
         <ChevronDownIcon
-          className={`h-5 w-5 text-gray-400 transition-transform ${
-            isOpen ? "transform rotate-180" : ""
-          }`}
+          className={`h-5 w-5 text-text-muted transition-transform ${isOpen ? "transform rotate-180" : ""
+            }`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-10 mt-1 w-full bg-surface border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
           <div className="p-2">
             {options.map((option) => (
               <Checkbox

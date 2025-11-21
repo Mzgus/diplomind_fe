@@ -14,13 +14,13 @@ const LoginForm: React.FC = () => {
 
   return (
     // Conteneur pour centrer le formulaire sur la page (repris de la v1)
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-background">
       <form
         onSubmit={handleSubmit}
         // Style du formulaire (repris de la v2)
-        className="w-full max-w-sm rounded-xl bg-[#2d3e4f] p-8 shadow-lg"
+        className="w-full max-w-sm rounded-xl bg-surface p-8 shadow-lg border border-border"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center text-white">
+        <h2 className="text-2xl font-bold mb-6 text-center text-text-main">
           Connexion
         </h2>
         <FormField
@@ -43,7 +43,7 @@ const LoginForm: React.FC = () => {
         />
         <Button
           type="submit"
-          className="w-full rounded-lg bg-[#277da1] py-3 font-bold text-white transition-colors hover:bg-[#216b8a] focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-[#2d3e4f]"
+          className="w-full rounded-lg bg-primary py-3 font-bold text-white transition-colors hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
         >
           Se connecter
         </Button>

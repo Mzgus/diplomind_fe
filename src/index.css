@@ -1,1 +1,123 @@
 @import "tailwindcss";
+
+:root {
+  /* Brand Colors */
+  --primary: #4DA7C8;
+  --primary-hover: #4291ac;
+
+  /* Sidebar Colors */
+  --sidebar: #374F5E;
+  --sidebar-active: #4A90A4;
+
+  /*Topbar Colors*/
+  --topbar: #ffffff;
+
+  /* Base Colors */
+  --background: #f3f4f6;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --input: #ffffff;
+
+  /* Text Colors */
+  --text-main: #111827;
+  --text-muted: #6b7280;
+
+  /* Status Colors */
+  --success-bg: #dcfce7;
+  --success-text: #15803d;
+  --success-border: #bbf7d0;
+
+  --danger-bg: #fee2e2;
+  --danger-text: #b91c1c;
+  --danger-border: #fecaca;
+
+  --warning-bg: #fef9c3;
+  --warning-text: #a16207;
+  --warning-border: #fde047;
+}
+
+.dark {
+  /* Brand Colors - Slightly lighter for better contrast on dark */
+  --primary: #5CB8D9;
+  --primary-hover: #4DA7C8;
+
+  /* Sidebar Colors - Darker */
+  --sidebar: #1f2937;
+  --sidebar-active: #374151;
+
+  /*Topbar Colors - Darker*/
+  --topbar: #0d131f;
+
+  /* Base Colors */
+  --background: #111827;
+  /* gray-900 */
+  --surface: #1f2937;
+  /* gray-800 */
+
+  --border: #374151;
+  /* gray-700 */
+  --input: #1f2937;
+  /* gray-800 - same as surface for dark mode */
+
+  /* Text Colors */
+  --text-main: #f9fafb;
+  /* gray-50 */
+  --text-muted: #9ca3af;
+  /* gray-400 */
+
+  /* Status Colors - Darker backgrounds, lighter text */
+  --success-bg: #064e3b;
+  /* green-900 */
+  --success-text: #dcfce7;
+  /* green-100 */
+  --success-border: #14532d;
+  /* green-800 */
+
+  --danger-bg: #7f1d1d;
+  /* red-900 */
+  --danger-text: #fee2e2;
+  /* red-100 */
+  --danger-border: #991b1b;
+  /* red-800 */
+
+  --warning-bg: #713f12;
+  /* yellow-900 */
+  --warning-text: #fef9c3;
+  /* yellow-100 */
+  --warning-border: #854d0e;
+  /* yellow-800 */
+}
+
+@theme {
+  /* Brand Colors */
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+
+  /* Sidebar Colors */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-active: var(--sidebar-active);
+
+  /* Base Colors */
+  --color-topbar: var(--topbar);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-input: var(--input);
+
+  /* Text Colors */
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+
+  /* Status Colors */
+  --color-success-bg: var(--success-bg);
+  --color-success-text: var(--success-text);
+  --color-success-border: var(--success-border);
+
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-text: var(--danger-text);
+  --color-danger-border: var(--danger-border);
+
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-text: var(--warning-text);
+  --color-warning-border: var(--warning-border);
+}

@@ -39,7 +39,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
 }) => {
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4 text-gray-800">{title}</h1>
+      <h1 className="text-3xl font-bold mb-4 text-text-main">{title}</h1>
       <div className="flex items-center justify-between mb-8 gap-4">
         <div className="w-3/4">
           <SearchBar

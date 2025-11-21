@@ -41,21 +41,21 @@ const SkillValidationModal: React.FC<SkillValidationModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black/50 backdrop-blur-sm p-4 md:p-0">
-            <div className="relative w-full max-w-md max-h-full rounded-lg bg-white shadow-xl ring-1 ring-gray-200">
+            <div className="relative w-full max-w-md max-h-full rounded-lg bg-surface shadow-xl ring-1 ring-border">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b p-4 md:p-5 rounded-t-lg">
+                <div className="flex items-center justify-between border-b border-border p-4 md:p-5 rounded-t-lg">
                     <div>
-                        <h3 className="text-xl font-semibold text-gray-900">
+                        <h3 className="text-xl font-semibold text-text-main">
                             Valider la compétence
                         </h3>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Étudiant : <span className="font-medium text-gray-900">{studentName}</span>
+                        <p className="text-sm text-text-muted mt-1">
+                            Étudiant : <span className="font-medium text-text-main">{studentName}</span>
                         </p>
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900"
+                        className="ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-sm text-text-muted hover:bg-background hover:text-text-main"
                     >
                         <svg
                             className="h-3 w-3"
@@ -78,20 +78,20 @@ const SkillValidationModal: React.FC<SkillValidationModalProps> = ({
 
                 {/* Body */}
                 <form onSubmit={handleSubmit} className="p-4 md:p-5 space-y-4">
-                    <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
-                        <h4 className="font-medium text-blue-900 text-sm mb-1">{skillName}</h4>
-                        <p className="text-blue-700 text-xs">{skillDescription}</p>
+                    <div className="bg-primary/10 p-3 rounded-md border border-primary/20">
+                        <h4 className="font-medium text-primary text-sm mb-1">{skillName}</h4>
+                        <p className="text-text-main text-xs">{skillDescription}</p>
                     </div>
 
                     <div>
-                        <label className="block mb-2 text-sm font-medium text-gray-900">
+                        <label className="block mb-2 text-sm font-medium text-text-main">
                             Statut de validation
                         </label>
                         <div className="grid grid-cols-1 gap-2">
                             {["Validé", "Partiellement validé", "Non validé", "Non évalué"].map((option) => (
                                 <label
                                     key={option}
-                                    className={`flex items-center justify-between p-3 text-gray-900 bg-white border rounded-lg cursor-pointer hover:bg-gray-50 ${status === option ? "border-blue-600 ring-1 ring-blue-600 bg-blue-50/50" : "border-gray-200"
+                                    className={`flex items-center justify-between p-3 text-text-main bg-surface border rounded-lg cursor-pointer hover:bg-background ${status === option ? "border-primary ring-1 ring-primary bg-primary/10" : "border-border"
                                         }`}
                                 >
                                     <div className="flex items-center">
@@ -101,9 +101,9 @@ const SkillValidationModal: React.FC<SkillValidationModalProps> = ({
                                             value={option}
                                             checked={status === option}
                                             onChange={(e) => setStatus(e.target.value)}
-                                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                                            className="w-4 h-4 text-primary bg-background border-border focus:ring-primary"
                                         />
-                                        <span className="w-full ms-2 text-sm font-medium rounded dark:text-gray-300">
+                                        <span className="w-full ms-2 text-sm font-medium rounded text-text-main">
                                             {option}
                                         </span>
                                     </div>
@@ -113,13 +113,13 @@ const SkillValidationModal: React.FC<SkillValidationModalProps> = ({
                     </div>
 
                     <div>
-                        <label htmlFor="comment" className="block mb-2 text-sm font-medium text-gray-900">
+                        <label htmlFor="comment" className="block mb-2 text-sm font-medium text-text-main">
                             Commentaire (optionnel)
                         </label>
                         <textarea
                             id="comment"
                             rows={4}
-                            className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                            className="block p-2.5 w-full text-sm text-text-main bg-background rounded-lg border border-border focus:ring-primary focus:border-primary"
                             placeholder="Ajouter un commentaire sur la validation..."
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
@@ -127,17 +127,17 @@ const SkillValidationModal: React.FC<SkillValidationModalProps> = ({
                     </div>
 
                     {/* Footer */}
-                    <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-200 rounded-b">
+                    <div className="flex items-center justify-end gap-2 pt-4 border-t border-border rounded-b">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100"
+                            className="py-2.5 px-5 text-sm font-medium text-text-main focus:outline-none bg-surface rounded-lg border border-border hover:bg-background hover:text-primary focus:z-10 focus:ring-4 focus:ring-background"
                         >
                             Annuler
                         </button>
                         <button
                             type="submit"
-                            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                            className="text-white bg-primary hover:bg-primary-hover focus:ring-4 focus:outline-none focus:ring-primary/30 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                         >
                             Enregistrer
                         </button>

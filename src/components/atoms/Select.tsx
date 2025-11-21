@@ -6,7 +6,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 
 const Select: React.FC<SelectProps> = ({ children, className, ...props }) => {
   const baseStyles =
-    "w-full rounded-lg border-gray-300 px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white";
+    "w-full rounded-lg border-border px-4 py-3 text-text-main focus:outline-none focus:ring-2 focus:ring-primary bg-input";
   const combinedClassName = `${baseStyles} ${className || ""}`;
 
   return (

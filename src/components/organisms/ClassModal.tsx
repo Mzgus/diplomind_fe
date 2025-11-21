@@ -66,7 +66,7 @@ const ClassModal: React.FC<ClassModalProps> = ({
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <div className="w-full max-w-5xl rounded-xl bg-[#2D525B] text-white shadow-2xl overflow-hidden flex flex-col">
+            <div className="w-full max-w-5xl rounded-xl bg-surface text-text-main shadow-2xl overflow-hidden flex flex-col border border-border">
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 pb-0">
                     <h2 className="text-2xl font-bold">
@@ -74,7 +74,7 @@ const ClassModal: React.FC<ClassModalProps> = ({
                     </h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-300 hover:text-white focus:outline-none"
+                        className="text-text-muted hover:text-text-main focus:outline-none"
                     >
                         <svg
                             className="h-6 w-6"
@@ -129,7 +129,7 @@ const ClassModal: React.FC<ClassModalProps> = ({
                                 <Button
                                     type="button"
                                     onClick={handleAddStudent}
-                                    className="bg-[#4DA7C8] hover:bg-[#3b8da6] mb-4 h-[46px] w-[46px] flex items-center justify-center rounded-full p-0"
+                                    className="bg-primary hover:bg-primary-hover mb-4 h-[46px] w-[46px] flex items-center justify-center rounded-full p-0 text-white"
                                     disabled={!selectedStudentId}
                                 >
                                     <svg
@@ -153,13 +153,13 @@ const ClassModal: React.FC<ClassModalProps> = ({
                                 {assignedStudents.map((student) => (
                                     <div
                                         key={student.id}
-                                        className="flex justify-between items-center bg-white text-gray-800 px-4 py-2 rounded-full shadow-sm"
+                                        className="flex justify-between items-center bg-background text-text-main px-4 py-2 rounded-full shadow-sm border border-border"
                                     >
                                         <span>{student.name}</span>
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveStudent(student.id)}
-                                            className="text-red-500 hover:text-red-700 focus:outline-none"
+                                            className="text-danger-text hover:text-danger-text/80 focus:outline-none"
                                         >
                                             <svg
                                                 className="w-5 h-5"
@@ -178,7 +178,7 @@ const ClassModal: React.FC<ClassModalProps> = ({
                                     </div>
                                 ))}
                                 {assignedStudents.length === 0 && (
-                                    <p className="text-gray-400 text-sm italic">
+                                    <p className="text-text-muted text-sm italic">
                                         Aucun élève associé pour le moment.
                                     </p>
                                 )}
@@ -187,17 +187,17 @@ const ClassModal: React.FC<ClassModalProps> = ({
                     </div>
 
                     {/* Footer */}
-                    <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-white/10">
+                    <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-border">
                         <Button
                             type="submit"
-                            className="bg-[#4DA7C8] hover:bg-[#3b8da6] px-8 py-2 rounded-full"
+                            className="bg-primary hover:bg-primary-hover px-8 py-2 rounded-full text-white"
                         >
                             Confirmer
                         </Button>
                         <Button
                             type="button"
                             onClick={onClose}
-                            className="bg-[#4DA7C8] hover:bg-[#3b8da6] px-8 py-2 rounded-full"
+                            className="bg-primary hover:bg-primary-hover px-8 py-2 rounded-full text-white"
                         >
                             Annuler
                         </Button>
