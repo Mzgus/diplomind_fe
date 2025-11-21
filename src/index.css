@@ -9,6 +9,9 @@
   --sidebar: #374F5E;
   --sidebar-active: #4A90A4;
 
+  /*Topbar Colors*/
+  --topbar: #ffffff;
+
   /* Base Colors */
   --background: #f3f4f6;
   --surface: #ffffff;
@@ -42,11 +45,15 @@
   --sidebar: #1f2937;
   --sidebar-active: #374151;
 
+  /*Topbar Colors - Darker*/
+  --topbar: #0d131f;
+
   /* Base Colors */
   --background: #111827;
   /* gray-900 */
   --surface: #1f2937;
   /* gray-800 */
+
   --border: #374151;
   /* gray-700 */
   --input: #1f2937;
@@ -91,6 +98,7 @@
   --color-sidebar-active: var(--sidebar-active);
 
   /* Base Colors */
+  --color-topbar: var(--topbar);
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-border: var(--border);

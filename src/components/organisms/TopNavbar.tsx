@@ -15,7 +15,7 @@ const TopNavbar: React.FC<TopBarProps> = ({
   profileType,
 }) => {
   return (
-    <header className="w-full bg-surface border-b border-border">
+    <header className="w-full bg-topbar border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <BrandLogo />
