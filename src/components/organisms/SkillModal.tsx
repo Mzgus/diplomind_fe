@@ -139,7 +139,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
                     <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-border">
                         <Button
                             type="submit"
-                            className="bg-secondary hover:bg-secondary-hover px-8 py-2 rounded-full text-white"
+                            className="bg-primary hover:bg-primary-hover px-8 py-2 rounded-full text-white"
                         >
                             Confirmer
                         </Button>
