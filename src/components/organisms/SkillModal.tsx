@@ -18,7 +18,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
     onClose,
     onSave,
     existingCourses,
-    existingSteps,
+    // existingSteps,
 }) => {
     // State pour la compétence
     const [skillName, setSkillName] = useState("");
@@ -117,7 +117,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
                                 ))}
                             </SelectGroup>
 
-                            <SelectGroup
+                            {/* <SelectGroup
                                 id="associate-step"
                                 label="Associer à une étape"
                                 value={selectedStepId}
@@ -131,7 +131,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
                                         {step.name}
                                     </option>
                                 ))}
-                            </SelectGroup>
+                            </SelectGroup> */}
                         </div>
                     </div>
 
