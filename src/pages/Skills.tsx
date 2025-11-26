@@ -103,6 +103,7 @@ const Skills: React.FC = () => {
 
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [skillToEdit, setSkillToEdit] = useState<{ id: string; name: string; description: string; courseId: string } | null>(null);
   const [isStepAssociationModalOpen, setIsStepAssociationModalOpen] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -119,8 +120,38 @@ const Skills: React.FC = () => {
   };
 
   const handleSaveNewSkill = (skillData: any) => {
-    console.log("Nouvelle compétence:", skillData);
+    if (skillData.id) {
+      console.log("Mise à jour de la compétence:", skillData);
+      // Here you would update the skill in the courses state
+      setCourses(courses.map(course => {
+        if (course.id === skillData.courseId) {
+          return {
+            ...course,
+            skills: course.skills.map(s =>
+              s.id === skillData.id
+                ? { ...s, name: skillData.name, description: skillData.description }
+                : s
+            )
+          };
+        }
+        return course;
+      }));
+    } else {
+      console.log("Nouvelle compétence:", skillData);
+      // Here you would add the new skill to the courses state
+    }
     setIsCreateModalOpen(false);
+    setSkillToEdit(null);
+  };
+
+  const handleEditSkill = (skill: Skill, courseId: string) => {
+    setSkillToEdit({
+      id: skill.id,
+      name: skill.name,
+      description: skill.description,
+      courseId: courseId,
+    });
+    setIsCreateModalOpen(true);
   };
 
   const handleOpenStepAssociation = (skill: Skill) => {
@@ -285,8 +316,18 @@ const Skills: React.FC = () => {
                             Lier une étape
                           </button>
                           <button
+                            onClick={() => handleEditSkill(skill, course.id)}
+                            className="p-2 text-text-muted hover:text-text-main hover:bg-background rounded-full transition-colors"
+                            title="Éditer cette compétence"
+                          >
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
                             onClick={() => handleOpenDeleteModal(skill, course.id)}
                             className="p-2 text-danger-text hover:bg-danger-bg rounded-full transition-colors"
+                            title="Supprimer cette compétence"
                           >
                             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -306,10 +347,14 @@ const Skills: React.FC = () => {
       {/* Modals */}
       <SkillModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setSkillToEdit(null);
+        }}
         onSave={handleSaveNewSkill}
         existingCourses={courses.map(c => ({ id: c.id, name: c.name }))}
         existingSteps={existingSteps}
+        skillToEdit={skillToEdit}
       />
 
       <StepAssociationModal
