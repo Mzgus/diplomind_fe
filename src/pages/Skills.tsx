@@ -159,9 +159,39 @@ const Skills: React.FC = () => {
     setIsStepAssociationModalOpen(true);
   };
 
-  const handleSaveStepAssociations = (associations: { projectId: string; stepId: string }[]) => {
-    console.log("Nouvelles associations d'étapes:", associations);
-    // Here you would update the skill's linkedSteps
+  const handleSaveStepAssociations = (stepIds: string[]) => {
+    if (selectedSkill) {
+      console.log("Nouvelles associations d'étapes:", stepIds);
+
+      // Transform IDs back to full Step objects with project info
+      // Note: For "new" steps created in modal with temp IDs, this lookup will fail 
+      // unless we added them to existingSteps. 
+      // In this mock implementation, we only support linking EXISTING steps successfully.
+
+      const updatedSteps = stepIds
+        .map(id => existingSteps.find(s => s.id === id))
+        .filter((s): s is typeof existingSteps[0] => s !== undefined)
+        .map(s => ({
+          id: s.id,
+          name: s.name,
+          projectId: s.projectId,
+          projectName: existingProjects.find(p => p.id === s.projectId)?.name || "Inconnu"
+        }));
+
+      setCourses(courses.map(course => {
+        // Find the course contaning the selected skill
+        const skillIndex = course.skills.findIndex(s => s.id === selectedSkill.id);
+        if (skillIndex !== -1) {
+          const updatedSkills = [...course.skills];
+          updatedSkills[skillIndex] = {
+            ...updatedSkills[skillIndex],
+            linkedSteps: updatedSteps
+          };
+          return { ...course, skills: updatedSkills };
+        }
+        return course;
+      }));
+    }
     setIsStepAssociationModalOpen(false);
   };
 
@@ -364,6 +394,7 @@ const Skills: React.FC = () => {
         skillName={selectedSkill?.name || ""}
         existingProjects={existingProjects}
         existingSteps={existingSteps}
+        currentStepIds={selectedSkill?.linkedSteps.map(s => s.id) || []}
       />
 
       <DeleteConfirmationModal
