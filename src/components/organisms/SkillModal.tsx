@@ -5,12 +5,20 @@ import InputGroup from "../molecules/InputGroup";
 import TextAreaGroup from "../molecules/TextAreaGroup";
 import SelectGroup from "../molecules/SelectGroup";
 
+interface SkillData {
+    id?: string;
+    name: string;
+    description: string;
+    courseId: string;
+}
+
 interface SkillModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (skillData: any) => void;
+    onSave: (skillData: SkillData) => void;
     existingCourses: { id: string; name: string }[];
     existingSteps: { id: string; name: string }[];
+    skillToEdit?: SkillData | null;
 }
 
 const SkillModal: React.FC<SkillModalProps> = ({
@@ -18,32 +26,39 @@ const SkillModal: React.FC<SkillModalProps> = ({
     onClose,
     onSave,
     existingCourses,
-    existingSteps,
+    // existingSteps,
+    skillToEdit = null,
 }) => {
     // State pour la compétence
     const [skillName, setSkillName] = useState("");
     const [skillDescription, setSkillDescription] = useState("");
     const [selectedCourseId, setSelectedCourseId] = useState("");
-    const [selectedStepId, setSelectedStepId] = useState("");
 
-    // Reset state when modal opens/closes
+    // Reset or populate state when modal opens/closes
     useEffect(() => {
         if (isOpen) {
-            setSkillName("");
-            setSkillDescription("");
-            setSelectedCourseId("");
-            setSelectedStepId("");
+            if (skillToEdit) {
+                // Edit mode - populate with existing data
+                setSkillName(skillToEdit.name);
+                setSkillDescription(skillToEdit.description);
+                setSelectedCourseId(skillToEdit.courseId);
+            } else {
+                // Create mode - reset fields
+                setSkillName("");
+                setSkillDescription("");
+                setSelectedCourseId("");
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, skillToEdit]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const skillData = {
+        const skillData: SkillData = {
+            id: skillToEdit?.id,
             name: skillName,
             description: skillDescription,
             courseId: selectedCourseId,
-            stepId: selectedStepId,
         };
 
         onSave(skillData);
@@ -55,7 +70,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 pb-0">
                     <h2 className="text-2xl font-bold">
-                        Formulaire de création / édition d'une compétence
+                        {skillToEdit ? "Éditer la compétence" : "Créer une compétence"}
                     </h2>
                     <button
                         onClick={onClose}
@@ -117,7 +132,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
                                 ))}
                             </SelectGroup>
 
-                            <SelectGroup
+                            {/* <SelectGroup
                                 id="associate-step"
                                 label="Associer à une étape"
                                 value={selectedStepId}
@@ -131,7 +146,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
                                         {step.name}
                                     </option>
                                 ))}
-                            </SelectGroup>
+                            </SelectGroup> */}
                         </div>
                     </div>
 
@@ -141,7 +156,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
                             type="submit"
                             className="bg-primary hover:bg-primary-hover px-8 py-2 rounded-full text-white"
                         >
-                            Confirmer
+                            {skillToEdit ? "Mettre à jour" : "Créer"}
                         </Button>
                         <Button
                             type="button"
