@@ -2,14 +2,18 @@ import React, { useState } from "react";
 import Button from "../atoms/Button";
 import FormField from "../molecules/FormField";
 
-const LoginForm: React.FC = () => {
+interface LoginFormProps {
+  onSubmit: (formData: any) => void;
+}
+
+const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [pwd, setPassword] = useState("");
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); // Empêche le rechargement de la page
-    // Ici, vous ajouteriez votre logique de connexion (ex: appel API)
-    console.log("Tentative de connexion avec:", { email, password });
+    // Appel de la fonction onSubmit passée en props avec les données du formulaire
+    onSubmit({ email, pwd });
   };
 
   return (
@@ -37,7 +41,7 @@ const LoginForm: React.FC = () => {
             label="Mot de passe :"
             type="password"
             id="password"
-            value={password}
+            value={pwd}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Mot de passe..."
             required

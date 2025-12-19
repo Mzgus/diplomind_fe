@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { Link } from "react-router-dom";
 import Avatar from "../atoms/Avatar";
 import Badge from "../atoms/Badge";
 import {
   UserCircleIcon,
-  ArrowLeftOnRectangleIcon,
+  ArrowLeftEndOnRectangleIcon,
 } from "@heroicons/react/24/outline";
+import { AuthContext } from "../../context/AuthContext";
 
 interface UserProfileProps {
   userName: string;
@@ -35,6 +36,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { logout } = useContext(AuthContext);
 
   // Ferme le menu si on clique en dehors
   useEffect(() => {
@@ -76,14 +78,15 @@ const UserProfile: React.FC<UserProfileProps> = ({
             Mon Compte
           </Link>
           <hr className="border-border" />
-          <a
-            href="/login"
+
+          <Link
+            to="/login"
+            onClick={logout}
             className="flex items-center gap-3 px-4 py-3 text-sm text-danger-text capitalize transition-colors duration-300 transform hover:bg-background"
           >
-            <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+            <ArrowLeftEndOnRectangleIcon className="w-5 h-5" />
             Déconnexion
-          </a>
-
+          </Link>
         </div>
       )}
     </div>
