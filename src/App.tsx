@@ -13,6 +13,7 @@ import UserSheets from "./pages/UserSheets";
 import Users from "./pages/Users";
 import Account from "./pages/Account";
 import ProjectSkillsValidation from "./pages/ProjectSkillsValidation";
+import RequireAuth from "./components/auth/RequireAuth";
 
 function App() {
   return (
@@ -23,20 +24,22 @@ function App() {
           <Route path="/login" element={<Login />} />
 
           {/* Routes privées qui utilisent le MainLayout */}
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/courses" element={<Courses />} />
-            <Route path="/project" element={<Project />} />
-            <Route path="/steps" element={<Steps />} />
-            <Route path="/skills" element={<Skills />} />
-            <Route path="/classes" element={<Classes />} />
-            <Route path="/user-sheets" element={<UserSheets />} />
-            <Route path="/users" element={<Users />} />
-            <Route path="/account" element={<Account />} />
-            <Route
-              path="/project-skills-validation"
-              element={<ProjectSkillsValidation />}
-            />
+          <Route element={<RequireAuth />}>
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/courses" element={<Courses />} />
+              <Route path="/project" element={<Project />} />
+              <Route path="/steps" element={<Steps />} />
+              <Route path="/skills" element={<Skills />} />
+              <Route path="/classes" element={<Classes />} />
+              <Route path="/user-sheets" element={<UserSheets />} />
+              <Route path="/users" element={<Users />} />
+              <Route path="/account" element={<Account />} />
+              <Route
+                path="/project-skills-validation"
+                element={<ProjectSkillsValidation />}
+              />
+            </Route>
           </Route>
         </Routes>
       </AuthProvider>
