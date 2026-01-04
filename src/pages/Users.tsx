@@ -1,45 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 import UserModal from "../components/organisms/UserModal";
+import { Endpoints } from "../_services/endpoints.services";
 
-// Données et colonnes fictives pour l'exemple
+// Colonnes pour l'affichage
 const userColumns = [
   { key: "name", header: "Nom" },
   { key: "email", header: "Email" },
   { key: "role", header: "Rôle" },
-  { key: "status", header: "Statut" },
 ];
 
-const userData = [
-  {
-    name: "Jean Dupont",
-    email: "jean.dupont@example.com",
-    role: "Admin",
-    status: "Actif",
-  },
-  {
-    name: "Marie Curie",
-    email: "marie.curie@example.com",
-    role: "Utilisateur",
-    status: "Actif",
-  },
-  {
-    name: "Pierre Martin",
-    email: "pierre.martin@example.com",
-    role: "Utilisateur",
-    status: "Inactif",
-  },
-  {
-    name: "Sophie Lambert",
-    email: "sophie.lambert@example.com",
-    role: "Editeur",
-    status: "Actif",
-  },
-];
+interface UserData {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
 
 const Users: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [userData, setUserData] = useState<UserData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch users from API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const response = await Endpoints.getUsers();
+        // Transform API response to match our table format
+        const transformedUsers = response.data.map((user: any) => ({
+          id: user.id,
+          name: `${user.first_name} ${user.last_name}`,
+          email: user.email,
+          role: user.type_user,
+        }));
+        setUserData(transformedUsers);
+        setError(null);
+      } catch (err: any) {
+        console.error("Failed to fetch users:", err);
+        setError("Erreur lors du chargement des utilisateurs");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   // Données fictives pour les fiches utilisateur existantes
   const existingUserSheets = [
@@ -80,12 +89,28 @@ const Users: React.FC = () => {
     setIsCreateModalOpen(false);
   };
 
-  // Logique de filtrage (sera utile plus tard)
+  // Logique de filtrage
   const filteredUsers = userData.filter(
     (user) =>
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p>Chargement des utilisateurs...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -118,4 +143,3 @@ const Users: React.FC = () => {
 };
 
 export default Users;
-
