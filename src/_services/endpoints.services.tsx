@@ -18,9 +18,14 @@ let getUsers = () => {
   return API.get("/users");
 };
 
+let verifyToken = () => {
+  return API.get("/verify_token");
+};
+
 export const Endpoints = {
   login,
   logout,
   refreshTokens,
   getUsers,
+  verifyToken,
 };
