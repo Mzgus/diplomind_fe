@@ -1,31 +1,13 @@
-import API from "./caller.services";
-
-// Utilisateurs
-
-let login = (formData: any) => {
-  return API.post("/login", formData);
-};
-
-let logout = () => {
-  return API.get("/logout");
-};
-
-let refreshTokens = () => {
-  return API.get("/refresh_tokens");
-};
-
-let getUsers = () => {
-  return API.get("/users");
-};
-
-let verifyToken = () => {
-  return API.get("/verify_token");
-};
+import { AuthService } from "./auth.service";
+import { UsersService } from "./users.service";
 
 export const Endpoints = {
-  login,
-  logout,
-  refreshTokens,
-  getUsers,
-  verifyToken,
+  // Auth
+  login: AuthService.login,
+  logout: AuthService.logout,
+  refreshTokens: AuthService.refreshTokens,
+  verifyToken: AuthService.verifyToken,
+
+  // Users
+  getUsers: UsersService.getAllUsers,
 };
