@@ -14,7 +14,7 @@ export interface UserSheet {
   nom: string;
   prenom: string;
   type_user: "student" | "teacher" | "admin";
-  avatar?: string;
+  profile_picture?: string;
   // Computed full name often useful
 }
 
