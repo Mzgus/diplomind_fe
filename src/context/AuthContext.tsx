@@ -1,6 +1,8 @@
 import { createContext, useState, useEffect, type ReactNode } from "react";
 import { jwtDecode, type JwtPayload } from "jwt-decode";
 import { Endpoints } from "../_services/endpoints.services";
+import { AuthService } from "../_services/auth.service";
+import type { UserSheet } from "../types";
 
 interface CustomJwtPayload extends JwtPayload {
   user_id: number;
@@ -18,6 +20,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [availableProfiles, setAvailableProfiles] = useState<UserSheet[]>([]);
+
+  const fetchProfiles = async () => {
+    try {
+      const res = await AuthService.getMyProfiles();
+      setAvailableProfiles(res.data);
+    } catch (e) {
+      console.error("Failed to fetch profiles", e);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -30,6 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(userData);
           setIsAuthenticated(true);
           setIsAdmin(userData.user_role === "admin");
+          fetchProfiles(); // Fetch profiles on verify success
           setLoading(false);
         })
         .catch(() => {
@@ -43,6 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setUser(decodedToken);
               setIsAuthenticated(true);
               setIsAdmin(decodedToken.user_role === "admin");
+              fetchProfiles(); // Fetch profiles on refresh success
               setLoading(false);
             })
             .catch(() => {
@@ -51,6 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               setUser(null);
               setIsAuthenticated(false);
               setIsAdmin(false);
+              setAvailableProfiles([]);
               setLoading(false);
             });
         });
@@ -65,6 +80,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(decodedToken);
     setIsAuthenticated(true);
     setIsAdmin(decodedToken.user_role === "admin");
+    fetchProfiles(); // Fetch profiles on login
+  };
+
+  const selectProfile = async (user_sheet_id: number) => {
+    try {
+      const res = await AuthService.switchProfile(user_sheet_id);
+      const newToken = res.data.token;
+      login(newToken);
+      // Optional: Force reload or just let state update
+    } catch (e) {
+      console.error("Failed to switch profile", e);
+    }
   };
 
   const logout = () => {
@@ -73,11 +100,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setIsAuthenticated(false);
     setIsAdmin(false);
+    setAvailableProfiles([]);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, loading, isAuthenticated, isAdmin }}
+      value={{
+        user,
+        login,
+        logout,
+        loading,
+        isAuthenticated,
+        isAdmin,
+        availableProfiles,
+        selectProfile,
+      }}
     >
       {children}
     </AuthContext.Provider>

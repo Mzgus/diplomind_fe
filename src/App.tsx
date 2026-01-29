@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
+import SelectProfile from "./pages/SelectProfile";
 import MainLayout from "./components/layouts/MainLayout";
 import Home from "./pages/Home";
 import { AuthProvider } from "./context/AuthContext";
@@ -22,6 +23,10 @@ function App() {
         <Routes>
           {/* Route publique sans Sidebar ni TopNavbar */}
           <Route path="/login" element={<Login />} />
+          
+          <Route element={<RequireAuth />}>
+             <Route path="/select-profile" element={<SelectProfile />} />
+          </Route>
 
           {/* Routes privées qui utilisent le MainLayout */}
           <Route element={<RequireAuth />}>

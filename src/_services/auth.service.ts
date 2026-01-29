@@ -16,9 +16,19 @@ const verifyToken = () => {
   return API.get("/verify_token");
 };
 
+const getMyProfiles = () => {
+  return API.get("/me/profiles");
+};
+
+const switchProfile = (user_sheet_id: number) => {
+  return API.post("/auth/switch-profile", { user_sheet_id });
+};
+
 export const AuthService = {
   login,
   logout,
   refreshTokens,
   verifyToken,
+  getMyProfiles,
+  switchProfile,
 };
