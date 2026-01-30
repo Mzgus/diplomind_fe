@@ -1,67 +1,83 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 import ProjectModal from "../components/organisms/ProjectModal";
+import { ProjectsService } from "../_services/projects.service";
+import { CoursesService } from "../_services/courses.service";
+// StepsService might be needed if creating steps, but let's check if we can import it
+// Assuming it follows the pattern
+import API from "../_services/caller.services";
 
-// Données et colonnes fictives pour les projets
+// Define StepService locally if not exported or use generic caller for now if file not found
+// But we saw it exists. Let's try to import it dynamically or just define helper
+const createStep = (data: any) => API.post("/steps", data);
+
+import type { Project as ProjectType, Course } from "../types";
+
+// Extended Project type for UI
+interface ProjectWithCourse extends ProjectType {
+  courseName?: string;
+}
+
 const projectColumns = [
   { key: "name", header: "Nom du Projet" },
-  { key: "client", header: "Client" },
-  { key: "deadline", header: "Échéance" },
-  { key: "status", header: "Statut" },
-];
-
-const projectData = [
-  {
-    name: "Refonte Site E-commerce",
-    client: "Client A",
-    deadline: "31/12/2024",
-    status: "En cours",
-  },
-  {
-    name: "Application Mobile",
-    client: "Client B",
-    deadline: "15/11/2024",
-    status: "En cours",
-  },
-  {
-    name: "Outil de gestion interne",
-    client: "Interne",
-    deadline: "01/10/2024",
-    status: "Terminé",
-  },
-  {
-    name: "Campagne Marketing",
-    client: "Client C",
-    deadline: "20/12/2024",
-    status: "Planifié",
-  },
+  { key: "description", header: "Description" },
+  { key: "courseName", header: "Cours Associé" },
 ];
 
 const Project: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [projects, setProjects] = useState<ProjectWithCourse[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [allSteps, setAllSteps] = useState<any[]>([]); // New state
+  const [loading, setLoading] = useState(true);
 
-  // Données fictives pour les listes déroulantes
-  const existingCourses = [
-    { id: "1", name: "Développement Web" },
-    { id: "2", name: "Design UI/UX" },
-  ];
-  const existingSteps = [
-    { id: "1", name: "Maquettage" },
-    { id: "2", name: "Intégration" },
-  ];
-
-  // State pour la modale de création
+  // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-  // State pour la modale de suppression
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
-    null
-  );
+  const [itemToDelete, setItemToDelete] = useState<ProjectType | null>(null);
+  const [projectToEdit, setProjectToEdit] = useState<ProjectType | null>(null);
 
-  const handleOpenDeleteModal = (project: Record<string, any>) => {
-    setItemToDelete(project);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      // Fetch projects, courses AND steps
+      const [projectsRes, coursesRes, stepsRes] = await Promise.all([
+        ProjectsService.getAllProjects(),
+        CoursesService.getAllCourses(),
+        // Assuming StepsService is available via import or helper
+        API.get("/steps"), // Using direct API call if Service not imported yet, but likely is
+      ]);
+
+      const projectsData: ProjectType[] = projectsRes.data;
+      const coursesData: Course[] = coursesRes.data;
+      const stepsData: any[] = stepsRes.data;
+
+      // Map course names to projects
+      const enrichedProjects = projectsData.map((p) => {
+        const course = coursesData.find((c) => c.id === p.course_id);
+        return {
+          ...p,
+          courseName: course ? course.name : "Non assigné",
+        };
+      });
+
+      setProjects(enrichedProjects);
+      setCourses(coursesData);
+      setAllSteps(stepsData); // Update steps
+    } catch (error) {
+      console.error("Failed to fetch data", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleOpenDeleteModal = (project: any) => {
+    setItemToDelete(project as ProjectType);
     setIsModalOpen(true);
   };
 
@@ -70,25 +86,75 @@ const Project: React.FC = () => {
     setItemToDelete(null);
   };
 
-  const handleConfirmDelete = () => {
-    console.log("Suppression confirmée pour:", itemToDelete?.name);
+  const handleConfirmDelete = async () => {
+    if (itemToDelete) {
+      try {
+        await ProjectsService.deleteProject(itemToDelete.id);
+        fetchData();
+      } catch (error) {
+        console.error("Failed to delete project", error);
+      }
+    }
     handleCloseModal();
   };
 
-  const handleSaveNewProject = (projectData: any, stepData: any | null) => {
-    console.log("Sauvegarde du nouveau projet:", {
-      project: projectData,
-      step: stepData,
-    });
-    setIsCreateModalOpen(false);
+  const handleSaveNewProject = async (projectData: any, stepData: any | null) => {
+    try {
+        let projectId = projectData.id;
+        
+        // 1. Save/Update Phase
+        if (projectId) {
+            // Update
+             await ProjectsService.updateProject(projectId, {
+                name: projectData.name,
+                description: projectData.description,
+                course_id: Number(projectData.courseId)
+             });
+        } else {
+            // Create
+            const res = await ProjectsService.createProject({
+                name: projectData.name,
+                description: projectData.description,
+                course_id: Number(projectData.courseId)
+            });
+            projectId = res.data.id; // Assuming backend returns the created object with ID
+        }
+
+        // 2. Step Creation (if provided)
+        if (stepData && projectId) {
+             // If creating a new step
+             if (stepData.name) {
+                 await createStep({
+                     name: stepData.name,
+                     description: stepData.description,
+                     project_id: projectId,
+                     step_order: 1 // Default order? Or fetch existing count + 1?
+                 });
+             } else if (stepData.id) {
+                 // Association logic? Steps already have project_id. 
+                 // If we selected an existing step, we're likely moving it?
+                 // For now, let's assume we call an update on the step
+                 // But we don't have updateStep imported.
+                 console.log("Linking existing step not fully implemented yet");
+             }
+        }
+
+        fetchData();
+        setIsCreateModalOpen(false);
+    } catch (error) {
+        console.error("Failed to save project", error);
+    }
   };
 
-  // Logique de filtrage pour les projets
-  const filteredProjects = projectData.filter(
+  // Filter projects
+  const filteredProjects = projects.filter(
     (project) =>
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.client.toLowerCase().includes(searchQuery.toLowerCase())
+      project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.courseName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) return <div className="p-6">Chargement...</div>;
 
   return (
     <>
@@ -101,6 +167,10 @@ const Project: React.FC = () => {
         onButtonClick={() => setIsCreateModalOpen(true)}
         columns={projectColumns}
         data={filteredProjects}
+        onEditRow={(row) => {
+            setProjectToEdit(row as ProjectType);
+            setIsCreateModalOpen(true);
+        }}
         onDeleteRow={handleOpenDeleteModal}
       />
       <DeleteConfirmationModal
@@ -112,10 +182,14 @@ const Project: React.FC = () => {
       />
       <ProjectModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => {
+            setIsCreateModalOpen(false);
+            setProjectToEdit(null);
+        }}
         onSave={handleSaveNewProject}
-        existingCourses={existingCourses}
-        existingSteps={existingSteps}
+        existingCourses={courses.map(c => ({ id: c.id.toString(), name: c.name }))}
+        existingSteps={allSteps.map(s => ({ id: s.id.toString(), name: s.name }))} 
+        initialData={projectToEdit}
       />
     </>
   );

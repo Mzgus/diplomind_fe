@@ -1,232 +1,285 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SearchBar from "../components/molecules/SearchBar";
 import Button from "../components/atoms/Button";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 import SkillModal from "../components/organisms/SkillModal";
 import StepAssociationModal from "../components/organisms/StepAssociationModal";
+import { CoursesService } from "../_services/courses.service";
+import { SkillsService } from "../_services/skills.service";
+import { StepsService } from "../_services/steps.service";
+import { ProjectsService } from "../_services/projects.service";
+import type { Course, Skill, Step, Project } from "../types";
 
-// Types
-interface Step {
-  id: string;
-  name: string;
-  projectId: string;
-  projectName: string;
+// Extended types for UI
+interface StepWithProject extends Step {
+    projectName?: string;
 }
 
-interface Skill {
-  id: string;
-  name: string;
-  description: string;
-  linkedSteps: Step[];
+interface SkillWithSteps extends Skill {
+    linkedSteps?: StepWithProject[];
 }
 
-interface Course {
-  id: string;
-  name: string;
-  skills: Skill[];
+interface CourseWithSkills extends Course {
+    skills?: SkillWithSteps[];
+    skillsLoaded?: boolean;
 }
-
-// Mock data with hierarchical structure
-const existingProjects = [
-  { id: "p1", name: "Site E-commerce" },
-  { id: "p2", name: "Application Mobile" },
-  { id: "p3", name: "Dashboard Analytics" },
-];
-
-const existingSteps = [
-  { id: "s1", name: "Maquettage", projectId: "p1" },
-  { id: "s2", name: "Intégration Frontend", projectId: "p1" },
-  { id: "s3", name: "API Backend", projectId: "p1" },
-  { id: "s4", name: "Design UX", projectId: "p2" },
-  { id: "s5", name: "Développement React Native", projectId: "p2" },
-  { id: "s6", name: "Visualisation de données", projectId: "p3" },
-];
-
-const mockCourses: Course[] = [
-  {
-    id: "c1",
-    name: "Développement Web",
-    skills: [
-      {
-        id: "sk1",
-        name: "React",
-        description: "Bibliothèque frontend moderne",
-        linkedSteps: [
-          { id: "s2", name: "Intégration Frontend", projectId: "p1", projectName: "Site E-commerce" },
-        ],
-      },
-      {
-        id: "sk2",
-        name: "Node.js",
-        description: "Backend JavaScript",
-        linkedSteps: [
-          { id: "s3", name: "API Backend", projectId: "p1", projectName: "Site E-commerce" },
-        ],
-      },
-    ],
-  },
-  {
-    id: "c2",
-    name: "Design UI/UX",
-    skills: [
-      {
-        id: "sk3",
-        name: "Figma",
-        description: "Outil de design collaboratif",
-        linkedSteps: [
-          { id: "s1", name: "Maquettage", projectId: "p1", projectName: "Site E-commerce" },
-          { id: "s4", name: "Design UX", projectId: "p2", projectName: "Application Mobile" },
-        ],
-      },
-    ],
-  },
-  {
-    id: "c3",
-    name: "Data Science",
-    skills: [
-      {
-        id: "sk4",
-        name: "D3.js",
-        description: "Visualisation de données",
-        linkedSteps: [
-          { id: "s6", name: "Visualisation de données", projectId: "p3", projectName: "Dashboard Analytics" },
-        ],
-      },
-    ],
-  },
-];
 
 const Skills: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [courses, setCourses] = useState<Course[]>(mockCourses);
-  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set(["c1"]));
+  const [courses, setCourses] = useState<CourseWithSkills[]>([]);
+  const [allSteps, setAllSteps] = useState<StepWithProject[]>([]);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [expandedCourses, setExpandedCourses] = useState<Set<number>>(new Set());
+  const [loading, setLoading] = useState(true);
 
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [skillToEdit, setSkillToEdit] = useState<{ id: string; name: string; description: string; courseId: string } | null>(null);
+  const [skillToEdit, setSkillToEdit] = useState<{ id: number; name: string; description: string; courseId: string } | null>(null);
   const [isStepAssociationModalOpen, setIsStepAssociationModalOpen] = useState(false);
-  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<SkillWithSteps | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<{ skill: Skill; courseId: string } | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{ skill: Skill; courseId: number } | null>(null);
 
-  const toggleCourse = (courseId: string) => {
+  // Fetch initial global data
+  const fetchGlobalData = async () => {
+    try {
+        setLoading(true);
+        const [coursesRes, stepsRes, projectsRes] = await Promise.all([
+            CoursesService.getAllCourses(),
+            StepsService.getAllSteps(),
+            ProjectsService.getAllProjects()
+        ]);
+
+        const projects: Project[] = projectsRes.data;
+        const steps: Step[] = stepsRes.data;
+        const rawCourses: Course[] = coursesRes.data;
+        
+        // Enrich steps with project names for global usage
+        const enrichedSteps = steps.map(s => {
+            const p = projects.find(proj => proj.id === s.project_id);
+            return {
+                ...s,
+                projectName: p ? p.name : "Inconnu"
+            };
+        });
+
+        setAllSteps(enrichedSteps);
+        setAllProjects(projects);
+
+        // Fetch skills for ALL courses immediately
+        const coursesWithSkills = await Promise.all(rawCourses.map(async (course) => {
+            try {
+                const skillsRes = await CoursesService.getCourseSkills(course.id);
+                const rawSkills: Skill[] = skillsRes.data;
+
+                // For each skill, fetch linked steps (This might be heavy, but requested "load every skills")
+                const skillsWithSteps = await Promise.all(rawSkills.map(async (skill) => {
+                     if (!skill.id) return { ...skill, linkedSteps: [] };
+                     try {
+                        const stepsRes = await StepsService.getSkillSteps(skill.id);
+                        const skillSteps: Step[] = stepsRes.data;
+
+                        const enrichedSkillSteps = skillSteps.map(s => {
+                            const p = projects.find(proj => proj.id === s.project_id);
+                            return { ...s, projectName: p ? p.name : "Inconnu" };
+                        });
+                        return { ...skill, linkedSteps: enrichedSkillSteps };
+                     } catch (err) {
+                         console.warn(`Failed to fetch steps for skill ${skill.id}`, err);
+                         return { ...skill, linkedSteps: [] };
+                     }
+                }));
+
+                return { ...course, skills: skillsWithSteps, skillsLoaded: true };
+            } catch (err) {
+                console.error(`Failed to fetch skills for course ${course.id}`, err);
+                return { ...course, skills: [], skillsLoaded: false };
+            }
+        }));
+
+        setCourses(coursesWithSkills);
+
+    } catch (error) {
+        console.error("Failed to fetch global data", error);
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGlobalData();
+  }, []);
+
+  const fetchCourseSkills = async (courseId: number) => {
+      // Re-fetch logic for updates
+      try {
+          const skillsRes = await CoursesService.getCourseSkills(courseId);
+          const rawSkills: Skill[] = skillsRes.data;
+
+          const skillsWithSteps = await Promise.all(rawSkills.map(async (skill) => {
+             if (!skill.id) return { ...skill, linkedSteps: [] };
+             try {
+                const stepsRes = await StepsService.getSkillSteps(skill.id);
+                // Ensure unique items just in case? API should handle it.
+                const skillSteps: Step[] = stepsRes.data;
+                const enrichedSkillSteps = skillSteps.map(s => {
+                    const p = allProjects.find(proj => proj.id === s.project_id);
+                    return { ...s, projectName: p ? p.name : "Inconnu" };
+                });
+                return { ...skill, linkedSteps: enrichedSkillSteps };
+             } catch (err) {
+                 return { ...skill, linkedSteps: [] };
+             }
+          }));
+
+          setCourses(prev => prev.map(c => {
+               if (c.id === courseId) {
+                   return { ...c, skills: skillsWithSteps, skillsLoaded: true };
+               }
+               return c;
+          }));
+
+      } catch (error) {
+           console.error(`Failed to fetch skills for course ${courseId}`, error);
+      }
+  };
+
+  const toggleCourse = (courseId: number) => {
     const newExpanded = new Set(expandedCourses);
+    const isExpanding = !newExpanded.has(courseId);
+    
     if (newExpanded.has(courseId)) {
       newExpanded.delete(courseId);
     } else {
       newExpanded.add(courseId);
     }
     setExpandedCourses(newExpanded);
-  };
 
-  const handleSaveNewSkill = (skillData: any) => {
-    if (skillData.id) {
-      console.log("Mise à jour de la compétence:", skillData);
-      // Here you would update the skill in the courses state
-      setCourses(courses.map(course => {
-        if (course.id === skillData.courseId) {
-          return {
-            ...course,
-            skills: course.skills.map(s =>
-              s.id === skillData.id
-                ? { ...s, name: skillData.name, description: skillData.description }
-                : s
-            )
-          };
-        }
-        return course;
-      }));
-    } else {
-      console.log("Nouvelle compétence:", skillData);
-      // Here you would add the new skill to the courses state
+    if (isExpanding) {
+        // Already loaded globally
     }
-    setIsCreateModalOpen(false);
-    setSkillToEdit(null);
   };
 
-  const handleEditSkill = (skill: Skill, courseId: string) => {
+  const handleSaveNewSkill = async (skillData: any) => {
+      try {
+         let skillId = skillData.id;
+         const courseId = Number(skillData.courseId);
+
+         if (skillId) {
+             // Update
+             await SkillsService.updateSkill(skillId, {
+                 name: skillData.name,
+                 description: skillData.description
+             });
+             // We might need to handle course change? 
+             // If courseId changed, we need to unlink from old and link to new.
+             // For simplicity, assuming validation prohibits course change or ignoring it for now as SkillModal implies linking.
+         } else {
+             // Create
+             const res = await SkillsService.createSkill({
+                 name: skillData.name,
+                 description: skillData.description
+             });
+             skillId = res.data.id;
+             // Link to course
+             await CoursesService.linkSkillToCourse({
+                 course_id: courseId,
+                 skill_id: skillId
+             });
+         }
+
+         // Refresh the specific course skills
+         fetchCourseSkills(courseId);
+         
+         setIsCreateModalOpen(false);
+         setSkillToEdit(null);
+      } catch (error) {
+          console.error("Failed to save skill", error);
+      }
+  };
+
+  const handleEditSkill = (skill: Skill, courseId: number) => {
     setSkillToEdit({
       id: skill.id,
       name: skill.name,
-      description: skill.description,
-      courseId: courseId,
+      description: skill.description || "",
+      courseId: courseId.toString(),
     });
     setIsCreateModalOpen(true);
   };
 
-  const handleOpenStepAssociation = (skill: Skill) => {
+  const handleOpenStepAssociation = (skill: SkillWithSteps) => {
     setSelectedSkill(skill);
     setIsStepAssociationModalOpen(true);
   };
 
-  const handleSaveStepAssociations = (stepIds: string[]) => {
+  const handleSaveStepAssociations = async (stepIds: number[]) => {
     if (selectedSkill) {
-      console.log("Nouvelles associations d'étapes:", stepIds);
+       try {
+           const currentIds = selectedSkill.linkedSteps?.map(s => s.id) || [];
+           
+           const added = stepIds.filter(id => !currentIds.includes(id));
+           const removed = currentIds.filter(id => !stepIds.includes(id));
 
-      // Transform IDs back to full Step objects with project info
-      // Note: For "new" steps created in modal with temp IDs, this lookup will fail 
-      // unless we added them to existingSteps. 
-      // In this mock implementation, we only support linking EXISTING steps successfully.
+           for (const stepId of added) {
+               await StepsService.linkSkillToStep({ step_id: stepId, skill_id: selectedSkill.id });
+           }
 
-      const updatedSteps = stepIds
-        .map(id => existingSteps.find(s => s.id === id))
-        .filter((s): s is typeof existingSteps[0] => s !== undefined)
-        .map(s => ({
-          id: s.id,
-          name: s.name,
-          projectId: s.projectId,
-          projectName: existingProjects.find(p => p.id === s.projectId)?.name || "Inconnu"
-        }));
+           for (const stepId of removed) {
+               await StepsService.unlinkSkillFromStep(stepId, selectedSkill.id);
+           }
 
-      setCourses(courses.map(course => {
-        // Find the course contaning the selected skill
-        const skillIndex = course.skills.findIndex(s => s.id === selectedSkill.id);
-        if (skillIndex !== -1) {
-          const updatedSkills = [...course.skills];
-          updatedSkills[skillIndex] = {
-            ...updatedSkills[skillIndex],
-            linkedSteps: updatedSteps
-          };
-          return { ...course, skills: updatedSkills };
-        }
-        return course;
-      }));
+           // Refresh skills for the course to show updates
+           // We need to find which course the selectedSkill belongs to
+           // Or just refresh all expanded?
+           // We can rely on 'selectedSkill' parent course.
+           // Since we don't store parent course in selectedSkill, we iterate courses
+           const course = courses.find(c => c.skills?.some(s => s.id === selectedSkill.id));
+           if (course) {
+               fetchCourseSkills(course.id);
+           }
+           
+       } catch (error) {
+           console.error("Failed to save step links", error);
+       }
     }
     setIsStepAssociationModalOpen(false);
   };
 
-  const handleOpenDeleteModal = (skill: Skill, courseId: string) => {
+  const handleOpenDeleteModal = (skill: Skill, courseId: number) => {
     setItemToDelete({ skill, courseId });
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (itemToDelete) {
-      console.log("Suppression de:", itemToDelete.skill.name);
-      // Update courses state to remove the skill
-      setCourses(courses.map(course => {
-        if (course.id === itemToDelete.courseId) {
-          return {
-            ...course,
-            skills: course.skills.filter(s => s.id !== itemToDelete.skill.id)
-          };
-        }
-        return course;
-      }));
+      try {
+          await SkillsService.deleteSkill(itemToDelete.skill.id);
+          // Refresh course
+          fetchCourseSkills(itemToDelete.courseId);
+      } catch (error) {
+          console.error("Failed to delete skill", error);
+      }
     }
     setIsDeleteModalOpen(false);
     setItemToDelete(null);
   };
 
   // Filter courses and skills based on search
+  // Note: Only filters LOADED skills.
   const filteredCourses = courses.map(course => ({
     ...course,
-    skills: course.skills.filter(skill =>
-      skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      skill.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  })).filter(course => course.skills.length > 0);
+    skills: course.skills?.filter(skill =>
+      (skill.name && skill.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (skill.description && skill.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (course.name && course.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    ) || []
+  })).filter(course => 
+      // Show course if it matches search OR if it has matching skills
+      (course.name && course.name.toLowerCase().includes(searchQuery.toLowerCase())) || (course.skills && course.skills.length > 0)
+  );
+
+  if (loading) return <div className="p-6">Chargement...</div>;
 
   return (
     <div className="p-6">
@@ -246,7 +299,7 @@ const Skills: React.FC = () => {
             Ajouter une compétence
           </Button>
           <Button
-            className="flex-1"
+            className="flex-1 bg-secondary hover:bg-secondary-hover"
             onClick={() => (window.location.href = "/project-skills-validation")}
           >
             Valider des compétences
@@ -256,9 +309,9 @@ const Skills: React.FC = () => {
 
       {/* Course Accordion */}
       <div className="space-y-4">
-        {filteredCourses.length === 0 ? (
+        {courses.length === 0 ? (
           <div className="text-center py-12 text-text-muted">
-            Aucune compétence trouvée
+             Aucun cours trouvé
           </div>
         ) : (
           filteredCourses.map((course) => (
@@ -267,6 +320,7 @@ const Skills: React.FC = () => {
               <button
                 onClick={() => toggleCourse(course.id)}
                 className="w-full flex items-center justify-between p-4 hover:bg-background transition-colors"
+                disabled={false}
               >
                 <div className="flex items-center gap-3">
                   <svg
@@ -280,7 +334,7 @@ const Skills: React.FC = () => {
                   </svg>
                   <h2 className="text-xl font-semibold text-text-main">{course.name}</h2>
                   <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                    {course.skills.length} {course.skills.length === 1 ? "compétence" : "compétences"}
+                    {course.skillsLoaded ? (course.skills?.length || 0) : "..."} compétences
                   </span>
                 </div>
               </button>
@@ -288,9 +342,14 @@ const Skills: React.FC = () => {
               {/* Skills List */}
               {expandedCourses.has(course.id) && (
                 <div className="border-t border-border">
-                  {course.skills.map((skill, index) => (
+                  {!course.skillsLoaded ? (
+                      <div className="p-4 text-center text-text-muted">Chargement des compétences...</div>
+                  ) : course.skills?.length === 0 ? (
+                      <div className="p-4 text-center text-text-muted">Aucune compétence associée.</div>
+                  ) : (
+                  course.skills?.map((skill, index) => (
                     <div
-                      key={skill.id}
+                      key={skill.id || `skill-${index}`}
                       className={`p-4 ${index !== 0 ? "border-t border-border" : ""} hover:bg-background/50 transition-colors`}
                     >
                       <div className="flex items-start justify-between gap-4">
@@ -301,23 +360,30 @@ const Skills: React.FC = () => {
                           <p className="text-sm text-text-muted mb-3">{skill.description}</p>
 
                           {/* Linked Steps */}
-                          {skill.linkedSteps.length > 0 ? (
+                          {skill.linkedSteps && skill.linkedSteps.length > 0 ? (
                             <div className="space-y-1">
-                              {skill.linkedSteps.map((step) => (
+                              {skill.linkedSteps.map((step, sIdx) => (
                                 <div
-                                  key={step.id}
+                                  key={step.id || `step-${sIdx}`}
                                   className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/5 border border-primary/20 rounded-lg text-sm mr-2 mb-2 group"
                                 >
                                   <svg className="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                   </svg>
-                                  <span className="text-text-main font-medium">{step.projectName}</span>
+                                  <span className="text-text-main font-medium">{step.projectName || "Inconnu"}</span>
                                   <span className="text-text-muted">-</span>
                                   <span className="text-text-muted">{step.name}</span>
                                   <button
-                                    onClick={() => {
-                                      console.log(`Suppression de l'association: ${skill.name} - ${step.name}`);
-                                      // Here you would update the skill's linkedSteps
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      // Unlink single step
+                                      try {
+                                          await StepsService.unlinkSkillFromStep(step.id, skill.id);
+                                          // Refresh
+                                          fetchCourseSkills(course.id);
+                                      } catch (err) {
+                                          console.error("Error unlinking step", err);
+                                      }
                                     }}
                                     className="ml-1 p-0.5 text-text-muted hover:text-danger-text transition-colors opacity-0 group-hover:opacity-100"
                                     title="Retirer cette étape"
@@ -366,7 +432,8 @@ const Skills: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  ))
+                  )}
                 </div>
               )}
             </div>
@@ -382,8 +449,8 @@ const Skills: React.FC = () => {
           setSkillToEdit(null);
         }}
         onSave={handleSaveNewSkill}
-        existingCourses={courses.map(c => ({ id: c.id, name: c.name }))}
-        existingSteps={existingSteps}
+        existingCourses={courses.map(c => ({ id: c.id.toString(), name: c.name }))}
+        existingSteps={[]} // Not adding steps here, handled in separate modal
         skillToEdit={skillToEdit}
       />
 
@@ -392,9 +459,9 @@ const Skills: React.FC = () => {
         onClose={() => setIsStepAssociationModalOpen(false)}
         onSave={handleSaveStepAssociations}
         skillName={selectedSkill?.name || ""}
-        existingProjects={existingProjects}
-        existingSteps={existingSteps}
-        currentStepIds={selectedSkill?.linkedSteps.map(s => s.id) || []}
+        existingProjects={allProjects.map(p => ({ id: p.id, name: p.name }))}
+        existingSteps={allSteps.map(s => ({ id: s.id, name: s.name, projectId: s.project_id }))}
+        currentStepIds={selectedSkill?.linkedSteps?.map(s => s.id) || []}
       />
 
       <DeleteConfirmationModal

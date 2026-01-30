@@ -11,6 +11,7 @@ interface ProjectModalProps {
     onSave: (projectData: any, stepData: any | null) => void;
     existingCourses: { id: string; name: string }[];
     existingSteps: { id: string; name: string }[];
+    initialData?: any;
 }
 
 const ProjectModal: React.FC<ProjectModalProps> = ({
@@ -19,6 +20,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
     onSave,
     existingCourses,
     existingSteps,
+    initialData
 }) => {
     // State pour le projet
     const [projectName, setProjectName] = useState("");
@@ -35,16 +37,26 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
     // Reset state when modal opens/closes
     useEffect(() => {
         if (isOpen) {
-            setProjectName("");
-            setProjectDescription("");
-            setSelectedCourseId("");
-            setSelectedStepId("");
-            setShowNewStepForm(false);
+            if (initialData) {
+                setProjectName(initialData.name);
+                setProjectDescription(initialData.description || "");
+                setSelectedCourseId(initialData.course_id ? initialData.course_id.toString() : "");
+                // No easy way to prefill "Step" logic for edit, as Project has many steps.
+                // Reset step form
+                setSelectedStepId("");
+                setShowNewStepForm(false);
+            } else {
+                setProjectName("");
+                setProjectDescription("");
+                setSelectedCourseId("");
+                setSelectedStepId("");
+                setShowNewStepForm(false);
+            }
             setStepName("");
             setStepDescription("");
             setIsStepConfirmed(false);
         }
-    }, [isOpen]);
+    }, [isOpen, initialData]);
 
     const handleStepChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
@@ -75,6 +87,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         }
 
         const projectData = {
+            id: initialData?.id,
             name: projectName,
             description: projectDescription,
             courseId: selectedCourseId,
@@ -94,7 +107,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 pb-0">
                     <h2 className="text-2xl font-bold">
-                        Formulaire de création / édition d'un projet
+                        {initialData ? "Éditer le projet" : "Créer un nouveau projet"}
                     </h2>
                     <button
                         onClick={onClose}

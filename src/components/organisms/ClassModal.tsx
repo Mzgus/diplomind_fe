@@ -4,11 +4,19 @@ import Button from "../atoms/Button";
 import InputGroup from "../molecules/InputGroup";
 import SelectGroup from "../molecules/SelectGroup";
 
+interface ClassData {
+    id?: number;
+    name: string;
+    year: number;
+    students: { id: number; name: string }[];
+}
+
 interface ClassModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (classData: any) => void;
-    existingStudents: { id: string; name: string }[];
+    existingStudents: { id: number; name: string }[];
+    initialData?: ClassData | null;
 }
 
 const ClassModal: React.FC<ClassModalProps> = ({
@@ -16,27 +24,37 @@ const ClassModal: React.FC<ClassModalProps> = ({
     onClose,
     onSave,
     existingStudents,
+    initialData
 }) => {
     const [className, setClassName] = useState("");
+    const [year, setYear] = useState(new Date().getFullYear().toString());
     const [selectedStudentId, setSelectedStudentId] = useState("");
     const [assignedStudents, setAssignedStudents] = useState<
-        { id: string; name: string }[]
+        { id: number; name: string }[]
     >([]);
 
     // Reset state when modal opens/closes
     useEffect(() => {
         if (isOpen) {
-            setClassName("");
+            if (initialData) {
+                setClassName(initialData.name);
+                setYear((initialData.year || new Date().getFullYear()).toString());
+                setAssignedStudents(initialData.students || []);
+            } else {
+                setClassName("");
+                setYear(new Date().getFullYear().toString());
+                setAssignedStudents([]);
+            }
             setSelectedStudentId("");
-            setAssignedStudents([]);
         }
-    }, [isOpen]);
+    }, [isOpen, initialData]);
 
     const handleAddStudent = () => {
         if (!selectedStudentId) return;
+        const idNum = Number(selectedStudentId);
 
         const studentToAdd = existingStudents.find(
-            (s) => s.id === selectedStudentId
+            (s) => s.id === idNum
         );
         if (studentToAdd && !assignedStudents.some((s) => s.id === studentToAdd.id)) {
             setAssignedStudents([...assignedStudents, studentToAdd]);
@@ -44,7 +62,7 @@ const ClassModal: React.FC<ClassModalProps> = ({
         }
     };
 
-    const handleRemoveStudent = (studentId: string) => {
+    const handleRemoveStudent = (studentId: number) => {
         setAssignedStudents(assignedStudents.filter((s) => s.id !== studentId));
     };
 
@@ -52,7 +70,9 @@ const ClassModal: React.FC<ClassModalProps> = ({
         e.preventDefault();
 
         const classData = {
+            id: initialData?.id, // Pass ID if editing
             name: className,
+            year: parseInt(year) || new Date().getFullYear(),
             studentIds: assignedStudents.map((s) => s.id),
         };
 
@@ -70,7 +90,7 @@ const ClassModal: React.FC<ClassModalProps> = ({
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 pb-0">
                     <h2 className="text-2xl font-bold">
-                        Formulaire de création / édition de classe
+                        {initialData ? "Éditer la classe" : "Créer une classe"}
                     </h2>
                     <button
                         onClick={onClose}
@@ -95,13 +115,22 @@ const ClassModal: React.FC<ClassModalProps> = ({
                 <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-6">
                     <div className="flex flex-col md:flex-row gap-8">
                         {/* Colonne Gauche : Info Classe */}
-                        <div className="flex-1">
+                        <div className="flex-1 space-y-4">
                             <InputGroup
                                 id="class-name"
                                 label="Nom"
                                 placeholder="Nom..."
                                 value={className}
                                 onChange={(e) => setClassName(e.target.value)}
+                                required
+                            />
+                            <InputGroup
+                                id="class-year"
+                                label="Année (ex: 2024)"
+                                type="number"
+                                placeholder="2024"
+                                value={year}
+                                onChange={(e) => setYear(e.target.value)}
                                 required
                             />
                         </div>

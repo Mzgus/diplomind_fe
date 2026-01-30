@@ -55,6 +55,10 @@ const updateUserAuthPassword = (id: number, pwd: string) => {
   return API.patch(`/users_auth/${id}/password`, { pwd });
 };
 
+const createAccount = (email: string) => {
+  return API.post("/accounts", { email });
+};
+
 export const UsersService = {
   getAllUsers,
   getUserById,
@@ -69,4 +73,5 @@ export const UsersService = {
   deleteUserAuth,
   updateUserAuthEmail,
   updateUserAuthPassword,
+  createAccount,
 };

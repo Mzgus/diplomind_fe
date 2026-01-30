@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import type { UserSheet } from "../types";
+import StatusBadge from "../components/atoms/StatusBadge";
 
 const SelectProfile = () => {
   const { availableProfiles, selectProfile, user } = useContext(AuthContext);
@@ -39,24 +40,21 @@ const SelectProfile = () => {
               <div className="mb-6 relative">
                 <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-border group-hover:border-primary transition-colors duration-300">
                   <img
+                    className="w-full h-full object-cover"
                     src={
                       profile.profile_picture ||
-                      `https://ui-avatars.com/api/?name=${profile.prenom}+${profile.nom}&background=random`
+                      `https://ui-avatars.com/api/?name=${profile.first_name}+${profile.last_name}&background=random`
                     }
-                    alt={`${profile.prenom} ${profile.nom}`}
-                    className="w-full h-full object-cover"
+                    alt={`${profile.first_name} ${profile.last_name}`}
                   />
                 </div>
-                <div className={`absolute -bottom-2 -right-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-white shadow-sm ${
-                    profile.type_user === 'admin' ? 'bg-red-500' :
-                    profile.type_user === 'teacher' ? 'bg-yellow-500' : 'bg-green-500'
-                }`}>
-                  {profile.type_user}
+                <div className="absolute -bottom-2 -right-2">
+                  <StatusBadge type="role" value={profile.type_user} />
                 </div>
               </div>
 
               <h3 className="text-lg font-semibold text-text-main mb-1 group-hover:text-primary transition-colors">
-                {profile.prenom} {profile.nom}
+                {profile.first_name} {profile.last_name}
               </h3>              
               <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-primary/10 pointer-events-none"></div>
             </button>

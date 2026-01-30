@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { Link } from "react-router-dom";
 import Avatar from "../atoms/Avatar";
-import Badge from "../atoms/Badge";
+import StatusBadge from "../atoms/StatusBadge";
 import {
   UserCircleIcon,
   ArrowLeftEndOnRectangleIcon,
@@ -18,22 +18,7 @@ interface UserProfileProps {
   onSwitchProfile: (id: number) => void;
 }
 
-const getBadgeColor = (
-  profileType: string
-): "blue" | "green" | "yellow" | "red" => {
-  switch (profileType.toLowerCase()) {
-    case "admin":
-      return "red";
-    case "teacher":
-    case "professeur":
-      return "yellow";
-    case "student":
-    case "etudiant":
-      return "green";
-    default:
-      return "blue";
-  }
-};
+
 
 const UserProfile: React.FC<UserProfileProps> = ({
   userName,
@@ -75,7 +60,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
       >
         <div className="hidden sm:flex items-center gap-2">
           <span className="font-medium text-text-main">{userName}</span>
-          <Badge color={getBadgeColor(profileType)}>{profileType}</Badge>
+          <StatusBadge type="role" value={profileType} />
         </div>
         <Avatar src={avatarUrl} alt={`Avatar de ${userName}`} />
       </button>
@@ -109,13 +94,13 @@ const UserProfile: React.FC<UserProfileProps> = ({
                   >
                     <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-border">
                       <img 
-                        src={profile.profile_picture || `https://ui-avatars.com/api/?name=${profile.prenom}+${profile.nom}`} 
-                        alt={profile.nom} 
+                        src={profile.profile_picture || `https://ui-avatars.com/api/?name=${profile.first_name}+${profile.last_name}`} 
+                        alt={profile.last_name} 
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="flex flex-col">
-                       <span className="font-medium text-text-main">{profile.prenom} {profile.nom}</span>
+                       <span className="font-medium text-text-main">{profile.first_name} {profile.last_name}</span>
                        <span className="text-xs text-text-secondary capitalize">{profile.type_user}</span>
                     </div>
                   </button>

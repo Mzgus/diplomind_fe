@@ -11,11 +11,11 @@ export interface User {
 export interface UserSheet {
   id: number;
   user_id: number;
-  nom: string;
-  prenom: string;
+  last_name: string;
+  first_name: string;
   type_user: "student" | "teacher" | "admin";
   profile_picture?: string;
-  // Computed full name often useful
+  active?: boolean;
 }
 
 export interface Project {
