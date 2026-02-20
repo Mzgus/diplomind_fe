@@ -1,0 +1,13 @@
+services:
+  diplomind_fe:
+    build: .
+    container_name: diplomind_fe
+    ports:
+      - "5173:80"
+    networks:
+      - diplomind_network
+    restart: unless-stopped
+
+networks:
+  diplomind_network:
+    external: true
