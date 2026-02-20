@@ -1,5 +1,5 @@
 services:
-  diplomind_fe:
+  fe:
     build: .
     container_name: diplomind_fe
     ports:
