@@ -133,43 +133,45 @@ const Users: React.FC = () => {
             // 3. Update Sheet Association or Create Sheet
             if (sheetData) {
                 if (sheetData.id) {
-                    // Link existing sheet to this auth
-                    await UsersService.updateUserSheet(sheetData.id, { user_id: authId });
+                    // Link existing sheet to this account via account_id
+                    await UsersService.updateUserSheet(sheetData.id, { account_id: authId });
                 } else if (sheetData.lastName) {
-                    // Create NEW sheet linked to this auth
+                    // Create NEW sheet linked to this account
                     await UsersService.createUserSheet({
-                        nom: sheetData.lastName,
-                        prenom: sheetData.firstName,
+                        last_name: sheetData.lastName,
+                        first_name: sheetData.firstName,
                         type_user: sheetData.type,
-                        user_id: authId
+                        account_id: authId
                     });
                 }
             }
         } else {
             // CREATE LOGIC
-            let authId = null;
+            let accountId = null;
 
-            // 1. Create Auth
+            // 1. Create Auth (backend auto-creates Account)
             if (userData && userData.email) {
                 const res = await UsersService.createUserAuth({
                     email: userData.email,
                     pwd: userData.password
                 });
-                authId = res.data.id;
+                accountId = res.data.account_id; // Use account_id from response
             }
 
             // 2. Create/Link Sheet
             if (sheetData) {
                 if (sheetData.id) {
-                    if (authId) {
-                         await UsersService.updateUserSheet(sheetData.id, { user_id: authId });
+                    // Link existing sheet to newly created account
+                    if (accountId) {
+                         await UsersService.updateUserSheet(sheetData.id, { account_id: accountId });
                     }
                 } else if (sheetData.lastName) {
+                    // Create NEW sheet linked to this account
                      await UsersService.createUserSheet({
-                         nom: sheetData.lastName,
-                         prenom: sheetData.firstName,
+                         last_name: sheetData.lastName,
+                         first_name: sheetData.firstName,
                          type_user: sheetData.type,
-                         user_id: authId
+                         account_id: accountId
                      });
                 }
             }

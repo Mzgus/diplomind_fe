@@ -142,7 +142,6 @@ const UserModal: React.FC<UserModalProps> = ({
                                 type="password"
                                 placeholder="Mot de passe..."
                                 value={password}
-                                value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required={!initialData} // Required only if creating
                             />
