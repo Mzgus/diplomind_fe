@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import SearchBar from "../components/molecules/SearchBar";
 import Button from "../components/atoms/Button";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
@@ -9,6 +9,7 @@ import { SkillsService } from "../_services/skills.service";
 import { StepsService } from "../_services/steps.service";
 import { ProjectsService } from "../_services/projects.service";
 import type { Course, Skill, Step, Project } from "../types";
+import { AuthContext } from "../context/AuthContext";
 
 // Extended types for UI
 interface StepWithProject extends Step {
@@ -25,6 +26,8 @@ interface CourseWithSkills extends Course {
 }
 
 const Skills: React.FC = () => {
+  const { user } = useContext(AuthContext);
+  const canEdit = user?.user_role !== "student";
   const [searchQuery, setSearchQuery] = useState("");
   const [courses, setCourses] = useState<CourseWithSkills[]>([]);
   const [allSteps, setAllSteps] = useState<StepWithProject[]>([]);
@@ -295,9 +298,11 @@ const Skills: React.FC = () => {
           />
         </div>
         <div className="w-1/4 flex gap-2">
+          {canEdit && (
           <Button className="flex-1" onClick={() => setIsCreateModalOpen(true)}>
             Ajouter une compétence
           </Button>
+          )}
           <Button
             className="flex-1 bg-secondary hover:bg-secondary-hover"
             onClick={() => (window.location.href = "/project-skills-validation")}
@@ -400,7 +405,8 @@ const Skills: React.FC = () => {
                           )}
                         </div>
 
-                        {/* Action Buttons */}
+                        {/* Action Buttons — teacher/admin only */}
+                        {canEdit && (
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleOpenStepAssociation(skill)}
@@ -430,6 +436,7 @@ const Skills: React.FC = () => {
                             </svg>
                           </button>
                         </div>
+                        )}
                       </div>
                     </div>
                   ))

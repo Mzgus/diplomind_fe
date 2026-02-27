@@ -13,7 +13,7 @@ interface PageLayoutProps {
   searchQuery: string;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   searchPlaceholder: string;
-  buttonText: string;
+  buttonText?: string;
   onButtonClick?: () => void;
   extraButtonText?: string;
   onExtraButtonClick?: () => void;
@@ -49,9 +49,11 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           />
         </div>
         <div className="w-1/4 flex gap-2">
-          <Button className="flex-1" onClick={onButtonClick}>
-            {buttonText}
-          </Button>
+          {buttonText && (
+            <Button className="flex-1" onClick={onButtonClick}>
+              {buttonText}
+            </Button>
+          )}
           {extraButtonText && onExtraButtonClick && (
             <Button className="flex-1" onClick={onExtraButtonClick}>
               {extraButtonText}

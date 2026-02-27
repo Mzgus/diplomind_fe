@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import SearchBar from "../components/molecules/SearchBar";
 import Button from "../components/atoms/Button";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
@@ -7,6 +7,7 @@ import ProjectAssociationModal from "../components/organisms/ProjectAssociationM
 import { CoursesService } from "../_services/courses.service";
 import { ProjectsService } from "../_services/projects.service";
 import type { Course, Project } from "../types";
+import { AuthContext } from "../context/AuthContext";
 
 // Extended Course type for UI (includes linkedProjects)
 interface CourseWithProjects extends Course {
@@ -14,6 +15,9 @@ interface CourseWithProjects extends Course {
 }
 
 const Courses: React.FC = () => {
+  const { user } = useContext(AuthContext);
+  const isAdmin = user?.user_role === "admin";
+  const isStudent = user?.user_role === "student";
   const [searchQuery, setSearchQuery] = useState("");
   const [courses, setCourses] = useState<CourseWithProjects[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,12 +40,17 @@ const Courses: React.FC = () => {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      const res = await CoursesService.getAllCourses();
-      const coursesData: Course[] = res.data;
+      let coursesData: Course[];
 
-      // For each course, fetch its linked projects
-      // Note: In a real app, you might want to fetch this on expand
-      // or duplicate the query to "get_all_courses_with_projects" in backend
+      if (isStudent && user?.user_id && user.user_id > 0) {
+        // Student: fetch only enrolled courses
+        const res = await CoursesService.getUserCourses(user.user_id);
+        coursesData = res.data;
+      } else {
+        const res = await CoursesService.getAllCourses();
+        coursesData = res.data;
+      }
+
       const coursesWithProjects = await Promise.all(
         coursesData.map(async (course) => {
           try {
@@ -283,9 +292,11 @@ const Courses: React.FC = () => {
           />
         </div>
         <div className="w-1/4">
-          <Button className="w-full" onClick={() => setIsCreateModalOpen(true)}>
-            Ajouter un cours
-          </Button>
+          {isAdmin && (
+            <Button className="w-full" onClick={() => setIsCreateModalOpen(true)}>
+              Ajouter un cours
+            </Button>
+          )}
         </div>
       </div>
 
@@ -362,11 +373,9 @@ const Courses: React.FC = () => {
                       )}
                     </div>
 
-                    {/* Action Buttons */}
+                    {/* Action Buttons — admin only */}
+                    {isAdmin && (
                     <div className="flex gap-2">
-                    {/* Project Association disabled from here for now, relying on Project Page? Or enable reassign?
-                        Let's enable it but with the caveat that it just moves projects TO this course.
-                     */}
                       <button
                         onClick={() => handleOpenProjectAssociation(course)}
                         className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-full text-sm font-medium transition-colors flex items-center gap-2"
@@ -398,6 +407,7 @@ const Courses: React.FC = () => {
                         </svg>
                       </button>
                     </div>
+                    )}
                   </div>
                 </div>
               )}

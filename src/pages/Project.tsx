@@ -1,18 +1,12 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 import ProjectModal from "../components/organisms/ProjectModal";
 import { ProjectsService } from "../_services/projects.service";
 import { CoursesService } from "../_services/courses.service";
-// StepsService might be needed if creating steps, but let's check if we can import it
-// Assuming it follows the pattern
 import API from "../_services/caller.services";
-
-// Define StepService locally if not exported or use generic caller for now if file not found
-// But we saw it exists. Let's try to import it dynamically or just define helper
-const createStep = (data: any) => API.post("/steps", data);
-
 import type { Project as ProjectType, Course } from "../types";
+import { AuthContext } from "../context/AuthContext";
 
 // Extended Project type for UI
 interface ProjectWithCourse extends ProjectType {
@@ -25,7 +19,13 @@ const projectColumns = [
   { key: "courseName", header: "Cours Associé" },
 ];
 
+// Define StepService locally if not exported or use generic caller for now if file not found
+const createStep = (data: any) => API.post("/steps", data);
+
 const Project: React.FC = () => {
+  const { user } = useContext(AuthContext);
+  const isStudent = user?.user_role === "student";
+  const canEdit = !isStudent; // admin and teacher can edit
   const [searchQuery, setSearchQuery] = useState("");
   const [projects, setProjects] = useState<ProjectWithCourse[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -41,30 +41,33 @@ const Project: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      // Fetch projects, courses AND steps
-      const [projectsRes, coursesRes, stepsRes] = await Promise.all([
-        ProjectsService.getAllProjects(),
+      let projectsData: ProjectType[];
+
+      if (isStudent && user?.user_id && user.user_id > 0) {
+        // Student: fetch only their own projects
+        const projectsRes = await ProjectsService.getStudentProjects(user.user_id);
+        projectsData = projectsRes.data;
+      } else {
+        const projectsRes = await ProjectsService.getAllProjects();
+        projectsData = projectsRes.data;
+      }
+
+      const [coursesRes, stepsRes] = await Promise.all([
         CoursesService.getAllCourses(),
-        // Assuming StepsService is available via import or helper
-        API.get("/steps"), // Using direct API call if Service not imported yet, but likely is
+        API.get("/steps"),
       ]);
 
-      const projectsData: ProjectType[] = projectsRes.data;
       const coursesData: Course[] = coursesRes.data;
       const stepsData: any[] = stepsRes.data;
 
-      // Map course names to projects
       const enrichedProjects = projectsData.map((p) => {
         const course = coursesData.find((c) => c.id === p.course_id);
-        return {
-          ...p,
-          courseName: course ? course.name : "Non assigné",
-        };
+        return { ...p, courseName: course ? course.name : "Non assigné" };
       });
 
       setProjects(enrichedProjects);
       setCourses(coursesData);
-      setAllSteps(stepsData); // Update steps
+      setAllSteps(stepsData);
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -148,7 +151,7 @@ const Project: React.FC = () => {
 
   // Filter projects
   const filteredProjects = projects.filter(
-    (project) =>
+    (project: ProjectWithCourse) =>
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.courseName?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -163,15 +166,15 @@ const Project: React.FC = () => {
         searchQuery={searchQuery}
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher un projet..."
-        buttonText="Ajouter un projet"
-        onButtonClick={() => setIsCreateModalOpen(true)}
+        buttonText={canEdit ? "Ajouter un projet" : undefined}
+        onButtonClick={canEdit ? () => setIsCreateModalOpen(true) : undefined}
         columns={projectColumns}
         data={filteredProjects}
-        onEditRow={(row) => {
+        onEditRow={canEdit ? (row) => {
             setProjectToEdit(row as ProjectType);
             setIsCreateModalOpen(true);
-        }}
-        onDeleteRow={handleOpenDeleteModal}
+        } : undefined}
+        onDeleteRow={canEdit ? handleOpenDeleteModal : undefined}
       />
       <DeleteConfirmationModal
         isOpen={isModalOpen}

@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 import ClassModal from "../components/organisms/ClassModal";
 import { ClassesService } from "../_services/classes.service";
 import { UsersService } from "../_services/users.service";
 import type { Class, UserSheet } from "../types";
+import { AuthContext } from "../context/AuthContext";
 
 // Columns definition
 const classColumns = [
   { key: "name", header: "Nom de la Classe" },
   { key: "year", header: "Année" },
   { key: "studentCount", header: "Nombre d'élèves" },
-  // { key: "mainTeacher", header: "Professeur Principal" }, // Removed as not in backend model yet
 ];
 
 interface ClassWithCount extends Class {
@@ -26,6 +26,9 @@ interface ClassData {
 }
 
 const Classes: React.FC = () => {
+  const { user } = useContext(AuthContext);
+  const isTeacher = user?.user_role === "teacher";
+
   const [searchQuery, setSearchQuery] = useState("");
   const [classes, setClasses] = useState<ClassWithCount[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,30 +46,28 @@ const Classes: React.FC = () => {
   const fetchData = async () => {
     try {
         setLoading(true);
+        // GET /classes already returns own classes for teacher (handled by backend)
+        // GET /users_sheets is now also allowed for teacher (read-only)
         const [classesRes, usersRes] = await Promise.all([
             ClassesService.getAllClasses(),
             UsersService.getAllUserSheets()
         ]);
 
         const rawClasses: Class[] = Array.isArray(classesRes.data) ? classesRes.data : [];
-        const allSheets: UserSheet[] = Array.isArray(usersRes.data) ? usersRes.data : []; // Handle potential undefined if API differs
+        const allSheets: UserSheet[] = Array.isArray(usersRes.data) ? usersRes.data : [];
 
-        // Filter students from sheets
-        // Assuming 'student' role string. Adjust if necessary.
-        const studentSheets = allSheets.filter(u => u.type_user === 'student'); 
-        
+        // Filter students only
+        const studentSheets = allSheets.filter(u => u.type_user === 'student');
         const formattedStudents = studentSheets.map(s => ({
-            id: s.id, // UserSheet ID
+            id: s.id,
             name: `${s.last_name || ""} ${s.first_name || ""}`.trim() || `Student #${s.id}`
         }));
         setAllStudents(formattedStudents);
 
-        // Fetch student counts for each class (Parallel)
-        // Optimization: Could be skipped or loaded lazily if too many classes.
+        // Fetch student counts for each class
         const classesWithCounts = await Promise.all(rawClasses.map(async (c) => {
             try {
                 const usersRes = await ClassesService.getClassUsers(c.id);
-                // Users returned are likely UserSheets or Users linked to class
                 const count = Array.isArray(usersRes.data) ? usersRes.data.length : 0;
                 return { ...c, studentCount: count };
             } catch (err) {
@@ -218,15 +219,15 @@ const Classes: React.FC = () => {
         searchQuery={searchQuery}
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher une classe..."
-        buttonText="Ajouter une classe"
-        onButtonClick={() => {
+        buttonText={isTeacher ? undefined : "Ajouter une classe"}
+        onButtonClick={isTeacher ? undefined : () => {
             setClassToEdit(null);
             setIsCreateModalOpen(true);
         }}
         columns={classColumns}
         data={filteredClasses}
-        onEditRow={handleEditClass}
-        onDeleteRow={handleOpenDeleteModal}
+        onEditRow={isTeacher ? undefined : handleEditClass}
+        onDeleteRow={isTeacher ? undefined : handleOpenDeleteModal}
       />
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}

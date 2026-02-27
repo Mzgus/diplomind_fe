@@ -15,35 +15,42 @@ import Users from "./pages/Users";
 import Account from "./pages/Account";
 import ProjectSkillsValidation from "./pages/ProjectSkillsValidation";
 import RequireAuth from "./components/auth/RequireAuth";
+import RequireRole from "./components/auth/RequireRole";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Route publique sans Sidebar ni TopNavbar */}
+          {/* Public route */}
           <Route path="/login" element={<Login />} />
-          
+
           <Route element={<RequireAuth />}>
              <Route path="/select-profile" element={<SelectProfile />} />
           </Route>
 
-          {/* Routes privées qui utilisent le MainLayout */}
+          {/* Private routes with MainLayout */}
           <Route element={<RequireAuth />}>
             <Route element={<MainLayout />}>
+              {/* All authenticated users */}
               <Route path="/" element={<Home />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/project" element={<Project />} />
               <Route path="/steps" element={<Steps />} />
               <Route path="/skills" element={<Skills />} />
-              <Route path="/classes" element={<Classes />} />
-              <Route path="/user-sheets" element={<UserSheets />} />
-              <Route path="/users" element={<Users />} />
               <Route path="/account" element={<Account />} />
-              <Route
-                path="/project-skills-validation"
-                element={<ProjectSkillsValidation />}
-              />
+              <Route path="/project-skills-validation" element={<ProjectSkillsValidation />} />
+
+              {/* Admin + Teacher */}
+              <Route element={<RequireRole allowedRoles={["admin", "teacher"]} />}>
+                <Route path="/classes" element={<Classes />} />
+              </Route>
+
+              {/* Admin only */}
+              <Route element={<RequireRole allowedRoles={["admin"]} />}>
+                <Route path="/user-sheets" element={<UserSheets />} />
+                <Route path="/users" element={<Users />} />
+              </Route>
             </Route>
           </Route>
         </Routes>
@@ -53,3 +60,4 @@ function App() {
 }
 
 export default App;
+

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 import StepModal from "../components/organisms/StepModal";
@@ -6,6 +6,7 @@ import { StepsService } from "../_services/steps.service";
 import { ProjectsService } from "../_services/projects.service";
 import { SkillsService } from "../_services/skills.service";
 import type { Step, Project, Skill } from "../types";
+import { AuthContext } from "../context/AuthContext";
 
 // Extended Step type for UI
 interface StepWithDetails extends Step {
@@ -20,6 +21,8 @@ const stepColumns = [
 ];
 
 const Steps: React.FC = () => {
+  const { user } = useContext(AuthContext);
+  const canEdit = user?.user_role !== "student";
   const [searchQuery, setSearchQuery] = useState("");
   const [steps, setSteps] = useState<StepWithDetails[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -158,15 +161,15 @@ const Steps: React.FC = () => {
         searchQuery={searchQuery}
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher une étape..."
-        buttonText="Ajouter une étape"
-        onButtonClick={() => setIsCreateModalOpen(true)}
+        buttonText={canEdit ? "Ajouter une étape" : undefined}
+        onButtonClick={canEdit ? () => setIsCreateModalOpen(true) : undefined}
         columns={stepColumns}
         data={filteredSteps}
-        onDeleteRow={handleOpenDeleteModal}
-        onEditRow={(row) => {
+        onDeleteRow={canEdit ? handleOpenDeleteModal : undefined}
+        onEditRow={canEdit ? (row) => {
             setStepToEdit(row as Step);
             setIsCreateModalOpen(true);
-        }}
+        } : undefined}
       />
       <DeleteConfirmationModal
         isOpen={isModalOpen}
