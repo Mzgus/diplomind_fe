@@ -76,8 +76,9 @@ const Project: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
     fetchData();
-  }, []);
+  }, [user]);
 
   const handleOpenDeleteModal = (project: any) => {
     setItemToDelete(project as ProjectType);

@@ -81,6 +81,22 @@ const Sidebar: React.FC = () => {
         {/* Séparateur */}
         <div className="my-4" />
 
+        {/* Validation compétences — admin/teacher only */}
+        <ul className="flex flex-col gap-1">
+          {isVisible({ name: "Validation", href: "/project-skills-validation", icon: AcademicCapIcon, roles: ["admin", "teacher"] }) && (
+            <li>
+              <SidebarNavItem
+                to="/project-skills-validation"
+                icon={AcademicCapIcon}
+                label="Validation compétences"
+              />
+            </li>
+          )}
+        </ul>
+
+        {/* Séparateur */}
+        <div className="my-4" />
+
         {/* Groupe 2 */}
         <ul className="flex flex-col gap-1">
           {navigationGroup2.filter(isVisible).map((item) => (

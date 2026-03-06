@@ -72,8 +72,9 @@ const Courses: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
     fetchCourses();
-  }, []);
+  }, [user]);
 
   // Fetch all projects when needed (for association modal)
   const fetchAllProjects = async () => {

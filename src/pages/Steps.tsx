@@ -5,6 +5,7 @@ import StepModal from "../components/organisms/StepModal";
 import { StepsService } from "../_services/steps.service";
 import { ProjectsService } from "../_services/projects.service";
 import { SkillsService } from "../_services/skills.service";
+import { UsersService } from "../_services/users.service";
 import type { Step, Project, Skill } from "../types";
 import { AuthContext } from "../context/AuthContext";
 
@@ -38,17 +39,28 @@ const Steps: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [stepsRes, projectsRes, skillsRes] = await Promise.all([
-        StepsService.getAllSteps(),
+      const isStudent = user?.user_role === "student";
+      const userId = user?.user_id;
+
+      let stepsData: Step[];
+
+      if (isStudent && userId && userId > 0) {
+        // Student: only steps reachable via their enrolled courses
+        const stepsRes = await UsersService.getUserSteps(userId);
+        stepsData = stepsRes.data;
+      } else {
+        const stepsRes = await StepsService.getAllSteps();
+        stepsData = stepsRes.data;
+      }
+
+      const [projectsRes, skillsRes] = await Promise.all([
         ProjectsService.getAllProjects(),
         SkillsService.getAllSkills(),
       ]);
 
-      const stepsData: Step[] = stepsRes.data;
       const projectsData: Project[] = projectsRes.data;
       const skillsData: Skill[] = skillsRes.data;
 
-      // Map project names to steps
       const enrichedSteps = stepsData.map((s) => {
         const project = projectsData.find((p) => p.id === s.project_id);
         return {
@@ -68,8 +80,9 @@ const Steps: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
     fetchData();
-  }, []);
+  }, [user]);
 
   const handleOpenDeleteModal = (step: any) => {
     setItemToDelete(step as Step);

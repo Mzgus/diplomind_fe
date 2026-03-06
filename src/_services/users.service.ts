@@ -59,6 +59,19 @@ const createAccount = (email: string) => {
   return API.post("/accounts", { email });
 };
 
+// Student Dashboard
+const getUserCourses = (userId: number) => {
+  return API.get(`/users/${userId}/courses`);
+};
+
+const getUserSteps = (userId: number) => {
+  return API.get(`/users/${userId}/steps`);
+};
+
+const getUserSkills = (userId: number) => {
+  return API.get(`/users/${userId}/skills`);
+};
+
 export const UsersService = {
   getAllUsers,
   getUserById,
@@ -74,4 +87,7 @@ export const UsersService = {
   updateUserAuthEmail,
   updateUserAuthPassword,
   createAccount,
+  getUserCourses,
+  getUserSteps,
+  getUserSkills,
 };
