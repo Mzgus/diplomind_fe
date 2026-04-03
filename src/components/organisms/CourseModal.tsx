@@ -8,7 +8,7 @@ interface CourseModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (courseData: any) => void;
-    courseToEdit?: { id: string; name: string; description: string } | null;
+    courseToEdit?: { id: number; name: string; description: string } | null;
 }
 
 const CourseModal: React.FC<CourseModalProps> = ({

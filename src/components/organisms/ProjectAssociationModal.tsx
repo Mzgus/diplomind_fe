@@ -11,6 +11,7 @@ interface ProjectAssociationModalProps {
     courseName: string;
     existingProjects: { id: string; name: string; description: string }[];
     currentProjectIds?: string[];
+    onCreateProject?: (name: string, description: string) => Promise<string | null>;
 }
 
 const ProjectAssociationModal: React.FC<ProjectAssociationModalProps> = ({
@@ -20,10 +21,12 @@ const ProjectAssociationModal: React.FC<ProjectAssociationModalProps> = ({
     courseName,
     existingProjects,
     currentProjectIds = [],
+    onCreateProject
 }) => {
     const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
     const [newProjectName, setNewProjectName] = useState("");
     const [newProjectDescription, setNewProjectDescription] = useState("");
+    const [isCreating, setIsCreating] = useState(false);
 
     // Reset state when modal opens/closes
     useEffect(() => {
@@ -31,6 +34,7 @@ const ProjectAssociationModal: React.FC<ProjectAssociationModalProps> = ({
             setSelectedProjectIds([...currentProjectIds]);
             setNewProjectName("");
             setNewProjectDescription("");
+            setIsCreating(false);
         }
     }, [isOpen, currentProjectIds]);
 
@@ -42,14 +46,23 @@ const ProjectAssociationModal: React.FC<ProjectAssociationModalProps> = ({
         }
     };
 
-    const handleAddNewProject = () => {
-        if (newProjectName.trim() && newProjectDescription.trim()) {
-            // In a real app, you would create the project here and get its ID
-            const tempId = `temp-${Date.now()}`;
-            setSelectedProjectIds([...selectedProjectIds, tempId]);
-            console.log("Nouveau projet créé:", { name: newProjectName, description: newProjectDescription });
-            setNewProjectName("");
-            setNewProjectDescription("");
+    const handleAddNewProject = async () => {
+        if (newProjectName.trim() && newProjectDescription.trim() && onCreateProject) {
+            setIsCreating(true);
+            try {
+                const newId = await onCreateProject(newProjectName, newProjectDescription);
+                if (newId) {
+                    setSelectedProjectIds(prev => [...prev, newId]);
+                    setNewProjectName("");
+                    setNewProjectDescription("");
+                }
+            } catch (error) {
+                console.error("Failed to create project inside modal", error);
+            } finally {
+                setIsCreating(false);
+            }
+        } else if (!onCreateProject) {
+             console.warn("onCreateProject prop not provided");
         } else {
             alert("Veuillez remplir tous les champs du projet.");
         }
@@ -147,8 +160,9 @@ const ProjectAssociationModal: React.FC<ProjectAssociationModalProps> = ({
                                         type="button"
                                         onClick={handleAddNewProject}
                                         className="flex-1 bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-full"
+                                        disabled={isCreating}
                                     >
-                                        Ajouter le projet
+                                        {isCreating ? "Création..." : "Ajouter le projet"}
                                     </Button>
                                     <Button
                                         type="button"

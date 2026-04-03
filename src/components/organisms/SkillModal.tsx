@@ -6,10 +6,10 @@ import TextAreaGroup from "../molecules/TextAreaGroup";
 import SelectGroup from "../molecules/SelectGroup";
 
 interface SkillData {
-    id?: string;
+    id?: number;
     name: string;
     description: string;
-    courseId: string;
+    courseId: string; // Keeps string for select value, but logic should handle number conversion
 }
 
 interface SkillModalProps {

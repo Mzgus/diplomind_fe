@@ -8,7 +8,8 @@ interface UserModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (userData: any, sheetData: any | null) => void;
-    existingSheets: { id: string; name: string }[];
+    existingSheets: { id: number; name: string }[];
+    initialData?: any;
 }
 
 const UserModal: React.FC<UserModalProps> = ({
@@ -16,6 +17,7 @@ const UserModal: React.FC<UserModalProps> = ({
     onClose,
     onSave,
     existingSheets,
+    initialData
 }) => {
     // State pour l'utilisateur
     const [userName, setUserName] = useState("");
@@ -26,22 +28,33 @@ const UserModal: React.FC<UserModalProps> = ({
     const [showNewSheetForm, setShowNewSheetForm] = useState(false);
     const [sheetLastName, setSheetLastName] = useState("");
     const [sheetFirstName, setSheetFirstName] = useState("");
-    const [sheetType, setSheetType] = useState("eleve");
+    const [sheetType, setSheetType] = useState("student");
     const [isSheetConfirmed, setIsSheetConfirmed] = useState(false);
 
     // Reset state when modal opens/closes
     useEffect(() => {
         if (isOpen) {
-            setUserName("");
-            setPassword("");
-            setSelectedSheetId("");
-            setShowNewSheetForm(false);
-            setSheetLastName("");
-            setSheetFirstName("");
-            setSheetType("eleve");
-            setIsSheetConfirmed(false);
+            if (initialData) {
+                setUserName(initialData.email || "");
+                setPassword(""); // Password reset? Or blank means keep.
+                setSelectedSheetId(initialData.sheetId ? String(initialData.sheetId) : "");
+                setShowNewSheetForm(false);
+                setSheetLastName("");
+                setSheetFirstName("");
+                setSheetType("student");
+                setIsSheetConfirmed(false);
+            } else {
+                setUserName("");
+                setPassword("");
+                setSelectedSheetId("");
+                setShowNewSheetForm(false);
+                setSheetLastName("");
+                setSheetFirstName("");
+                setSheetType("student");
+                setIsSheetConfirmed(false);
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, initialData]);
 
     const handleSheetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
@@ -74,10 +87,12 @@ const UserModal: React.FC<UserModalProps> = ({
             return;
         }
 
-        const userData = { name: userName, password };
+        const userData = { email: userName, password };
         const sheetData = showNewSheetForm
             ? { lastName: sheetLastName, firstName: sheetFirstName, type: sheetType }
-            : null;
+            : selectedSheetId
+                ? { id: Number(selectedSheetId) }
+                : null;
         onSave(userData, sheetData);
     };
 
@@ -128,7 +143,7 @@ const UserModal: React.FC<UserModalProps> = ({
                                 placeholder="Mot de passe..."
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                required
+                                required={!initialData} // Required only if creating
                             />
 
                             {/* Panneau Nouvelle Fiche (Apparition Conditionnelle) */}
@@ -188,8 +203,8 @@ const UserModal: React.FC<UserModalProps> = ({
                                         onChange={(e) => setSheetType(e.target.value)}
                                         disabled={isSheetConfirmed}
                                     >
-                                        <option value="eleve">Eleve</option>
-                                        <option value="professeur">Professeur</option>
+                                        <option value="student">Elève</option>
+                                        <option value="teacher">Professeur</option>
                                         <option value="admin">Admin</option>
                                     </SelectGroup>
                                     <div className="flex justify-center gap-4 mt-4">
@@ -252,7 +267,7 @@ const UserModal: React.FC<UserModalProps> = ({
                                 <div className="mt-4 p-4 bg-background/10 rounded-lg">
                                     <p className="text-sm text-text-muted">
                                         Fiche sélectionnée :{" "}
-                                        {existingSheets.find((s) => s.id === selectedSheetId)?.name}
+                                        {existingSheets.find((s) => s.id === Number(selectedSheetId))?.name}
                                     </p>
                                 </div>
                             )}

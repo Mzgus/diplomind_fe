@@ -11,6 +11,7 @@ interface StepModalProps {
     onSave: (stepData: any, skillData: any | null) => void;
     existingProjects: { id: string; name: string }[];
     existingSkills: { id: string; name: string }[];
+    initialData?: any;
 }
 
 const StepModal: React.FC<StepModalProps> = ({
@@ -19,6 +20,7 @@ const StepModal: React.FC<StepModalProps> = ({
     onSave,
     existingProjects,
     existingSkills,
+    initialData
 }) => {
     // State pour l'étape
     const [stepName, setStepName] = useState("");
@@ -35,16 +37,28 @@ const StepModal: React.FC<StepModalProps> = ({
     // Reset state when modal opens/closes
     useEffect(() => {
         if (isOpen) {
-            setStepName("");
-            setStepDescription("");
-            setSelectedProjectId("");
-            setSelectedSkillId("");
-            setShowNewSkillForm(false);
+            if (initialData) {
+                setStepName(initialData.name);
+                setStepDescription(initialData.description || "");
+                setSelectedProjectId(initialData.project_id ? initialData.project_id.toString() : "");
+                // Skill prefill? Step might be linked to skills. 
+                // But this modal logic seems to be about CREATING a new skill or linking existing (singular?).
+                // Steps to Skills is Many-to-Many via `step_skills`.
+                // For now reset skill form as we likely manage links in `StepAssociationModal` (inverse of this?).
+                setSelectedSkillId("");
+                setShowNewSkillForm(false);
+            } else {
+                setStepName("");
+                setStepDescription("");
+                setSelectedProjectId("");
+                setSelectedSkillId("");
+                setShowNewSkillForm(false);
+            }
             setSkillName("");
             setSkillDescription("");
             setIsSkillConfirmed(false);
         }
-    }, [isOpen]);
+    }, [isOpen, initialData]);
 
     const handleSkillChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
@@ -75,6 +89,7 @@ const StepModal: React.FC<StepModalProps> = ({
         }
 
         const stepData = {
+            id: initialData?.id,
             name: stepName,
             description: stepDescription,
             projectId: selectedProjectId,
@@ -94,7 +109,7 @@ const StepModal: React.FC<StepModalProps> = ({
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 pb-0">
                     <h2 className="text-2xl font-bold">
-                        Formulaire de création / édition d'une étape
+                        {initialData ? "Éditer l'étape" : "Créer une nouvelle étape"}
                     </h2>
                     <button
                         onClick={onClose}

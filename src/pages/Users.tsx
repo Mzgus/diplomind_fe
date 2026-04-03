@@ -1,121 +1,245 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageLayout from "../components/templates/PageLayout";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 import UserModal from "../components/organisms/UserModal";
+import { UsersService } from "../_services/users.service";
+import StatusBadge from "../components/atoms/StatusBadge";
 
-// Données et colonnes fictives pour l'exemple
+// Colonnes pour l'affichage (Full User Info)
 const userColumns = [
-  { key: "name", header: "Nom" },
+  { key: "avatar", header: "Avatar" },
   { key: "email", header: "Email" },
+  { key: "lastName", header: "Nom" },
+  { key: "firstName", header: "Prénom" },
   { key: "role", header: "Rôle" },
-  { key: "status", header: "Statut" },
+  { key: "active", header: "Statut" },
 ];
 
-const userData = [
-  {
-    name: "Jean Dupont",
-    email: "jean.dupont@example.com",
-    role: "Admin",
-    status: "Actif",
-  },
-  {
-    name: "Marie Curie",
-    email: "marie.curie@example.com",
-    role: "Utilisateur",
-    status: "Actif",
-  },
-  {
-    name: "Pierre Martin",
-    email: "pierre.martin@example.com",
-    role: "Utilisateur",
-    status: "Inactif",
-  },
-  {
-    name: "Sophie Lambert",
-    email: "sophie.lambert@example.com",
-    role: "Editeur",
-    status: "Actif",
-  },
-];
+interface UserDisplay {
+    id: number;
+    email: string;
+    avatar: React.ReactNode;
+    lastName: string;
+    firstName: string;
+    role: any; // ReactNode
+    active: any; // ReactNode
+    sheetId?: number; // For editing association
+}
 
 const Users: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [userData, setUserData] = useState<UserDisplay[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Data for Modal
+  const [allSheets, setAllSheets] = useState<{ id: number; name: string }[]>([]);
 
-  // Données fictives pour les fiches utilisateur existantes
-  const existingUserSheets = [
-    { id: "1", name: "Fiche de Alice Martin" },
-    { id: "2", name: "Fiche de Bob Garcia" },
-  ];
-
-  // State pour la modale de création
+  // States
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<UserDisplay | null>(null);
+  const [itemToEdit, setItemToEdit] = useState<UserDisplay | null>(null);
 
-  // State pour la modale de suppression
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<Record<string, any> | null>(
-    null
-  );
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const [usersRes, sheetsRes] = await Promise.all([
+          UsersService.getAllUsers(),
+          UsersService.getAllUserSheets()
+      ]);
 
-  const handleOpenDeleteModal = (user: Record<string, any>) => {
-    setItemToDelete(user);
-    setIsModalOpen(true);
+      // Handle PaginatedResponse (data.data) or direct Array
+      const usersList = usersRes.data && Array.isArray(usersRes.data.data) 
+          ? usersRes.data.data 
+          : Array.isArray(usersRes.data) 
+             ? usersRes.data 
+             : [];
+
+      setUserData(usersList.map((u: any) => ({
+          id: u.account_id || u.id, // Use account_id as primary for list, or fallback
+          email: u.email || u.user_email || "No Email",
+          lastName: u.user_lastname || "",
+          firstName: u.user_firstname || "",
+          role: <StatusBadge type="role" value={u.user_role} />,
+          avatar: (
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
+                  {u.user_profilepicture ? (
+                      <img src={u.user_profilepicture} alt="avatar" className="w-full h-full object-cover" />
+                  ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">?</div>
+                  )}
+              </div>
+          ),
+          active: <StatusBadge type="status" value={u.user_active} />,
+          sheetId: u.user_id 
+      })));
+      
+      const sheets = Array.isArray(sheetsRes.data) ? sheetsRes.data : [];
+      setAllSheets(sheets.map((s: any) => ({
+          id: s.id,
+         name: `${s.last_name} ${s.first_name} (${s.type_user})`
+      })));
+
+    } catch (err: any) {
+      console.error("Failed to fetch users:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleOpenDeleteModal = (user: Record<string, any>) => {
+    setItemToDelete(user as UserDisplay);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleEditRow = (row: Record<string, any>) => {
+    setItemToEdit(row as UserDisplay);
+    setIsCreateModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (itemToDelete) {
+        try {
+            await UsersService.deleteUserAuth(itemToDelete.id);
+            fetchUsers();
+        } catch (error) {
+            console.error("Failed to delete user", error);
+        }
+    }
+    setIsDeleteModalOpen(false);
     setItemToDelete(null);
   };
 
-  const handleConfirmDelete = () => {
-    console.log("Suppression confirmée pour:", itemToDelete?.name);
-    handleCloseModal();
+  const handleSaveNewUser = async (userData: any, sheetData: any | null) => {
+    try {
+        if (itemToEdit) {
+            // UPDATE LOGIC
+            const authId = itemToEdit.id;
+
+            // 1. Update Email if changed
+            if (userData.email && userData.email !== itemToEdit.email) {
+                await UsersService.updateUserAuthEmail(authId, userData.email);
+            }
+
+            // 2. Update Password if provided
+            if (userData.password) {
+                await UsersService.updateUserAuthPassword(authId, userData.password);
+            }
+
+            // 3. Update Sheet Association or Create Sheet
+            if (sheetData) {
+                if (sheetData.id) {
+                    // Link existing sheet to this account via account_id
+                    await UsersService.updateUserSheet(sheetData.id, { account_id: authId });
+                } else if (sheetData.lastName) {
+                    // Create NEW sheet linked to this account
+                    await UsersService.createUserSheet({
+                        last_name: sheetData.lastName,
+                        first_name: sheetData.firstName,
+                        type_user: sheetData.type,
+                        account_id: authId
+                    });
+                }
+            }
+        } else {
+            // CREATE LOGIC
+            let accountId = null;
+
+            // 1. Create Auth (backend auto-creates Account)
+            if (userData && userData.email) {
+                const res = await UsersService.createUserAuth({
+                    email: userData.email,
+                    pwd: userData.password
+                });
+                accountId = res.data.account_id; // Use account_id from response
+            }
+
+            // 2. Create/Link Sheet
+            if (sheetData) {
+                if (sheetData.id) {
+                    // Link existing sheet to newly created account
+                    if (accountId) {
+                         await UsersService.updateUserSheet(sheetData.id, { account_id: accountId });
+                    }
+                } else if (sheetData.lastName) {
+                    // Create NEW sheet linked to this account
+                     await UsersService.createUserSheet({
+                         last_name: sheetData.lastName,
+                         first_name: sheetData.firstName,
+                         type_user: sheetData.type,
+                         account_id: accountId
+                     });
+                }
+            }
+        }
+        
+        fetchUsers();
+        setIsCreateModalOpen(false);
+        setItemToEdit(null);
+
+    } catch (error) {
+        console.error("Failed to save user", error);
+        alert("Erreur lors de la sauvegarde.");
+    }
   };
 
-  const handleSaveNewUser = (userData: any, sheetData: any | null) => {
-    console.log("Sauvegarde du nouvel utilisateur:", {
-      user: userData,
-      sheet: sheetData,
-    });
-    // Ici, vous ajouteriez la logique pour sauvegarder via une API
-    setIsCreateModalOpen(false);
-  };
-
-  // Logique de filtrage (sera utile plus tard)
+  // Logique de filtrage
   const filteredUsers = userData.filter(
     (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
+      user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p>Chargement des utilisateurs...</p>
+      </div>
+    );
+  }
 
   return (
     <>
       <PageLayout
-        title="Utilisateurs"
+        title="Utilisateurs (Comptes)"
         searchQuery={searchQuery}
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         searchPlaceholder="Rechercher un utilisateur..."
         buttonText="Ajouter un utilisateur"
-        onButtonClick={() => setIsCreateModalOpen(true)}
+        onButtonClick={() => {
+            setItemToEdit(null);
+            setIsCreateModalOpen(true);
+        }}
         columns={userColumns}
         data={filteredUsers}
+        onEditRow={handleEditRow}
         onDeleteRow={handleOpenDeleteModal}
       />
       <DeleteConfirmationModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+            setIsDeleteModalOpen(false);
+            setItemToDelete(null);
+        }}
         onConfirm={handleConfirmDelete}
-        itemName={itemToDelete?.name || ""}
+        itemName={itemToDelete?.email || ""}
         itemType="l'utilisateur"
       />
       <UserModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => {
+            setIsCreateModalOpen(false);
+            setItemToEdit(null);
+        }}
         onSave={handleSaveNewUser}
-        existingSheets={existingUserSheets}
+        existingSheets={allSheets}
+        initialData={itemToEdit}
       />
     </>
   );
 };
 
 export default Users;
-

@@ -8,8 +8,9 @@ interface UserSheetModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (sheetData: any, userData: any | null) => void;
-    existingClasses: { id: string; name: string }[];
-    existingUsers: { id: string; name: string }[];
+    existingClasses: { id: number; name: string }[];
+    existingUsers: { id: number; name: string }[];
+    initialData?: any; // For editing if needed
 }
 
 const UserSheetModal: React.FC<UserSheetModalProps> = ({
@@ -18,14 +19,15 @@ const UserSheetModal: React.FC<UserSheetModalProps> = ({
     onSave,
     existingClasses,
     existingUsers,
+    initialData
 }) => {
     // State pour la fiche utilisateur
-    const [sheetName, setSheetName] = useState("");
-    const [sheetType, setSheetType] = useState("");
+    const [sheetType, setSheetType] = useState("student");
     const [sheetFirstName, setSheetFirstName] = useState("");
     const [sheetLastName, setSheetLastName] = useState("");
     const [selectedClassId, setSelectedClassId] = useState("");
     const [selectedUserId, setSelectedUserId] = useState("");
+    const [isActive, setIsActive] = useState(true);
 
     // State pour le nouvel utilisateur
     const [showNewUserForm, setShowNewUserForm] = useState(false);
@@ -36,16 +38,31 @@ const UserSheetModal: React.FC<UserSheetModalProps> = ({
     // Reset state when modal opens/closes
     useEffect(() => {
         if (isOpen) {
-            setSheetName("");
-            setSheetType("");
-            setSelectedClassId("");
-            setSelectedUserId("");
-            setShowNewUserForm(false);
-            setUserEmail("");
-            setUserPassword("");
-            setIsUserConfirmed(false);
+            if (initialData) {
+                setSheetLastName(initialData.last_name || "");
+                setSheetFirstName(initialData.first_name || "");
+                setSheetType(initialData.type_user || "student");
+                // Pre-fill linked account if available
+                setSelectedUserId(initialData.account_id ? String(initialData.account_id) : "");
+                // Pre-fill linked class if available
+                setSelectedClassId(initialData.class_id ? String(initialData.class_id) : "");
+                setShowNewUserForm(false);
+                setIsUserConfirmed(!!initialData.account_id); // Consider linked if has account
+                setIsActive(initialData.active !== false); // Default true if undefined, false if existing inactive
+            } else {
+                setSheetType("student");
+                setSheetFirstName("");
+                setSheetLastName("");
+                setSelectedClassId("");
+                setSelectedUserId("");
+                setShowNewUserForm(false);
+                setUserEmail("");
+                setUserPassword("");
+                setIsUserConfirmed(false);
+                setIsActive(true);
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, initialData]);
 
     const handleUserChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
@@ -76,14 +93,16 @@ const UserSheetModal: React.FC<UserSheetModalProps> = ({
         }
 
         const sheetData = {
-            name: sheetName,
-            type: sheetType,
-            classId: selectedClassId,
+            nom: sheetLastName,
+            prenom: sheetFirstName,
+            type_user: sheetType,
+            classId: selectedClassId ? Number(selectedClassId) : null,
+            active: isActive,
         };
         const userData = showNewUserForm
             ? { email: userEmail, password: userPassword }
             : selectedUserId
-                ? { id: selectedUserId }
+                ? { id: Number(selectedUserId) }
                 : null;
 
         onSave(sheetData, userData);
@@ -91,7 +110,7 @@ const UserSheetModal: React.FC<UserSheetModalProps> = ({
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <div className="w-full max-w-5xl rounded-xl bg-surface text-text-main shadow-2xl overflow-hidden flex flex-col">
+            <div className="w-full max-w-5xl rounded-xl bg-surface text-text-main shadow-2xl overflow-hidden flex flex-col border border-border">
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 pb-0">
                     <h2 className="text-2xl font-bold">
@@ -119,9 +138,9 @@ const UserSheetModal: React.FC<UserSheetModalProps> = ({
 
                 <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-6">
                     <div className="flex flex-col md:flex-row gap-8">
-                        {/* Colonne Gauche : Info Fiche */}
-                        <div className="flex-1">
-                            <div className="flex flex-inline gap-4">
+                        {/* Info Fiche */}
+                        <div className="flex-1 space-y-4">
+                            <div className="flex gap-4">
                                 <InputGroup
                                     id="sheet-first-name"
                                     label="Prénom"
@@ -145,16 +164,13 @@ const UserSheetModal: React.FC<UserSheetModalProps> = ({
                                 value={sheetType}
                                 onChange={(e) => setSheetType(e.target.value)}
                             >
-                                <option value="" disabled>
-                                    Type fiche...
-                                </option>
-                                <option value="eleve">Elève</option>
-                                <option value="professeur">Professeur</option>
-                                <option value="admin">Admin</option>
+                                <option key="opt-student" value="student">Elève</option>
+                                <option key="opt-teacher" value="teacher">Professeur</option>
+                                <option key="opt-admin" value="admin">Admin</option>
                             </SelectGroup>
 
-                            {/* Panneau Nouveau Utilisateur */}
-                            {showNewUserForm && (
+                             {/* Panneau Nouveau Utilisateur */}
+                             {showNewUserForm && (
                                 <div
                                     className={`mt-6 bg-background rounded-xl p-6 shadow-inner animate-fade-in transition-all duration-300 border border-border ${isUserConfirmed
                                         ? "opacity-75 border-success-border"
@@ -205,7 +221,7 @@ const UserSheetModal: React.FC<UserSheetModalProps> = ({
                                         disabled={isUserConfirmed}
                                     />
 
-                                    <div className="flex justify-center gap-4 mt-4">
+                                    <div className="flex justify-end gap-4 mt-4">
                                         {!isUserConfirmed ? (
                                             <>
                                                 <Button
@@ -241,15 +257,15 @@ const UserSheetModal: React.FC<UserSheetModalProps> = ({
                             )}
                         </div>
 
-                        {/* Colonne Droite : Associations */}
-                        <div className="flex-1">
+                        {/* Associations */}
+                        <div className="flex-1 space-y-4">
                             <SelectGroup
                                 id="associate-class"
                                 label="Associer une classe"
                                 value={selectedClassId}
                                 onChange={(e) => setSelectedClassId(e.target.value)}
                             >
-                                <option value="" disabled>
+                                <option key="default-class" value="" disabled>
                                     Choisir classe...
                                 </option>
                                 {existingClasses.map((cls) => (
@@ -261,20 +277,42 @@ const UserSheetModal: React.FC<UserSheetModalProps> = ({
 
                             <SelectGroup
                                 id="associate-user"
-                                label="Associer utilisateur à la fiche"
+                                label="Associer utilisateur (Compte)"
                                 value={selectedUserId}
                                 onChange={handleUserChange}
                             >
-                                <option value="" disabled>
-                                    Choisir utilisateur...
+                                <option key="default-user" value="" disabled>
+                                    Choisir compte...
                                 </option>
                                 {existingUsers.map((user) => (
                                     <option key={user.id} value={user.id}>
                                         {user.name}
                                     </option>
                                 ))}
-                                <option value="create_new">+ Nouvelle utilisateur</option>
+                                <option key="create-new" value="create_new">+ Créer nouveau compte</option>
                             </SelectGroup>
+
+                            <div className="flex items-center gap-2 pt-2">
+                                <label htmlFor="sheet-active" className="text-sm font-medium text-text-main">
+                                    Fiche Active
+                                </label>
+                                <button
+                                    type="button"
+                                    id="sheet-active"
+                                    role="switch"
+                                    aria-checked={isActive}
+                                    onClick={() => setIsActive(!isActive)}
+                                    className={`${
+                                        isActive ? "bg-primary" : "bg-gray-200"
+                                    } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2`}
+                                >
+                                    <span
+                                        className={`${
+                                            isActive ? "translate-x-6" : "translate-x-1"
+                                        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                                    />
+                                </button>
+                            </div>
                         </div>
                     </div>
 
