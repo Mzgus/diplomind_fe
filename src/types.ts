@@ -66,3 +66,24 @@ export interface Validation {
 export interface StepWithSkills extends Step {
   skills: Skill[];
 }
+
+// Extended types for Skills UI
+export interface StepWithProject extends Step {
+  projectName?: string;
+}
+
+export interface SkillWithSteps extends Skill {
+  linkedSteps?: StepWithProject[];
+}
+
+export interface CourseWithSkills extends Course {
+  skills?: SkillWithSteps[];
+  skillsLoaded?: boolean;
+}
+
+export interface SkillValidation {
+  skill_id: number;
+  status: string;
+  comment?: string;
+  validated_at?: string;
+}
