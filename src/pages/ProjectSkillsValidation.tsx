@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SkillValidationModal from "../components/organisms/SkillValidationModal";
+import ValidationMatrix from "../components/organisms/ValidationMatrix";
+import ValidationFilters from "../components/molecules/ValidationFilters";
 import { ProjectsService } from "../_services/projects.service";
 import { StepsService } from "../_services/steps.service";
 import { ClassesService } from "../_services/classes.service";
@@ -62,7 +64,6 @@ const ProjectSkillsValidation: React.FC = () => {
     const [courses, setCourses] = useState<CourseItem[]>([]);
     const [stepsWithSkills, setStepsWithSkills] = useState<StepWithSkills[]>([]);
     const [students, setStudents] = useState<Student[]>([]);
-    // validations: Record<"userId_skillId", { status: string; comment: string }>
     const [validations, setValidations] = useState<Record<string, { status: string; comment: string }>>({});
 
     // --- Filter State ---
@@ -90,7 +91,6 @@ const ProjectSkillsValidation: React.FC = () => {
                 setClasses(cl);
                 setCourses(co);
 
-                // Auto-select first items if available
                 if (cl.length > 0) setSelectedClassId(String(cl[0].id));
                 if (co.length > 0) setSelectedCourseId(String(co[0].id));
             } catch (err) {
@@ -102,7 +102,7 @@ const ProjectSkillsValidation: React.FC = () => {
         fetchInitial();
     }, []);
 
-    // --- 2. When course changes → fetch Projects for that course ---
+    // --- 2. Quand le cours change → fetch les projets du cours ---
     useEffect(() => {
         if (!selectedCourseId) return;
         const fetchProjects = async () => {
@@ -110,7 +110,6 @@ const ProjectSkillsValidation: React.FC = () => {
                 const res = await ProjectsService.getProjectsByCourse(Number(selectedCourseId));
                 const p: Project[] = Array.isArray(res.data) ? res.data : [];
                 setProjects(p);
-                // Auto-select first project
                 if (p.length > 0) {
                     setSelectedProjectId(String(p[0].id));
                 } else {
@@ -126,7 +125,7 @@ const ProjectSkillsValidation: React.FC = () => {
         fetchProjects();
     }, [selectedCourseId]);
 
-    // --- 2. When project changes → fetch Steps → for each step fetch Skills ---
+    // --- 3. Quand le projet change → fetch étapes + compétences ---
     useEffect(() => {
         if (!selectedProjectId) return;
         const fetchStepsAndSkills = async () => {
@@ -135,7 +134,6 @@ const ProjectSkillsValidation: React.FC = () => {
                 const stepsRes = await StepsService.getStepsByProject(Number(selectedProjectId));
                 const rawSteps: Step[] = Array.isArray(stepsRes.data) ? stepsRes.data : [];
 
-                // For each step, fetch its skills
                 const stepsWithSkillsData: StepWithSkills[] = await Promise.all(
                     rawSteps.map(async (step) => {
                         try {
@@ -158,7 +156,7 @@ const ProjectSkillsValidation: React.FC = () => {
         fetchStepsAndSkills();
     }, [selectedProjectId]);
 
-    // --- 3. When class changes → fetch Students ---
+    // --- 4. Quand la classe change → fetch les étudiants ---
     useEffect(() => {
         if (!selectedClassId) return;
         const fetchStudents = async () => {
@@ -174,12 +172,12 @@ const ProjectSkillsValidation: React.FC = () => {
         fetchStudents();
     }, [selectedClassId]);
 
-    // --- 4. Build flat skills array with unique keys ---
+    // --- Build flat skills array with unique keys ---
     const allSkills = stepsWithSkills.flatMap((step) =>
         step.skills.map((skill) => ({ ...skill, uid: `${step.id}_${skill.id}` }))
     );
 
-    // --- 5. When students or skills change → fetch Validations ---
+    // --- 5. Quand étudiants ou compétences changent → fetch validations ---
     useEffect(() => {
         if (students.length === 0 || allSkills.length === 0) {
             setValidations({});
@@ -205,7 +203,7 @@ const ProjectSkillsValidation: React.FC = () => {
                                 };
                             });
                         } catch {
-                            // Student has no validations yet
+                            // L'étudiant n'a pas encore de validations
                         }
                     })
                 );
@@ -241,16 +239,13 @@ const ProjectSkillsValidation: React.FC = () => {
         const key = `${studentId}_${skillId}`;
 
         try {
-            // Check if validation already exists
             const existing = validations[key];
             if (existing) {
-                // UPDATE existing validation
                 await ValidationsService.updateValidationStatus(studentId, skillId, {
                     status: backendStatus,
                     comment,
                 });
             } else {
-                // CREATE new validation
                 await ValidationsService.createValidation({
                     user_id: studentId,
                     skill_id: skillId,
@@ -259,7 +254,6 @@ const ProjectSkillsValidation: React.FC = () => {
                 });
             }
 
-            // Update local state optimistically
             setValidations((prev) => ({
                 ...prev,
                 [key]: { status, comment },
@@ -267,45 +261,6 @@ const ProjectSkillsValidation: React.FC = () => {
         } catch (err) {
             console.error("Failed to save validation:", err);
             alert("Erreur lors de la sauvegarde de la validation.");
-        }
-    };
-
-    // --- Style Helpers ---
-    const getStatusStyle = (status?: string) => {
-        switch (status) {
-            case "Validé":
-                return "bg-success-bg text-success-text border-success-border hover:bg-success-border";
-            case "Non validé":
-                return "bg-danger-bg text-danger-text border-danger-border hover:bg-danger-border";
-            case "Partiellement validé":
-                return "bg-warning-bg text-warning-text border-warning-border hover:bg-warning-border";
-            default:
-                return "bg-background text-text-muted border-border hover:bg-border";
-        }
-    };
-
-    const getStatusIcon = (status?: string) => {
-        switch (status) {
-            case "Validé":
-                return (
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                );
-            case "Non validé":
-                return (
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                );
-            case "Partiellement validé":
-                return (
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                );
-            default:
-                return <div className="w-2 h-2 rounded-full bg-text-muted/30" />;
         }
     };
 
@@ -336,9 +291,10 @@ const ProjectSkillsValidation: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-background p-8 font-sans text-text-main">
-            {/* Header Section */}
+            {/* Header */}
             <div className="max-w-full mx-auto mb-8">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    {/* Titre + sélection projet */}
                     <div>
                         <h1 className="text-3xl font-bold text-text-main tracking-tight">
                             Validation des Compétences
@@ -359,176 +315,33 @@ const ProjectSkillsValidation: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Filters & Search */}
-                    <div className="flex flex-wrap items-center gap-3">
-                        {/* Search Input */}
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Rechercher un étudiant..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10 pr-4 py-2 bg-surface border border-border rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-64 text-text-main"
-                            />
-                            <svg
-                                className="w-5 h-5 text-text-muted absolute left-3 top-1/2 transform -translate-y-1/2"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                />
-                            </svg>
-                        </div>
-
-                        <select 
-                            value={selectedClassId}
-                            onChange={(e) => setSelectedClassId(e.target.value)}
-                            className="px-4 py-2 bg-surface border border-border rounded-lg shadow-sm text-sm font-medium text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer hover:bg-background transition-colors"
-                        >
-                            {classes.map((cls) => (
-                                <option key={cls.id} value={cls.id}>
-                                    Classe: {cls.name}
-                                </option>
-                            ))}
-                        </select>
-                        <select 
-                            value={selectedCourseId}
-                            onChange={(e) => setSelectedCourseId(e.target.value)}
-                            className="px-4 py-2 bg-surface border border-border rounded-lg shadow-sm text-sm font-medium text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer hover:bg-background transition-colors"
-                        >
-                            {courses.map((course) => (
-                                <option key={course.id} value={course.id}>
-                                    Cours: {course.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    {/* Filtres */}
+                    <ValidationFilters
+                        searchQuery={searchQuery}
+                        onSearchChange={(e) => setSearchQuery(e.target.value)}
+                        selectedClassId={selectedClassId}
+                        onClassChange={(e) => setSelectedClassId(e.target.value)}
+                        classes={classes}
+                        selectedCourseId={selectedCourseId}
+                        onCourseChange={(e) => setSelectedCourseId(e.target.value)}
+                        courses={courses}
+                    />
                 </div>
 
-                {/* Matrix Container */}
+                {/* Matrice */}
                 <div className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden flex flex-col h-[calc(100vh-200px)]">
-                    {loadingMatrix ? (
-                        <div className="flex items-center justify-center h-full">
-                            <p className="text-text-muted">Chargement de la matrice...</p>
-                        </div>
-                    ) : allSkills.length === 0 ? (
-                        <div className="flex items-center justify-center h-full">
-                            <p className="text-text-muted">Aucune compétence trouvée pour ce projet. Vérifiez que des étapes et compétences sont associées.</p>
-                        </div>
-                    ) : (
-                    <div className="overflow-auto flex-1 relative custom-scrollbar">
-                        <table className="border-separate border-spacing-0">
-                            <thead>
-                                {/* Steps Header */}
-                                <tr>
-                                    <th className="sticky top-0 left-0 z-30 bg-surface p-4 border-b border-r border-border whitespace-nowrap h-16 min-w-[250px]">
-                                        <div className="flex items-center justify-end h-full text-text-muted font-bold text-sm uppercase tracking-wider">
-                                            Étapes &rarr;
-                                        </div>
-                                    </th>
-                                    {stepsWithSkills.map((step) => (
-                                        <th
-                                            key={step.id}
-                                            colSpan={step.skills.length || 1}
-                                            className="sticky top-0 z-20 bg-background p-3 border-b border-r border-border text-center text-xs font-bold text-text-muted uppercase tracking-wider"
-                                        >
-                                            {step.name}
-                                        </th>
-                                    ))}
-                                </tr>
-                                {/* Skills Header */}
-                                <tr>
-                                    <th className="sticky top-16 left-0 z-30 bg-surface p-4 border-b border-r border-border shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)]">
-                                        <div className="flex flex-col justify-between h-full">
-                                            <div className="flex items-center justify-end h-full text-text-muted font-bold text-sm uppercase tracking-wider">
-                                                Compétences &rarr;
-                                            </div>
-                                        </div>
-                                    </th>
-                                    {allSkills.map((skill) => (
-                                        <th
-                                            key={skill.uid}
-                                            className="sticky top-16 z-20 bg-surface border-b border-r border-border min-w-[60px] w-[60px] h-[180px] align-bottom hover:bg-background transition-colors group cursor-help pb-2"
-                                            title={skill.description || ""}
-                                        >
-                                            <div className="flex items-center justify-center h-full">
-                                                <div className="transform -rotate-45 w-[160px]  mb-2 text-left">
-                                                    <span className="text-sm font-medium text-text-main group-hover:text-primary transition-colors block">
-                                                        {skill.name}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredStudents.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={allSkills.length + 1} className="p-8 text-center text-text-muted">
-                                            Aucun étudiant trouvé dans cette classe.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                filteredStudents.map((student) => (
-                                    <tr key={student.id} className="group">
-                                        {/* Student Row Header */}
-                                        <td className="sticky left-0 z-10 bg-surface p-4 border-b border-r border-border group-hover:bg-primary/10 transition-colors shadow-[4px_0_8px_-4px_rgba(0,0,0,0.05)] whitespace-nowrap">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-background overflow-hidden border border-border">
-                                                    {student.profile_picture ? (
-                                                        <img
-                                                            src={student.profile_picture}
-                                                            alt={`${student.first_name} ${student.last_name}`}
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-text-muted text-xs">
-                                                            {student.first_name?.[0]}{student.last_name?.[0]}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <span className="font-medium text-text-main text-sm group-hover:text-primary-hover transition-colors">
-                                                    {student.last_name} {student.first_name}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        {/* Validation Cells */}
-                                        {allSkills.map((skill) => {
-                                            const key = `${student.id}_${skill.id}`;
-                                            const validation = validations[key];
-                                            return (
-                                                <td
-                                                    key={skill.uid}
-                                                    onClick={() => handleCellClick(student.id, skill.id)}
-                                                    className="p-2 border-b border-r border-border bg-surface hover:bg-background transition-all cursor-pointer text-center relative min-w-[60px]"
-                                                >
-                                                    <div
-                                                        className={`w-full h-full min-h-[50px] rounded-md flex items-center justify-center border transition-all duration-200 ${getStatusStyle(
-                                                            validation?.status
-                                                        )}`}
-                                                    >
-                                                        {getStatusIcon(validation?.status)}
-                                                    </div>
-                                                </td>
-                                            );
-                                        })}
-                                    </tr>
-                                ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                    )}
+                    <ValidationMatrix
+                        stepsWithSkills={stepsWithSkills}
+                        allSkills={allSkills}
+                        filteredStudents={filteredStudents}
+                        validations={validations}
+                        loadingMatrix={loadingMatrix}
+                        onCellClick={handleCellClick}
+                    />
                 </div>
             </div>
 
-            {/* Validation Modal */}
+            {/* Modal de validation */}
             <SkillValidationModal
                 isOpen={!!selectedCell}
                 onClose={handleModalClose}
