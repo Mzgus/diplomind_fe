@@ -44,7 +44,7 @@ const SkillAdminRow: React.FC<SkillAdminRowProps> = ({
                 {!stepId && (
                     <button
                         onClick={() => onLinkStep(skill)}
-                        className="px-2 py-1 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-full text-xs font-medium transition-colors flex items-center gap-1 border border-primary/30"
+                        className="cursor-pointer px-2 py-1 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-full text-xs font-medium transition-colors flex items-center gap-1 border border-primary/30"
                         title="Lier à une étape"
                         type="button"
                     >
@@ -56,7 +56,7 @@ const SkillAdminRow: React.FC<SkillAdminRowProps> = ({
                 )}
                 <button
                     onClick={() => onEdit(skill, courseId)}
-                    className="p-1.5 text-text-muted hover:text-text-main hover:bg-surface border border-transparent hover:border-border rounded-full transition-colors"
+                    className="cursor-pointer p-1.5 text-text-muted hover:text-text-main hover:bg-surface border border-transparent hover:border-border rounded-full transition-colors"
                     title="Éditer"
                     type="button"
                 >
@@ -66,7 +66,7 @@ const SkillAdminRow: React.FC<SkillAdminRowProps> = ({
                 </button>
                 <button
                     onClick={() => onDelete(skill, courseId)}
-                    className="p-1.5 text-danger-text hover:bg-danger-bg border border-transparent hover:border-danger-border rounded-full transition-colors"
+                    className="cursor-pointer p-1.5 text-danger-text hover:bg-danger-bg border border-transparent hover:border-danger-border rounded-full transition-colors"
                     title="Supprimer"
                     type="button"
                 >

@@ -69,7 +69,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({ onEdit, onDelete }) => {
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="p-2 rounded-full hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+        className="cursor-pointer p-2 rounded-full hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary"
       >
         <EllipsisVerticalIcon className="w-5 h-5 text-text-muted" />
       </button>

@@ -56,7 +56,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-4 focus:outline-none hover:opacity-80 transition-opacity"
+        className="cursor-pointer flex items-center gap-4 focus:outline-none hover:opacity-80 transition-opacity"
       >
         <div className="hidden sm:flex items-center gap-2">
           <span className="font-medium text-text-main">{userName}</span>

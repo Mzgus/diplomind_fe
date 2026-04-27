@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "../atoms/Button";
 
 interface CourseActionButtonsProps {
     onLinkProject: () => void;
@@ -10,21 +11,20 @@ const CourseActionButtons: React.FC<CourseActionButtonsProps> = ({ onLinkProject
     return (
         <div className="flex gap-2">
             {/* Lier un projet */}
-            <button
+            <Button
                 onClick={onLinkProject}
-                className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-full text-sm font-medium transition-colors flex items-center gap-2"
-                type="button"
+                className="text-sm font-medium flex items-center gap-2"
             >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
                 Lier un projet
-            </button>
+            </Button>
 
             {/* Éditer */}
             <button
                 onClick={onEdit}
-                className="p-2 text-text-muted hover:text-text-main hover:bg-background rounded-full transition-colors"
+                className="cursor-pointer p-2 text-text-muted hover:text-text-main hover:bg-background rounded-full transition-colors"
                 title="Éditer ce cours"
                 type="button"
             >
@@ -36,7 +36,7 @@ const CourseActionButtons: React.FC<CourseActionButtonsProps> = ({ onLinkProject
             {/* Supprimer */}
             <button
                 onClick={onDelete}
-                className="p-2 text-danger-text hover:bg-danger-bg rounded-full transition-colors"
+                className="cursor-pointer p-2 text-danger-text hover:bg-danger-bg rounded-full transition-colors"
                 title="Supprimer ce cours"
                 type="button"
             >
