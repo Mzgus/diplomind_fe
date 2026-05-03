@@ -1,6 +1,6 @@
 import React from "react";
 import SearchBar from "./SearchBar";
-import Button from "../atoms/Button";
+import Button from "../atoms/Buttons/Button";
 
 interface CoursePageHeaderProps {
     searchQuery: string;

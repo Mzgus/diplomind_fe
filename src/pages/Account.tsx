@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import InfoField from "../components/molecules/InfoField";
-import Button from "../components/atoms/Button";
+import Button from "../components/atoms/Buttons/Button";
 import StatusBadge from "../components/atoms/StatusBadge";
 import { AuthContext } from "../context/AuthContext";
 import { UsersService } from "../_services/users.service";

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import SearchBar from "../components/molecules/SearchBar";
-import Button from "../components/atoms/Button";
+import Button from "../components/atoms/Buttons/Button";
 import AdminSkillsCourseAccordion from "../components/organisms/AdminSkillsCourseAccordion";
 import StudentSkillsAccordion from "../components/organisms/StudentSkillsAccordion";
 import SkillModal from "../components/organisms/SkillModal";

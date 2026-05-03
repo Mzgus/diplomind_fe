@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Button from "../atoms/Button";
+import Button from "../atoms/Buttons/Button";
 import FormField from "../molecules/FormField";
 
 interface LoginFormProps {

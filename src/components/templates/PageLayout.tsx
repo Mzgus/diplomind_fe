@@ -1,6 +1,6 @@
 import React from "react";
 import SearchBar from "../molecules/SearchBar";
-import Button from "../atoms/Button";
+import Button from "../atoms/Buttons/Button";
 import DataTable from "../organisms/DataTable";
 
 interface ColumnDefinition {
