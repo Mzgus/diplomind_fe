@@ -1,6 +1,6 @@
 import React from "react";
 import BrandLogo from "../molecules/BrandLogo";
-import UserProfile from "../molecules/UserProfile";
+import UserProfile from "./UserProfile";
 import ThemeToggle from "../atoms/ThemeToggle";
 
 import type { UserSheet } from "../../types";

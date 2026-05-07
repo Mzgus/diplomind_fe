@@ -1,5 +1,5 @@
 import React from "react";
-import ValidationCell from "../atoms/ValidationCell";
+import ValidationCell from "./ValidationCell";
 
 interface Student {
     id: number;

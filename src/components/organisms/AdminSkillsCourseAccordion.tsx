@@ -1,5 +1,5 @@
 import React from "react";
-import StepSkillsSection from "../molecules/StepSkillsSection";
+import StepSkillsSection from "./StepSkillsSection";
 import SkillAdminRow from "../molecules/SkillAdminRow";
 import type { Project, CourseWithSkills, SkillWithSteps, StepWithProject } from "../../types";
 

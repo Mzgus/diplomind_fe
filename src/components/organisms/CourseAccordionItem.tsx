@@ -55,28 +55,15 @@ const CourseAccordionItem: React.FC<CourseAccordionItemProps> = ({
 
             {/* Contenu dépliable */}
             {isExpanded && (
-                <div className="border-t border-border p-4">
+                <div className="border-t border-border p-4 space-y-4">
+
+                    {/* Ligne 1 : description + boutons d'action côte à côte */}
                     <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                            <p className="text-sm text-text-muted mb-4">{course.description}</p>
-
-                            {/* Projets liés */}
-                            {course.linkedProjects.length > 0 ? (
-                                <div className="space-y-2">
-                                    <h3 className="text-sm font-semibold text-text-main mb-2">
-                                        Projets associés :
-                                    </h3>
-                                    {course.linkedProjects.map((project) => (
-                                        <LinkedProjectCard
-                                            key={project.id}
-                                            project={project}
-                                            isAdmin={isAdmin}
-                                            onDelete={onDeleteProject}
-                                        />
-                                    ))}
-                                </div>
+                            {course.description ? (
+                                <p className="text-sm text-text-muted">{course.description}</p>
                             ) : (
-                                <p className="text-sm text-text-muted italic">Aucun projet lié</p>
+                                <p className="text-sm text-text-muted italic">Aucune description</p>
                             )}
                         </div>
 
@@ -89,6 +76,28 @@ const CourseAccordionItem: React.FC<CourseAccordionItemProps> = ({
                             />
                         )}
                     </div>
+
+                    {/* Ligne 2 : projets liés sur toute la largeur */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-text-main mb-2">
+                            Projets associés :
+                        </h3>
+                        {course.linkedProjects.length > 0 ? (
+                            <div className="flex flex-wrap w-full">
+                                {course.linkedProjects.map((project) => (
+                                    <LinkedProjectCard
+                                        key={project.id}
+                                        project={project}
+                                        isAdmin={isAdmin}
+                                        onDelete={onDeleteProject}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-text-muted italic">Aucun projet lié</p>
+                        )}
+                    </div>
+
                 </div>
             )}
         </div>

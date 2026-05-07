@@ -7,7 +7,7 @@ import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
 import Courses from "./pages/Courses";
 import Project from "./pages/Project";
-import Steps from "./pages/Steps";
+
 import Skills from "./pages/Skills";
 import Classes from "./pages/Classes";
 import UserSheets from "./pages/UserSheets";
@@ -36,7 +36,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/project" element={<Project />} />
-              <Route path="/steps" element={<Steps />} />
+
               <Route path="/skills" element={<Skills />} />
               <Route path="/account" element={<Account />} />
               <Route path="/project-skills-validation" element={<ProjectSkillsValidation />} />

@@ -3,7 +3,6 @@ import {
   Squares2X2Icon,
   BookOpenIcon,
   RocketLaunchIcon,
-  FlagIcon,
   UsersIcon,
   TrophyIcon,
   DocumentTextIcon,
@@ -25,7 +24,6 @@ const navigationGroup1: NavItem[] = [
   { name: "Dashboard", href: "/", icon: Squares2X2Icon },
   { name: "Cours", href: "/courses", icon: BookOpenIcon },
   { name: "Projet", href: "/project", icon: RocketLaunchIcon },
-  { name: "Étape", href: "/steps", icon: FlagIcon },
   { name: "Compétence", href: "/skills", icon: TrophyIcon },
 ];
 
