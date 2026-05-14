@@ -28,7 +28,7 @@ const ProjectAssociationModal: React.FC<ProjectAssociationModalProps> = ({
     const [newProjectDescription, setNewProjectDescription] = useState("");
     const [isCreating, setIsCreating] = useState(false);
 
-    // Reset state when modal opens/closes
+    // Reset state when modal opens
     useEffect(() => {
         if (isOpen) {
             setSelectedProjectIds([...currentProjectIds]);
@@ -36,7 +36,7 @@ const ProjectAssociationModal: React.FC<ProjectAssociationModalProps> = ({
             setNewProjectDescription("");
             setIsCreating(false);
         }
-    }, [isOpen, currentProjectIds]);
+    }, [isOpen]);
 
     const handleToggleProject = (projectId: string) => {
         if (selectedProjectIds.includes(projectId)) {

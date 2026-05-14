@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import CoursePageHeader from "../components/molecules/CoursePageHeader";
 import CourseAccordionItem from "../components/organisms/CourseAccordionItem";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
@@ -32,9 +32,9 @@ const Courses: React.FC = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<Course | null>(null);
 
-    // Project deletion
-    const [isDeleteProjectModalOpen, setIsDeleteProjectModalOpen] = useState(false);
-    const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+    // Project unlinking
+    const [isUnlinkProjectModalOpen, setIsUnlinkProjectModalOpen] = useState(false);
+    const [projectToUnlink, setProjectToUnlink] = useState<Project | null>(null);
 
     // --- Fetch ---
     const fetchCourses = async () => {
@@ -190,22 +190,23 @@ const Courses: React.FC = () => {
         }
     };
 
-    const handleRemoveProject = (project: Project) => {
-        setProjectToDelete(project);
-        setIsDeleteProjectModalOpen(true);
+    const handleUnlinkProject = (project: Project) => {
+        setProjectToUnlink(project);
+        setIsUnlinkProjectModalOpen(true);
     };
 
-    const handleConfirmDeleteProject = async () => {
-        if (projectToDelete) {
+    const handleConfirmUnlinkProject = async () => {
+        if (projectToUnlink) {
             try {
-                await ProjectsService.deleteProject(projectToDelete.id);
+                // To unlink a project, we set its course_id to null
+                await ProjectsService.updateProject(projectToUnlink.id, { ...projectToUnlink, course_id: null });
                 fetchCourses();
             } catch (error) {
-                console.error("Failed to delete project", error);
+                console.error("Failed to unlink project", error);
             }
         }
-        setIsDeleteProjectModalOpen(false);
-        setProjectToDelete(null);
+        setIsUnlinkProjectModalOpen(false);
+        setProjectToUnlink(null);
     };
 
     // --- Derived ---
@@ -217,6 +218,18 @@ const Courses: React.FC = () => {
                 project.name.toLowerCase().includes(searchQuery.toLowerCase())
             )
     );
+
+    const memoizedExistingProjects = useMemo(() => {
+        return allProjects.map((p) => ({
+            id: p.id.toString(),
+            name: p.name,
+            description: p.description || "",
+        }));
+    }, [allProjects]);
+
+    const memoizedCurrentProjectIds = useMemo(() => {
+        return selectedCourse?.linkedProjects.map((p) => p.id.toString()) || [];
+    }, [selectedCourse]);
 
     if (loading) return <div className="p-6">Chargement...</div>;
 
@@ -246,7 +259,7 @@ const Courses: React.FC = () => {
                             onEdit={handleEditCourse}
                             onDelete={handleOpenDeleteModal}
                             onLinkProject={handleOpenProjectAssociation}
-                            onDeleteProject={handleRemoveProject}
+                            onUnlinkProject={handleUnlinkProject}
                         />
                     ))
                 )}
@@ -268,12 +281,8 @@ const Courses: React.FC = () => {
                 onClose={() => setIsProjectAssociationModalOpen(false)}
                 onSave={handleSaveProjectAssociations}
                 courseName={selectedCourse?.name || ""}
-                existingProjects={allProjects.map((p) => ({
-                    id: p.id.toString(),
-                    name: p.name,
-                    description: p.description || "",
-                }))}
-                currentProjectIds={selectedCourse?.linkedProjects.map((p) => p.id.toString()) || []}
+                existingProjects={memoizedExistingProjects}
+                currentProjectIds={memoizedCurrentProjectIds}
                 onCreateProject={handleCreateProjectInModal}
             />
 
@@ -289,14 +298,17 @@ const Courses: React.FC = () => {
             />
 
             <DeleteConfirmationModal
-                isOpen={isDeleteProjectModalOpen}
+                isOpen={isUnlinkProjectModalOpen}
                 onClose={() => {
-                    setIsDeleteProjectModalOpen(false);
-                    setProjectToDelete(null);
+                    setIsUnlinkProjectModalOpen(false);
+                    setProjectToUnlink(null);
                 }}
-                onConfirm={handleConfirmDeleteProject}
-                itemName={projectToDelete?.name || ""}
+                onConfirm={handleConfirmUnlinkProject}
+                itemName={projectToUnlink?.name || ""}
                 itemType="le projet"
+                title="Confirmation de la dissociation"
+                message={`Êtes-vous sûr de vouloir dissocier le projet "${projectToUnlink?.name || ""}" de ce cours ? Le projet ne sera pas supprimé.`}
+                confirmText="Dissocier"
             />
         </div>
     );

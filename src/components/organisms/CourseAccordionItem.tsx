@@ -15,7 +15,7 @@ interface CourseAccordionItemProps {
     onEdit: (course: Course) => void;
     onDelete: (course: Course) => void;
     onLinkProject: (course: CourseWithProjects) => void;
-    onDeleteProject: (project: Project) => void;
+    onUnlinkProject: (project: Project) => void;
 }
 
 const CourseAccordionItem: React.FC<CourseAccordionItemProps> = ({
@@ -26,7 +26,7 @@ const CourseAccordionItem: React.FC<CourseAccordionItemProps> = ({
     onEdit,
     onDelete,
     onLinkProject,
-    onDeleteProject,
+    onUnlinkProject,
 }) => {
     return (
         <div className="border border-border rounded-lg overflow-hidden bg-surface">
@@ -89,7 +89,7 @@ const CourseAccordionItem: React.FC<CourseAccordionItemProps> = ({
                                         key={project.id}
                                         project={project}
                                         isAdmin={isAdmin}
-                                        onDelete={onDeleteProject}
+                                        onUnlink={onUnlinkProject}
                                     />
                                 ))}
                             </div>

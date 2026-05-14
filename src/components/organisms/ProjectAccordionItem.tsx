@@ -53,7 +53,7 @@ const ProjectAccordionItem: React.FC<ProjectAccordionItemProps> = ({
                     </span>
                     {project.courseName && (
                         <span className="px-2 py-0.5 bg-surface border border-border text-text-muted rounded-full text-xs">
-                            {project.courseName}
+                            Associé au cours : <b>{project.courseName}</b>
                         </span>
                     )}
                 </div>
