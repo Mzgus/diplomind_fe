@@ -141,7 +141,7 @@ const AdminSkillsCourseAccordion: React.FC<AdminSkillsCourseAccordionProps> = ({
                                             {unassignedSkills.length}
                                         </span>
                                     </div>
-                                    <div className="divide-y divide-border rounded-lg border border-border bg-surface overflow-hidden px-2">
+                                    <div className="divide-y divide-border rounded-lg border border-border bg-surface overflow-hidden">
                                         {unassignedSkills.map((skill) => (
                                             <SkillAdminRow
                                                 key={skill.id}

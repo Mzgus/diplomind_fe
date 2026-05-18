@@ -15,7 +15,7 @@ const SkillAdminRow: React.FC<SkillAdminRowProps> = ({
     skill, courseId, stepId, onLinkStep, onEdit, onDelete, onUnlinkStep,
 }) => {
     return (
-        <div className="flex items-center justify-between gap-4 py-2.5 px-2 rounded-lg hover:bg-background transition-colors group">
+        <div className="flex items-center justify-between gap-4 py-2.5 px-3 rounded-lg hover:bg-background transition-colors group">
             {/* Nom + description */}
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">

@@ -8,9 +8,6 @@ interface DeleteConfirmationModalProps {
   onConfirm: () => void;
   itemName: string;
   itemType: string;
-  title?: string;
-  message?: string;
-  confirmText?: string;
 }
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
@@ -19,18 +16,15 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
   onConfirm,
   itemName,
   itemType,
-  title,
-  message,
-  confirmText,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="w-full max-w-md rounded-xl bg-surface p-8 shadow-lg text-text-main border border-border">
         <h3 className="text-xl font-bold text-center mb-4">
-          {title || "Confirmation de suppression"}
+          Confirmation de suppression
         </h3>
         <p className="text-center mb-8">
-          {message || `Êtes-vous sûr de vouloir supprimer ${itemType} "${itemName}" ?`}
+          Êtes-vous sûr de vouloir supprimer {itemType} "{itemName}" ?
         </p>
         <div className="flex justify-center gap-4">
           <Button
@@ -43,7 +37,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
             onClick={onConfirm}
             className="bg-danger-bg hover:bg-danger-border text-white w-1/2"
           >
-            {confirmText || "Confirmer"}
+            Confirmer
           </Button>
         </div>
       </div>
