@@ -3,6 +3,7 @@ import React from "react";
 interface ValidationCellProps {
     status?: string;
     onClick: () => void;
+    isHighlighted?: boolean;
 }
 
 const getStatusStyle = (status?: string): string => {
@@ -43,14 +44,18 @@ const getStatusIcon = (status?: string): React.ReactNode => {
     }
 };
 
-const ValidationCell: React.FC<ValidationCellProps> = ({ status, onClick }) => {
+const ValidationCell: React.FC<ValidationCellProps> = ({ status, onClick, isHighlighted }) => {
     return (
         <td
             onClick={onClick}
-            className="p-2 border-b border-r border-border bg-surface hover:bg-background transition-all cursor-pointer text-center relative min-w-[60px]"
+            className={`p-2 border-b border-r border-border hover:bg-background transition-all cursor-pointer text-center relative min-w-[60px] ${
+                isHighlighted ? "bg-primary/5 ring-1 ring-primary/30 ring-inset shadow-inner" : "bg-surface"
+            }`}
         >
             <div
-                className={`w-full h-full min-h-[50px] rounded-md flex items-center justify-center border transition-all duration-200 ${getStatusStyle(status)}`}
+                className={`w-full h-full min-h-[50px] rounded-md flex items-center justify-center border transition-all duration-200 ${getStatusStyle(status)} ${
+                    isHighlighted ? "scale-[1.03] shadow-sm" : ""
+                }`}
             >
                 {getStatusIcon(status)}
             </div>

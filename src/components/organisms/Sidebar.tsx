@@ -2,9 +2,7 @@ import React, { useContext } from "react";
 import {
   Squares2X2Icon,
   BookOpenIcon,
-  RocketLaunchIcon,
   UsersIcon,
-  TrophyIcon,
   DocumentTextIcon,
   UserIcon,
   AcademicCapIcon,
@@ -22,9 +20,7 @@ interface NavItem {
 
 const navigationGroup1: NavItem[] = [
   { name: "Dashboard", href: "/", icon: Squares2X2Icon },
-  { name: "Cours", href: "/courses", icon: BookOpenIcon },
-  { name: "Projet", href: "/project", icon: RocketLaunchIcon },
-  { name: "Compétence", href: "/skills", icon: TrophyIcon },
+  { name: "Curriculum", href: "/curriculum", icon: BookOpenIcon },
 ];
 
 const navigationGroup2: NavItem[] = [

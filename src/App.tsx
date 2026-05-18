@@ -5,10 +5,7 @@ import MainLayout from "./components/layouts/MainLayout";
 import Home from "./pages/Home";
 import { AuthProvider } from "./context/AuthContext";
 import "./index.css";
-import Courses from "./pages/Courses";
-import Project from "./pages/Project";
-
-import Skills from "./pages/Skills";
+import Curriculum from "./pages/Curriculum";
 import Classes from "./pages/Classes";
 import UserSheets from "./pages/UserSheets";
 import Users from "./pages/Users";
@@ -34,10 +31,7 @@ function App() {
             <Route element={<MainLayout />}>
               {/* All authenticated users */}
               <Route path="/" element={<Home />} />
-              <Route path="/courses" element={<Courses />} />
-              <Route path="/project" element={<Project />} />
-
-              <Route path="/skills" element={<Skills />} />
+              <Route path="/curriculum" element={<Curriculum />} />
               <Route path="/account" element={<Account />} />
               <Route path="/project-skills-validation" element={<ProjectSkillsValidation />} />
 

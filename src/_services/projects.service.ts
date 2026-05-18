@@ -26,9 +26,9 @@ const getProjectsByCourse = (courseId: number) => {
   return API.get(`/courses/${courseId}/projects`);
 };
 
-// Dashboard (Student)
-const getStudentProjects = (studentId: number) => {
-  return API.get(`/users/${studentId}/projects`);
+// Dashboard (Student & Teacher)
+const getUserProjects = (userId: number) => {
+  return API.get(`/users/${userId}/projects`);
 };
 
 export const ProjectsService = {
@@ -38,5 +38,5 @@ export const ProjectsService = {
   updateProject,
   deleteProject,
   getProjectsByCourse,
-  getStudentProjects,
+  getUserProjects,
 };

@@ -65,7 +65,7 @@ const Account: React.FC = () => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-text-main mb-6">Mon Compte</h1>
+      <h1 className="text-3xl font-bold text-text-main mb-6 p-6">Mon Compte</h1>
       <div className="bg-surface p-8 pt-5 rounded-xl shadow-md max-w-2xl mx-auto border border-border">
         <div className="mb-4">
           <StatusBadge type="role" value={roleKey} />

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import SkillValidationModal from "../components/organisms/SkillValidationModal";
 import ValidationMatrix from "../components/organisms/ValidationMatrix";
 import ValidationFilters from "../components/molecules/ValidationFilters";
@@ -58,6 +59,13 @@ interface CourseItem {
 }
 
 const ProjectSkillsValidation: React.FC = () => {
+    const location = useLocation();
+    const state = location.state as {
+        preselectedCourseId?: number;
+        preselectedProjectId?: number;
+        preselectedSkillId?: number;
+    } | null;
+
     // --- Data State ---
     const [projects, setProjects] = useState<Project[]>([]);
     const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -92,7 +100,11 @@ const ProjectSkillsValidation: React.FC = () => {
                 setCourses(co);
 
                 if (cl.length > 0) setSelectedClassId(String(cl[0].id));
-                if (co.length > 0) setSelectedCourseId(String(co[0].id));
+                if (state?.preselectedCourseId) {
+                    setSelectedCourseId(String(state.preselectedCourseId));
+                } else if (co.length > 0) {
+                    setSelectedCourseId(String(co[0].id));
+                }
             } catch (err) {
                 console.error("Failed to fetch initial data:", err);
             } finally {
@@ -100,7 +112,7 @@ const ProjectSkillsValidation: React.FC = () => {
             }
         };
         fetchInitial();
-    }, []);
+    }, [state]);
 
     // --- 2. Quand le cours change → fetch les projets du cours ---
     useEffect(() => {
@@ -111,7 +123,11 @@ const ProjectSkillsValidation: React.FC = () => {
                 const p: Project[] = Array.isArray(res.data) ? res.data : [];
                 setProjects(p);
                 if (p.length > 0) {
-                    setSelectedProjectId(String(p[0].id));
+                    if (state?.preselectedProjectId && p.some((proj) => proj.id === state.preselectedProjectId)) {
+                        setSelectedProjectId(String(state.preselectedProjectId));
+                    } else {
+                        setSelectedProjectId(String(p[0].id));
+                    }
                 } else {
                     setSelectedProjectId("");
                     setStepsWithSkills([]);
@@ -123,7 +139,7 @@ const ProjectSkillsValidation: React.FC = () => {
             }
         };
         fetchProjects();
-    }, [selectedCourseId]);
+    }, [selectedCourseId, state]);
 
     // --- 3. Quand le projet change → fetch étapes + compétences ---
     useEffect(() => {
@@ -337,6 +353,7 @@ const ProjectSkillsValidation: React.FC = () => {
                         validations={validations}
                         loadingMatrix={loadingMatrix}
                         onCellClick={handleCellClick}
+                        preselectedSkillId={state?.preselectedSkillId}
                     />
                 </div>
             </div>

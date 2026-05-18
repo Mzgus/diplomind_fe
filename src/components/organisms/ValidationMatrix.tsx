@@ -35,6 +35,7 @@ interface ValidationMatrixProps {
     validations: Record<string, { status: string; comment: string }>;
     loadingMatrix: boolean;
     onCellClick: (studentId: number, skillId: number) => void;
+    preselectedSkillId?: number;
 }
 
 const ValidationMatrix: React.FC<ValidationMatrixProps> = ({
@@ -44,7 +45,39 @@ const ValidationMatrix: React.FC<ValidationMatrixProps> = ({
     validations,
     loadingMatrix,
     onCellClick,
+    preselectedSkillId,
 }) => {
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+        if (!preselectedSkillId || !containerRef.current) return;
+
+        const container = containerRef.current;
+        const timeoutId = setTimeout(() => {
+            const highlightedHeader = container.querySelector(`th[data-skill-id="${preselectedSkillId}"]`) as HTMLElement | null;
+
+            if (highlightedHeader) {
+                const stickyTh = container.querySelector("thead th.sticky.left-0") as HTMLElement | null;
+                const stickyWidth = stickyTh ? stickyTh.offsetWidth : 250;
+
+                const containerWidth = container.clientWidth;
+                const thOffsetLeft = highlightedHeader.offsetLeft;
+                const thWidth = highlightedHeader.offsetWidth;
+
+                // Center the column in the visible scrollable area (excluding the sticky column width)
+                const visibleAreaCenter = stickyWidth + (containerWidth - stickyWidth) / 2;
+                const targetScrollLeft = thOffsetLeft - visibleAreaCenter + (thWidth / 2);
+
+                container.scrollTo({
+                    left: Math.max(0, targetScrollLeft),
+                    behavior: "smooth",
+                });
+            }
+        }, 100);
+
+        return () => clearTimeout(timeoutId);
+    }, [preselectedSkillId, allSkills]);
+
     if (loadingMatrix) {
         return (
             <div className="flex items-center justify-center h-full">
@@ -64,7 +97,7 @@ const ValidationMatrix: React.FC<ValidationMatrixProps> = ({
     }
 
     return (
-        <div className="overflow-auto flex-1 relative custom-scrollbar">
+        <div ref={containerRef} className="overflow-auto flex-1 relative custom-scrollbar">
             <table className="border-separate border-spacing-0">
                 <thead>
                     {/* Ligne des étapes */}
@@ -96,8 +129,10 @@ const ValidationMatrix: React.FC<ValidationMatrixProps> = ({
                             <SkillColumnHeader
                                 key={skill.uid}
                                 uid={skill.uid}
+                                skillId={skill.id}
                                 name={skill.name}
                                 description={skill.description}
+                                isHighlighted={preselectedSkillId === skill.id}
                             />
                         ))}
                     </tr>
@@ -118,6 +153,7 @@ const ValidationMatrix: React.FC<ValidationMatrixProps> = ({
                                 skills={allSkills}
                                 validations={validations}
                                 onCellClick={onCellClick}
+                                preselectedSkillId={preselectedSkillId}
                             />
                         ))
                     )}
