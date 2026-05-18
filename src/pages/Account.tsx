@@ -39,8 +39,19 @@ const Account: React.FC = () => {
       setNewPassword("");
       setConfirmPassword("");
       setShowPwdForm(false);
-    } catch {
-      setFeedback({ type: "error", msg: "Erreur lors du changement de mot de passe." });
+    } catch (err: any) {
+      let errorMsg = "Erreur lors du changement de mot de passe.";
+      if (err.response) {
+        // Le serveur a répondu avec un code d'erreur (4xx, 5xx)
+        errorMsg = err.response.data?.error || err.response.data?.message || (typeof err.response.data === "string" ? err.response.data : errorMsg);
+      } else if (err.request) {
+        // La requête a été envoyée mais aucune réponse n'a été reçue
+        errorMsg = "Le serveur ne répond pas. Veuillez vérifier votre connexion.";
+      } else {
+        // Erreur lors de la configuration de la requête
+        errorMsg = err.message || errorMsg;
+      }
+      setFeedback({ type: "error", msg: errorMsg });
     } finally {
       setLoading(false);
     }
@@ -120,4 +131,3 @@ const Account: React.FC = () => {
 };
 
 export default Account;
-
