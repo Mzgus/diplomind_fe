@@ -172,10 +172,10 @@ const CurriculumNavTree: React.FC<CurriculumNavTreeProps> = ({
                                 return (
                                     <div
                                         key={project.id}
-                                        className={`group flex items-center gap-2 pl-8 pr-3 py-2 cursor-pointer transition-colors ${
+                                        className={`group flex items-center gap-2 pl-10 pr-3 py-1.5 cursor-pointer transition-colors ${
                                             isProjectSelected
-                                                ? "bg-primary/15 border-l-2 border-primary"
-                                                : "hover:bg-background border-l-2 border-transparent"
+                                                ? "bg-primary/10 border-l-4 border-primary text-primary font-semibold"
+                                                : "bg-background/80 hover:bg-background border-l-4 border-transparent"
                                         }`}
                                         onClick={() => onSelectProject(course.id, project.id)}
                                     >
@@ -189,10 +189,10 @@ const CurriculumNavTree: React.FC<CurriculumNavTreeProps> = ({
 
                                         {/* Name + count */}
                                         <div className="flex-1 min-w-0">
-                                            <p className={`text-sm font-medium truncate ${isProjectSelected ? "text-primary" : "text-text-main"}`}>
+                                            <p className={`text-sm truncate ${isProjectSelected ? "text-primary" : "text-text-main/80"}`}>
                                                 {project.name}
                                             </p>
-                                            <p className="text-xs text-text-muted">
+                                            <p className="text-[10px] text-text-muted/70 uppercase tracking-wider font-semibold">
                                                 {project.linkedSteps.length} étape{project.linkedSteps.length !== 1 ? "s" : ""}
                                             </p>
                                         </div>

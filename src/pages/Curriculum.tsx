@@ -77,7 +77,8 @@ async function enrichCourses(rawCourses: Course[]): Promise<CurriculumCourse[]> 
 // ─── component ───────────────────────────────────────────────────────────────
 
 const Curriculum: React.FC = () => {
-    const { user } = useContext(AuthContext);
+    const auth = useContext(AuthContext);
+    const user = auth?.user;
     const isAdmin = user?.user_role === "admin";
     const canEdit = user?.user_role !== "student";
 
