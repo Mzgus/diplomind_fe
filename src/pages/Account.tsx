@@ -6,7 +6,9 @@ import { AuthContext } from "../context/AuthContext";
 import { UsersService } from "../_services/users.service";
 
 const Account: React.FC = () => {
-  const { user } = useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) return null;
+  const { user } = context;
 
   const [showPwdForm, setShowPwdForm] = useState(false);
   const [newPassword, setNewPassword] = useState("");
