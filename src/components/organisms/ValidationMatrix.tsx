@@ -36,6 +36,7 @@ interface ValidationMatrixProps {
     loadingMatrix: boolean;
     onCellClick: (studentId: number, skillId: number) => void;
     preselectedSkillId?: number;
+    preselectedStepId?: number;
 }
 
 const ValidationMatrix: React.FC<ValidationMatrixProps> = ({
@@ -46,6 +47,7 @@ const ValidationMatrix: React.FC<ValidationMatrixProps> = ({
     loadingMatrix,
     onCellClick,
     preselectedSkillId,
+    preselectedStepId,
 }) => {
     const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -54,7 +56,13 @@ const ValidationMatrix: React.FC<ValidationMatrixProps> = ({
 
         const container = containerRef.current;
         const timeoutId = setTimeout(() => {
-            const highlightedHeader = container.querySelector(`th[data-skill-id="${preselectedSkillId}"]`) as HTMLElement | null;
+            let highlightedHeader: HTMLElement | null = null;
+            if (preselectedStepId) {
+                highlightedHeader = container.querySelector(`th[data-uid="${preselectedStepId}_${preselectedSkillId}"]`) as HTMLElement | null;
+            }
+            if (!highlightedHeader) {
+                highlightedHeader = container.querySelector(`th[data-skill-id="${preselectedSkillId}"]`) as HTMLElement | null;
+            }
 
             if (highlightedHeader) {
                 const stickyTh = container.querySelector("thead th.sticky.left-0") as HTMLElement | null;
@@ -76,7 +84,7 @@ const ValidationMatrix: React.FC<ValidationMatrixProps> = ({
         }, 100);
 
         return () => clearTimeout(timeoutId);
-    }, [preselectedSkillId, allSkills]);
+    }, [preselectedSkillId, preselectedStepId, allSkills]);
 
     if (loadingMatrix) {
         return (
@@ -125,16 +133,21 @@ const ValidationMatrix: React.FC<ValidationMatrixProps> = ({
                                 Compétences &rarr;
                             </div>
                         </th>
-                        {allSkills.map((skill) => (
-                            <SkillColumnHeader
-                                key={skill.uid}
-                                uid={skill.uid}
-                                skillId={skill.id}
-                                name={skill.name}
-                                description={skill.description}
-                                isHighlighted={preselectedSkillId === skill.id}
-                            />
-                        ))}
+                        {allSkills.map((skill) => {
+                            const isHighlighted = preselectedStepId
+                                ? (preselectedSkillId === skill.id && skill.uid === `${preselectedStepId}_${skill.id}`)
+                                : preselectedSkillId === skill.id;
+                            return (
+                                <SkillColumnHeader
+                                    key={skill.uid}
+                                    uid={skill.uid}
+                                    skillId={skill.id}
+                                    name={skill.name}
+                                    description={skill.description}
+                                    isHighlighted={isHighlighted}
+                                />
+                            );
+                        })}
                     </tr>
                 </thead>
 
@@ -154,6 +167,7 @@ const ValidationMatrix: React.FC<ValidationMatrixProps> = ({
                                 validations={validations}
                                 onCellClick={onCellClick}
                                 preselectedSkillId={preselectedSkillId}
+                                preselectedStepId={preselectedStepId}
                             />
                         ))
                     )}

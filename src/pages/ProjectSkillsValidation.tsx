@@ -64,6 +64,7 @@ const ProjectSkillsValidation: React.FC = () => {
         preselectedCourseId?: number;
         preselectedProjectId?: number;
         preselectedSkillId?: number;
+        preselectedStepId?: number;
     } | null;
 
     // --- Data State ---
@@ -354,6 +355,7 @@ const ProjectSkillsValidation: React.FC = () => {
                         loadingMatrix={loadingMatrix}
                         onCellClick={handleCellClick}
                         preselectedSkillId={state?.preselectedSkillId}
+                        preselectedStepId={state?.preselectedStepId}
                     />
                 </div>
             </div>

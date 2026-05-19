@@ -21,9 +21,10 @@ interface StudentRowProps {
     validations: Record<string, { status: string; comment: string }>;
     onCellClick: (studentId: number, skillId: number) => void;
     preselectedSkillId?: number;
+    preselectedStepId?: number;
 }
 
-const StudentRow: React.FC<StudentRowProps> = ({ student, skills, validations, onCellClick, preselectedSkillId }) => {
+const StudentRow: React.FC<StudentRowProps> = ({ student, skills, validations, onCellClick, preselectedSkillId, preselectedStepId }) => {
     return (
         <tr className="group">
             {/* Cellule sticky gauche : avatar + nom */}
@@ -52,12 +53,15 @@ const StudentRow: React.FC<StudentRowProps> = ({ student, skills, validations, o
             {skills.map((skill) => {
                 const key = `${student.id}_${skill.id}`;
                 const validation = validations[key];
+                const isHighlighted = preselectedStepId
+                    ? (preselectedSkillId === skill.id && skill.uid === `${preselectedStepId}_${skill.id}`)
+                    : preselectedSkillId === skill.id;
                 return (
                     <ValidationCell
                         key={skill.uid}
                         status={validation?.status}
                         onClick={() => onCellClick(student.id, skill.id)}
-                        isHighlighted={preselectedSkillId === skill.id}
+                        isHighlighted={isHighlighted}
                     />
                 );
             })}

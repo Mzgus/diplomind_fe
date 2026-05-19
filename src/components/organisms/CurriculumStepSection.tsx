@@ -12,7 +12,7 @@ interface CurriculumStepSectionProps {
     onDeleteSkill: (skill: Skill, courseId: number) => void;
     onUnlinkSkillFromStep: (stepId: number, skillId: number, courseId: number) => void;
     onLinkExistingSkill: (skill: SkillWithSteps) => void;
-    onValidateSkill?: (skill: SkillWithSteps) => void;
+    onValidateSkill?: (skill: SkillWithSteps, stepId: number) => void;
 }
 
 const CurriculumStepSection: React.FC<CurriculumStepSectionProps> = ({
@@ -124,7 +124,7 @@ const CurriculumStepSection: React.FC<CurriculumStepSectionProps> = ({
                                     {/* Bouton Valider — visible pour les admins/teachers */}
                                     {canEdit && onValidateSkill && (
                                         <button
-                                            onClick={() => onValidateSkill(skill)}
+                                            onClick={() => onValidateSkill(skill, step.id)}
                                             className="px-3 py-1 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary-hover transition-colors"
                                             title="Valider la compétence"
                                             type="button"

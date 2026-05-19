@@ -46,12 +46,13 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
 }) => {
     const navigate = useNavigate();
 
-    const handleValidateSkill = (skill: SkillWithSteps) => {
+    const handleValidateSkill = (skill: SkillWithSteps, stepId: number) => {
         navigate("/project-skills-validation", {
             state: {
                 preselectedCourseId: selectedCourse?.id,
                 preselectedProjectId: selectedProject?.id,
                 preselectedSkillId: skill.id,
+                preselectedStepId: stepId,
             },
         });
     };
