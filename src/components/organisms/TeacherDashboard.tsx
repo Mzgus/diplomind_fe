@@ -14,7 +14,7 @@ interface TeacherDashboardProps {
   };
 }
 
-const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ classes, pendingValidations, stats }) => {
+const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ classes: _classes, pendingValidations, stats }) => {
   const navigate = useNavigate();
 
   return (

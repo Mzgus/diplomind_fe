@@ -9,8 +9,10 @@ interface UserSheetModalProps {
     onClose: () => void;
     onSave: (sheetData: any, userData: any | null) => void;
     existingClasses: { id: number; name: string }[];
+    existingCourses: { id: number; name: string }[];
     existingUsers: { id: number; name: string }[];
     initialData?: any; // For editing if needed
+    preselectedAccountId?: number;
 }
 
 const UserSheetModal: React.FC<UserSheetModalProps> = ({
@@ -18,77 +20,63 @@ const UserSheetModal: React.FC<UserSheetModalProps> = ({
     onClose,
     onSave,
     existingClasses,
+    existingCourses,
     existingUsers,
-    initialData
+    initialData,
+    preselectedAccountId
 }) => {
-    // State pour la fiche utilisateur
+    // Basic fields
     const [sheetType, setSheetType] = useState("student");
     const [sheetFirstName, setSheetFirstName] = useState("");
     const [sheetLastName, setSheetLastName] = useState("");
-    const [selectedClassId, setSelectedClassId] = useState("");
-    const [selectedUserId, setSelectedUserId] = useState("");
     const [isActive, setIsActive] = useState(true);
+    const [selectedUserId, setSelectedUserId] = useState("");
 
-    // State pour le nouvel utilisateur
-    const [showNewUserForm, setShowNewUserForm] = useState(false);
-    const [userEmail, setUserEmail] = useState("");
-    const [userPassword, setUserPassword] = useState("");
-    const [isUserConfirmed, setIsUserConfirmed] = useState(false);
+    // Dynamic selectors
+    const [selectedClassId, setSelectedClassId] = useState(""); // For Student
+    const [selectedCourseIds, setSelectedCourseIds] = useState<number[]>([]); // For Teacher
+    const [courseSearchQuery, setCourseSearchQuery] = useState(""); // Course search filter
 
-    // Reset state when modal opens/closes
     useEffect(() => {
         if (isOpen) {
+            setCourseSearchQuery("");
             if (initialData) {
                 setSheetLastName(initialData.last_name || "");
                 setSheetFirstName(initialData.first_name || "");
                 setSheetType(initialData.type_user || "student");
-                // Pre-fill linked account if available
-                setSelectedUserId(initialData.account_id ? String(initialData.account_id) : "");
-                // Pre-fill linked class if available
+                setSelectedUserId(
+                    initialData.account_id 
+                        ? String(initialData.account_id) 
+                        : (preselectedAccountId ? String(preselectedAccountId) : "")
+                );
                 setSelectedClassId(initialData.class_id ? String(initialData.class_id) : "");
-                setShowNewUserForm(false);
-                setIsUserConfirmed(!!initialData.account_id); // Consider linked if has account
-                setIsActive(initialData.active !== false); // Default true if undefined, false if existing inactive
+                setSelectedCourseIds(initialData.course_ids || []);
+                setIsActive(initialData.active !== false);
             } else {
                 setSheetType("student");
                 setSheetFirstName("");
                 setSheetLastName("");
                 setSelectedClassId("");
-                setSelectedUserId("");
-                setShowNewUserForm(false);
-                setUserEmail("");
-                setUserPassword("");
-                setIsUserConfirmed(false);
+                setSelectedCourseIds([]);
+                setSelectedUserId(preselectedAccountId ? String(preselectedAccountId) : "");
                 setIsActive(true);
             }
         }
-    }, [isOpen, initialData]);
+    }, [isOpen, initialData, preselectedAccountId]);
 
-    const handleUserChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-        setSelectedUserId(value);
-        if (value === "create_new") {
-            setShowNewUserForm(true);
-            setIsUserConfirmed(false);
+    const handleToggleCourse = (courseId: number) => {
+        if (selectedCourseIds.includes(courseId)) {
+            setSelectedCourseIds(selectedCourseIds.filter(id => id !== courseId));
         } else {
-            setShowNewUserForm(false);
-            setIsUserConfirmed(true);
-        }
-    };
-
-    const handleConfirmUser = () => {
-        if (userEmail.trim() && userPassword.trim()) {
-            setIsUserConfirmed(true);
-        } else {
-            alert("Veuillez remplir tous les champs de l'utilisateur.");
+            setSelectedCourseIds([...selectedCourseIds, courseId]);
         }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (showNewUserForm && !isUserConfirmed) {
-            alert("Veuillez confirmer la création de l'utilisateur avant de continuer.");
+        if (sheetType === "student" && !selectedClassId) {
+            alert("Veuillez sélectionner une classe.");
             return;
         }
 
@@ -96,244 +84,202 @@ const UserSheetModal: React.FC<UserSheetModalProps> = ({
             nom: sheetLastName,
             prenom: sheetFirstName,
             type_user: sheetType,
-            classId: selectedClassId ? Number(selectedClassId) : null,
+            classId: sheetType === "student" && selectedClassId ? Number(selectedClassId) : null,
+            courseIds: sheetType === "teacher" ? selectedCourseIds : [],
             active: isActive,
         };
-        const userData = showNewUserForm
-            ? { email: userEmail, password: userPassword }
-            : selectedUserId
-                ? { id: Number(selectedUserId) }
-                : null;
 
+        const userData = selectedUserId ? { id: Number(selectedUserId) } : null;
         onSave(sheetData, userData);
     };
 
+    const filteredCourses = existingCourses.filter(course =>
+        course.name.toLowerCase().includes(courseSearchQuery.toLowerCase())
+    );
+
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <div className="w-full max-w-5xl rounded-xl bg-surface text-text-main shadow-2xl overflow-hidden flex flex-col border border-border">
+            <div className="w-full max-w-2xl rounded-xl bg-surface text-text-main shadow-2xl overflow-hidden flex flex-col border border-border">
                 {/* Header */}
-                <div className="flex justify-between items-center p-6 pb-0">
-                    <h2 className="text-2xl font-bold">
-                        Formulaire de création / édition de fiche utilisateur
+                <div className="flex justify-between items-center p-6 border-b border-border">
+                    <h2 className="text-xl font-bold">
+                        {initialData ? "Modifier le profil" : "Créer un profil"}
                     </h2>
                     <button
                         onClick={onClose}
                         className="text-text-muted hover:text-text-main focus:outline-none"
                     >
-                        <svg
-                            className="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                            />
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-6">
-                    <div className="flex flex-col md:flex-row gap-8">
-                        {/* Info Fiche */}
-                        <div className="flex-1 space-y-4">
-                            <div className="flex gap-4">
-                                <InputGroup
-                                    id="sheet-first-name"
-                                    label="Prénom"
-                                    placeholder="Prénom..."
-                                    value={sheetFirstName}
-                                    onChange={(e) => setSheetFirstName(e.target.value)}
-                                    required
-                                />
-                                <InputGroup
-                                    id="sheet-last-name"
-                                    label="Nom"
-                                    placeholder="Nom..."
-                                    value={sheetLastName}
-                                    onChange={(e) => setSheetLastName(e.target.value)}
-                                    required
-                                />
-                            </div>
+                <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
+                    {/* Identity */}
+                    <div className="flex gap-4">
+                        <div className="flex-1">
+                            <InputGroup
+                                id="sheet-firstname"
+                                label="Prénom"
+                                placeholder="Prénom..."
+                                value={sheetFirstName}
+                                onChange={(e) => setSheetFirstName(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <InputGroup
+                                id="sheet-lastname"
+                                label="Nom"
+                                placeholder="Nom..."
+                                value={sheetLastName}
+                                onChange={(e) => setSheetLastName(e.target.value)}
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    {/* Role & Status */}
+                    <div className="flex gap-4 items-center">
+                        <div className="flex-1">
                             <SelectGroup
                                 id="sheet-type"
-                                label="Type de fiche"
+                                label="Rôle / Type de profil"
                                 value={sheetType}
                                 onChange={(e) => setSheetType(e.target.value)}
                             >
-                                <option key="opt-student" value="student">Elève</option>
-                                <option key="opt-teacher" value="teacher">Professeur</option>
-                                <option key="opt-admin" value="admin">Admin</option>
+                                <option value="student">Élève</option>
+                                <option value="teacher">Professeur</option>
+                                <option value="admin">Admin</option>
                             </SelectGroup>
-
-                             {/* Panneau Nouveau Utilisateur */}
-                             {showNewUserForm && (
-                                <div
-                                    className={`mt-6 bg-background rounded-xl p-6 shadow-inner animate-fade-in transition-all duration-300 border border-border ${isUserConfirmed
-                                        ? "opacity-75 border-success-border"
-                                        : ""
-                                        }`}
-                                >
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h3 className="text-lg font-bold text-text-main">
-                                            Création d'un utilisateur
-                                        </h3>
-                                        {isUserConfirmed && (
-                                            <span className="text-success-text font-bold text-sm flex items-center">
-                                                <svg
-                                                    className="w-5 h-5 mr-1"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M5 13l4 4L19 7"
-                                                    />
-                                                </svg>
-                                                Confirmé
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <InputGroup
-                                        id="user-email"
-                                        label="Email"
-                                        placeholder="email..."
-                                        value={userEmail}
-                                        onChange={(e) => setUserEmail(e.target.value)}
-                                        required
-                                        disabled={isUserConfirmed}
-                                    />
-                                    <InputGroup
-                                        id="user-password"
-                                        label="Mot de passe"
-                                        type="password"
-                                        placeholder="Mot de passe..."
-                                        value={userPassword}
-                                        onChange={(e) => setUserPassword(e.target.value)}
-                                        required
-                                        disabled={isUserConfirmed}
-                                    />
-
-                                    <div className="flex justify-end gap-4 mt-4">
-                                        {!isUserConfirmed ? (
-                                            <>
-                                                <Button
-                                                    type="button"
-                                                    onClick={handleConfirmUser}
-                                                    className="bg-primary hover:bg-primary-hover text-white px-8"
-                                                >
-                                                    Confirmer
-                                                </Button>
-                                                <Button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setShowNewUserForm(false);
-                                                        setSelectedUserId("");
-                                                        setIsUserConfirmed(false);
-                                                    }}
-                                                    className="bg-secondary hover:bg-secondary-hover text-white px-8"
-                                                >
-                                                    Annuler
-                                                </Button>
-                                            </>
-                                        ) : (
-                                            <Button
-                                                type="button"
-                                                onClick={() => setIsUserConfirmed(false)}
-                                                className="bg-surface hover:bg-background border border-border px-8 text-sm text-text-main"
-                                            >
-                                                Modifier
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
                         </div>
+                        <div className="flex flex-col gap-2 justify-center pt-5">
+                            <span className="text-xs font-semibold text-text-muted uppercase">Statut Actif</span>
+                            <button
+                                type="button"
+                                role="switch"
+                                aria-checked={isActive}
+                                onClick={() => setIsActive(!isActive)}
+                                className={`${
+                                    isActive ? "bg-primary" : "bg-gray-200 dark:bg-gray-700"
+                                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary`}
+                            >
+                                <span
+                                    className={`${
+                                        isActive ? "translate-x-6" : "translate-x-1"
+                                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                                />
+                            </button>
+                        </div>
+                    </div>
 
-                        {/* Associations */}
-                        <div className="flex-1 space-y-4">
+                    {/* Account association dropdown (shown only if not preselected) */}
+                    {!preselectedAccountId && (
+                        <SelectGroup
+                            id="associate-user"
+                            label="Associer à un compte (Email)"
+                            value={selectedUserId}
+                            onChange={(e) => setSelectedUserId(e.target.value)}
+                        >
+                            <option value="">-- Sans compte (Fiche Orpheline) --</option>
+                            {existingUsers.map((user) => (
+                                <option key={user.id} value={user.id}>
+                                    {user.name}
+                                </option>
+                            ))}
+                        </SelectGroup>
+                    )}
+
+                    {/* Dynamic Sections Based on Role */}
+                    <div className="border-t border-border pt-4 mt-2">
+                        {sheetType === "student" && (
                             <SelectGroup
-                                id="associate-class"
+                                id="student-class"
                                 label="Associer une classe"
                                 value={selectedClassId}
                                 onChange={(e) => setSelectedClassId(e.target.value)}
                             >
-                                <option key="default-class" value="" disabled>
-                                    Choisir classe...
-                                </option>
+                                <option value="" disabled>Choisir une classe...</option>
                                 {existingClasses.map((cls) => (
                                     <option key={cls.id} value={cls.id}>
                                         {cls.name}
                                     </option>
                                 ))}
                             </SelectGroup>
+                        )}
 
-                            <SelectGroup
-                                id="associate-user"
-                                label="Associer utilisateur (Compte)"
-                                value={selectedUserId}
-                                onChange={handleUserChange}
-                            >
-                                <option key="default-user" value="" disabled>
-                                    Choisir compte...
-                                </option>
-                                {existingUsers.map((user) => (
-                                    <option key={user.id} value={user.id}>
-                                        {user.name}
-                                    </option>
-                                ))}
-                                <option key="create-new" value="create_new">+ Créer nouveau compte</option>
-                            </SelectGroup>
-
-                            <div className="flex items-center gap-2 pt-2">
-                                <label htmlFor="sheet-active" className="text-sm font-medium text-text-main">
-                                    Fiche Active
+                        {sheetType === "teacher" && (
+                            <div className="flex flex-col gap-2">
+                                <label className="block text-sm font-medium text-text-main">
+                                    Associer à des cours / matières
                                 </label>
-                                <button
-                                    type="button"
-                                    id="sheet-active"
-                                    role="switch"
-                                    aria-checked={isActive}
-                                    onClick={() => setIsActive(!isActive)}
-                                    className={`${
-                                        isActive ? "bg-primary" : "bg-gray-200"
-                                    } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2`}
-                                >
-                                    <span
-                                        className={`${
-                                            isActive ? "translate-x-6" : "translate-x-1"
-                                        } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                                    />
-                                </button>
+                                <div className="border border-border rounded-lg bg-background overflow-hidden flex flex-col h-[200px]">
+                                    {/* Search field */}
+                                    <div className="p-2 border-b border-border bg-surface">
+                                        <input
+                                            type="text"
+                                            placeholder="Rechercher un cours..."
+                                            value={courseSearchQuery}
+                                            onChange={(e) => setCourseSearchQuery(e.target.value)}
+                                            className="w-full px-3 py-1.5 bg-background border border-border rounded-lg text-xs text-text-main placeholder-text-muted focus:outline-none focus:border-primary"
+                                        />
+                                    </div>
+                                    {/* Checklist */}
+                                    <div className="flex-1 overflow-y-auto divide-y divide-border/40">
+                                        {filteredCourses.length === 0 ? (
+                                            <div className="p-4 text-text-muted italic text-xs text-center">
+                                                Aucun cours trouvé.
+                                            </div>
+                                        ) : (
+                                            filteredCourses.map((course) => {
+                                                const isSelected = selectedCourseIds.includes(course.id);
+                                                return (
+                                                    <label
+                                                        key={course.id}
+                                                        className={`flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors ${
+                                                            isSelected ? "bg-primary/5" : "hover:bg-background/80"
+                                                        }`}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isSelected}
+                                                            onChange={() => handleToggleCourse(course.id)}
+                                                            className="h-4 w-4 text-primary rounded border-border focus:ring-primary"
+                                                        />
+                                                        <span className={`text-xs ${isSelected ? "text-primary font-semibold" : "text-text-main"}`}>
+                                                            {course.name}
+                                                        </span>
+                                                    </label>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        )}
+
+                        {sheetType === "admin" && (
+                            <div className="bg-background/50 p-4 rounded-lg border border-border/80 text-center text-sm text-text-secondary">
+                                Aucun paramètre additionnel requis pour le profil Administrateur.
+                            </div>
+                        )}
                     </div>
 
-                    {/* Footer */}
-                    <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-border">
-                        <Button
-                            type="submit"
-                            className={`bg-primary hover:bg-primary-hover text-white px-8 py-2 rounded-full ${showNewUserForm && !isUserConfirmed
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                                }`}
-                            disabled={showNewUserForm && !isUserConfirmed}
-                        >
-                            Confirmer
-                        </Button>
+                    {/* Footer Actions */}
+                    <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-border">
                         <Button
                             type="button"
                             onClick={onClose}
-                            className="bg-secondary hover:bg-secondary-hover text-white px-8 py-2 rounded-full"
+                            className="bg-secondary hover:bg-secondary-hover px-5 py-2 text-white font-medium animate-none"
                         >
                             Annuler
+                        </Button>
+                        <Button
+                            type="submit"
+                            className="bg-primary hover:bg-primary-hover px-5 py-2 text-white font-medium animate-none"
+                        >
+                            Confirmer
                         </Button>
                     </div>
                 </form>

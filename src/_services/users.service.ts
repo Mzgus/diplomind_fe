@@ -72,6 +72,14 @@ const getUserSkills = (userId: number) => {
   return API.get(`/users/${userId}/skills`);
 };
 
+const linkUserSheetToAccount = (sheetId: number, accountId: number) => {
+  return API.post(`/users_sheets/${sheetId}/account`, { account_id: accountId });
+};
+
+const unlinkUserSheetAccount = (id: number) => {
+  return API.delete(`/users_sheets/${id}/account`);
+};
+
 export const UsersService = {
   getAllUsers,
   getUserById,
@@ -90,4 +98,6 @@ export const UsersService = {
   getUserCourses,
   getUserSteps,
   getUserSkills,
+  linkUserSheetToAccount,
+  unlinkUserSheetAccount,
 };

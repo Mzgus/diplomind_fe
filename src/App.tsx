@@ -8,7 +8,6 @@ import { SidebarProvider } from "./context/SidebarContext";
 import "./index.css";
 import Curriculum from "./pages/Curriculum";
 import Classes from "./pages/Classes";
-import UserSheets from "./pages/UserSheets";
 import Users from "./pages/Users";
 import Account from "./pages/Account";
 import ProjectSkillsValidation from "./pages/ProjectSkillsValidation";
@@ -44,7 +43,6 @@ function App() {
 
                 {/* Admin only */}
                 <Route element={<RequireRole allowedRoles={["admin"]} />}>
-                  <Route path="/user-sheets" element={<UserSheets />} />
                   <Route path="/users" element={<Users />} />
                 </Route>
               </Route>
