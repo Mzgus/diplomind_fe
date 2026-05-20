@@ -25,6 +25,8 @@ interface CurriculumDetailPanelProps {
     onDeleteSkill: (skill: Skill, courseId: number) => void;
     onUnlinkSkillFromStep: (stepId: number, skillId: number, courseId: number) => void;
     onLinkExistingSkill: (skill: SkillWithSteps) => void;
+    onAddSkillToCourse: (course: CurriculumCourse) => void;
+    onUnlinkSkillFromCourse: (courseId: number, skillId: number) => void;
 }
 
 const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
@@ -43,6 +45,8 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
     onDeleteSkill,
     onUnlinkSkillFromStep,
     onLinkExistingSkill,
+    onAddSkillToCourse,
+    onUnlinkSkillFromCourse,
 }) => {
     const navigate = useNavigate();
 
@@ -131,6 +135,85 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
                                     </svg>
                                 </div>
                             </button>
+                        ))
+                    )}
+                </div>
+
+                {/* Skills list */}
+                <div className="mt-8 space-y-3">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-text-main">Compétences</h3>
+                        {canEdit && (
+                            <Button onClick={() => onAddSkillToCourse(selectedCourse)}>
+                                + Ajouter une compétence
+                            </Button>
+                        )}
+                    </div>
+
+                    {(selectedCourse.linkedSkills || []).length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-border p-12 text-center text-text-muted">
+                            {canEdit
+                                ? "Aucune compétence — cliquez sur « Ajouter une compétence »"
+                                : "Aucune compétence pour ce cours."}
+                        </div>
+                    ) : (
+                        (selectedCourse.linkedSkills || []).map((skill) => (
+                            <div
+                                key={skill.id}
+                                className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-surface hover:border-primary hover:bg-primary/5 transition-all text-left group"
+                            >
+                                {/* Academic cap icon */}
+                                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                                    <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                                    </svg>
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-text-main group-hover:text-primary transition-colors">
+                                        {skill.name}
+                                    </p>
+                                    {skill.description && (
+                                        <p className="text-sm text-text-muted truncate mt-0.5">{skill.description}</p>
+                                    )}
+                                </div>
+
+                                {canEdit && (
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                            type="button"
+                                            onClick={() => onEditSkill(skill as any, selectedCourse.id)}
+                                            className="p-2 text-text-muted hover:text-text-main hover:bg-background border border-transparent hover:border-border rounded-full transition-colors"
+                                            title="Modifier la compétence"
+                                        >
+                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => onUnlinkSkillFromCourse(selectedCourse.id, skill.id)}
+                                            className="p-2 text-text-muted hover:text-danger-text hover:bg-danger-bg border border-transparent hover:border-danger-border rounded-full transition-colors"
+                                            title="Délier du cours"
+                                        >
+                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => onDeleteSkill(skill, selectedCourse.id)}
+                                            className="p-2 text-danger-text hover:bg-danger-bg border border-transparent hover:border-danger-border rounded-full transition-colors"
+                                            title="Supprimer la compétence de la base de données"
+                                        >
+                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         ))
                     )}
                 </div>

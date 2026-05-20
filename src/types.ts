@@ -102,5 +102,6 @@ export interface CurriculumProject extends Project {
 
 export interface CurriculumCourse extends Course {
   linkedProjects: CurriculumProject[];
+  linkedSkills: Skill[];
 }
 

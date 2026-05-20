@@ -22,7 +22,7 @@ import type {
 // ─── local modal-target interfaces ──────────────────────────────────────────
 
 interface SkillToEdit {
-    id: number;
+    id?: number;
     name: string;
     description: string;
     courseId: string;
@@ -44,6 +44,12 @@ async function enrichCourses(rawCourses: Course[]): Promise<CurriculumCourse[]> 
             try {
                 const res = await ProjectsService.getProjectsByCourse(course.id);
                 rawProjects = res.data;
+            } catch { /* keep empty */ }
+
+            let linkedSkills: Skill[] = [];
+            try {
+                const res = await CoursesService.getCourseSkills(course.id);
+                linkedSkills = res.data;
             } catch { /* keep empty */ }
 
             const linkedProjects: CurriculumProject[] = await Promise.all(
@@ -69,7 +75,7 @@ async function enrichCourses(rawCourses: Course[]): Promise<CurriculumCourse[]> 
                 })
             );
 
-            return { ...course, linkedProjects };
+            return { ...course, linkedProjects, linkedSkills };
         })
     );
 }
@@ -77,7 +83,9 @@ async function enrichCourses(rawCourses: Course[]): Promise<CurriculumCourse[]> 
 // ─── component ───────────────────────────────────────────────────────────────
 
 const Curriculum: React.FC = () => {
-    const { user } = useContext(AuthContext);
+    const authContext = useContext(AuthContext);
+    if (!authContext) return null;
+    const { user } = authContext;
     const isAdmin = user?.user_role === "admin";
     const canEdit = user?.user_role !== "student";
 
@@ -370,6 +378,13 @@ const Curriculum: React.FC = () => {
         } catch (err) { console.error(err); }
     };
 
+    const handleUnlinkSkillFromCourse = async (courseId: number, skillId: number) => {
+        try {
+            await CoursesService.unlinkSkillFromCourse(courseId, skillId);
+            await refreshCourse(courseId);
+        } catch (err) { console.error(err); }
+    };
+
     const handleOpenStepAssociation = (skill: SkillWithSteps) => {
         setSelectedSkillForStepLink(skill);
         setIsStepAssocModalOpen(true);
@@ -393,9 +408,7 @@ const Curriculum: React.FC = () => {
     const handleOpenSkillStepModal = (step: CurriculumStep, courseId: number) => {
         const course = courses.find((c) => c.id === courseId);
         const currentSkillIds = step.skills.map((sk) => sk.id);
-        const availableSkills = (course?.linkedProjects.flatMap((p) =>
-            p.linkedSteps.flatMap((s) => s.skills)
-        ) ?? []).filter((sk, i, arr) => arr.findIndex((x) => x.id === sk.id) === i);
+        const availableSkills = course?.linkedSkills ?? [];
         setSkillStepTarget({ step, courseId, currentSkillIds, availableSkills });
         setIsSkillStepModalOpen(true);
     };
@@ -496,6 +509,11 @@ const Curriculum: React.FC = () => {
                     onDeleteSkill={(sk, cId) => { setSkillToDelete({ skill: sk, courseId: cId }); setIsDeleteSkillModalOpen(true); }}
                     onUnlinkSkillFromStep={handleUnlinkSkillFromStep}
                     onLinkExistingSkill={handleOpenStepAssociation}
+                    onAddSkillToCourse={(c) => {
+                        setSkillToEdit({ name: "", description: "", courseId: c.id.toString() });
+                        setIsSkillModalOpen(true);
+                    }}
+                    onUnlinkSkillFromCourse={handleUnlinkSkillFromCourse}
                 />
             </div>
 
