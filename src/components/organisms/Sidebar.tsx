@@ -3,7 +3,6 @@ import {
   Squares2X2Icon,
   BookOpenIcon,
   UsersIcon,
-  DocumentTextIcon,
   UserIcon,
   AcademicCapIcon,
   ChevronLeftIcon,
@@ -32,12 +31,6 @@ const navigationGroup2: NavItem[] = [
     href: "/classes",
     icon: AcademicCapIcon,
     roles: ["admin", "teacher"],
-  },
-  {
-    name: "Fiches utilisateur",
-    href: "/user-sheets",
-    icon: DocumentTextIcon,
-    roles: ["admin"],
   },
   {
     name: "Utilisateurs",
