@@ -35,13 +35,13 @@ const navigationGroup2: NavItem[] = [
   {
     name: "Utilisateurs",
     href: "/users",
-    icon: UserIcon,
+    icon: UsersIcon,
     roles: ["admin"],
   },
   {
     name: "Mon profil",
     href: "/account",
-    icon: UsersIcon,
+    icon: UserIcon,
   },
 ];
 

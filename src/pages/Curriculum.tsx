@@ -6,7 +6,6 @@ import CourseModal from "../components/organisms/CourseModal";
 import ProjectModal from "../components/organisms/ProjectModal";
 import StepModal from "../components/organisms/StepModal";
 import SkillModal from "../components/organisms/SkillModal";
-import StepAssociationModal from "../components/organisms/StepAssociationModal";
 import SkillStepAssociationModal from "../components/organisms/SkillStepAssociationModal";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
 
@@ -14,6 +13,7 @@ import { CoursesService } from "../_services/courses.service";
 import { ProjectsService } from "../_services/projects.service";
 import { StepsService } from "../_services/steps.service";
 import { SkillsService } from "../_services/skills.service";
+import { ValidationsService } from "../_services/validations.service";
 import type {
     Course, Project, Step, Skill, SkillWithSteps,
     CurriculumCourse, CurriculumProject, CurriculumStep,
@@ -93,6 +93,7 @@ const Curriculum: React.FC = () => {
     const [courses, setCourses] = useState<CurriculumCourse[]>([]);
     const [allSkills, setAllSkills] = useState<Skill[]>([]);
     const [loading, setLoading] = useState(true);
+    const [validations, setValidations] = useState<Record<number, { status: string; comment?: string; validated_at?: string }>>({});
 
     // ── UI selection state ────────────────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
@@ -124,13 +125,11 @@ const Curriculum: React.FC = () => {
     // ── modal: skill ──────────────────────────────────────────────────────────
     const [isSkillModalOpen, setIsSkillModalOpen] = useState(false);
     const [skillToEdit, setSkillToEdit] = useState<SkillToEdit | null>(null);
+    const [skillModalCourseId, setSkillModalCourseId] = useState<number | null>(null);
     const [isDeleteSkillModalOpen, setIsDeleteSkillModalOpen] = useState(false);
     const [skillToDelete, setSkillToDelete] = useState<{ skill: Skill; courseId: number } | null>(null);
 
     // ── modal: link skill ↔ step ──────────────────────────────────────────────
-    const [isStepAssocModalOpen, setIsStepAssocModalOpen] = useState(false);
-    const [selectedSkillForStepLink, setSelectedSkillForStepLink] = useState<SkillWithSteps | null>(null);
-
     const [isSkillStepModalOpen, setIsSkillStepModalOpen] = useState(false);
     const [skillStepTarget, setSkillStepTarget] = useState<SkillStepTarget | null>(null);
 
@@ -151,6 +150,24 @@ const Curriculum: React.FC = () => {
                 rawCourses = res.data;
             }
 
+            // Fetch student validations if applicable
+            let valMap: Record<number, { status: string; comment?: string; validated_at?: string }> = {};
+            if (user.user_role === "student") {
+                try {
+                    const valRes = await ValidationsService.getUserValidations(user.user_id);
+                    const vals = Array.isArray(valRes.data) ? valRes.data : [];
+                    vals.forEach((v: any) => {
+                        valMap[v.skill_id] = {
+                            status: v.status,
+                            comment: v.comment,
+                            validated_at: v.validated_at,
+                        };
+                    });
+                } catch (valErr) {
+                    console.error("Failed to load student validations", valErr);
+                }
+            }
+
             const [enriched, skillsRes] = await Promise.all([
                 enrichCourses(rawCourses),
                 SkillsService.getAllSkills(),
@@ -158,6 +175,7 @@ const Curriculum: React.FC = () => {
 
             setCourses(enriched);
             setAllSkills(skillsRes.data);
+            setValidations(valMap);
         } catch (err) {
             console.error("Failed to fetch curriculum data", err);
         } finally {
@@ -283,33 +301,23 @@ const Curriculum: React.FC = () => {
     // Step handlers
     // ─────────────────────────────────────────────────────────────────────────
 
-    const handleSaveStep = async (stepData: any, skillData: any | null) => {
+    const handleSaveStep = async (stepData: any) => {
         try {
-            let stepId = stepData.id;
             const projectId = Number(stepData.projectId) || preselectedProjectId;
-            if (stepId) {
-                await StepsService.updateStep(stepId, {
+            if (stepData.id) {
+                await StepsService.updateStep(stepData.id, {
                     name: stepData.name,
                     description: stepData.description,
                     project_id: projectId,
                     step_order: Number(stepData.order) || 1,
                 });
             } else {
-                const res = await StepsService.createStep({
+                await StepsService.createStep({
                     name: stepData.name,
                     description: stepData.description,
                     project_id: projectId,
                     step_order: Number(stepData.order) || 1,
                 });
-                stepId = res.data.id;
-            }
-            if (skillData && stepId) {
-                if (skillData.name) {
-                    const skillRes = await SkillsService.createSkill({ name: skillData.name, description: skillData.description });
-                    await StepsService.linkSkillToStep({ step_id: stepId, skill_id: skillRes.data.id });
-                } else if (skillData.id) {
-                    await StepsService.linkSkillToStep({ step_id: stepId, skill_id: Number(skillData.id) });
-                }
             }
             const parent = courses.find((c) =>
                 c.linkedProjects.some((p) => p.id === (projectId ?? preselectedProjectId))
@@ -357,6 +365,39 @@ const Curriculum: React.FC = () => {
         } catch (err) { console.error(err); }
         setIsSkillModalOpen(false);
         setSkillToEdit(null);
+        setSkillModalCourseId(null);
+    };
+
+    const handleAssociateSkillsToCourse = async (skillIds: number[], courseId: number) => {
+        const course = courses.find((c) => c.id === courseId);
+        const currentSkillIds = (course?.linkedSkills ?? []).map((s) => s.id);
+        const added = skillIds.filter((id) => !currentSkillIds.includes(id));
+        const removed = currentSkillIds.filter((id) => !skillIds.includes(id));
+        try {
+            await Promise.all([
+                ...added.map((id) => CoursesService.linkSkillToCourse({ course_id: courseId, skill_id: id })),
+                ...removed.map((id) => CoursesService.unlinkSkillFromCourse(courseId, id)),
+            ]);
+            await refreshCourse(courseId);
+            const allRes = await SkillsService.getAllSkills();
+            setAllSkills(allRes.data);
+        } catch (err) { console.error(err); }
+        setIsSkillModalOpen(false);
+        setSkillToEdit(null);
+        setSkillModalCourseId(null);
+    };
+
+    const handleCreateSkillForCourse = async (name: string, description: string, courseId: number): Promise<number | null> => {
+        try {
+            const res = await SkillsService.createSkill({ name, description });
+            const newId = res.data.id;
+            const allRes = await SkillsService.getAllSkills();
+            setAllSkills(allRes.data);
+            return newId;
+        } catch (err) {
+            console.error("Failed to create skill for course", err);
+            return null;
+        }
     };
 
     const handleConfirmDeleteSkill = async () => {
@@ -383,26 +424,6 @@ const Curriculum: React.FC = () => {
             await CoursesService.unlinkSkillFromCourse(courseId, skillId);
             await refreshCourse(courseId);
         } catch (err) { console.error(err); }
-    };
-
-    const handleOpenStepAssociation = (skill: SkillWithSteps) => {
-        setSelectedSkillForStepLink(skill);
-        setIsStepAssocModalOpen(true);
-    };
-
-    const handleSaveStepAssociations = async (stepIds: number[]) => {
-        if (!selectedSkillForStepLink) return;
-        const currentIds = selectedSkillForStepLink.linkedSteps?.map((s) => s.id) ?? [];
-        const added = stepIds.filter((id) => !currentIds.includes(id));
-        const removed = currentIds.filter((id) => !stepIds.includes(id));
-        try {
-            await Promise.all([
-                ...added.map((sid) => StepsService.linkSkillToStep({ step_id: sid, skill_id: selectedSkillForStepLink.id })),
-                ...removed.map((sid) => StepsService.unlinkSkillFromStep(sid, selectedSkillForStepLink.id)),
-            ]);
-            await fetchAll();
-        } catch (err) { console.error(err); }
-        setIsStepAssocModalOpen(false);
     };
 
     const handleOpenSkillStepModal = (step: CurriculumStep, courseId: number) => {
@@ -454,8 +475,12 @@ const Curriculum: React.FC = () => {
         [selectedCourse, selectedProjectId]
     );
 
-    const allProjectsFlat = useMemo(() => courses.flatMap((c) => c.linkedProjects), [courses]);
-    const allStepsFlat = useMemo(() => allProjectsFlat.flatMap((p) => p.linkedSteps), [allProjectsFlat]);
+    // Compétences non encore liées au cours sélectionné (pour l'onglet "Associer")
+    const availableSkillsForCourse = useMemo(() => {
+        if (!selectedCourse) return allSkills;
+        const linkedIds = new Set((selectedCourse.linkedSkills ?? []).map((s) => s.id));
+        return allSkills.filter((s) => !linkedIds.has(s.id));
+    }, [allSkills, selectedCourse]);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Render
@@ -468,24 +493,24 @@ const Curriculum: React.FC = () => {
             {/* Left panel — navigation tree (1/3) */}
             <div className="w-1/3 flex-shrink-0 h-full">
                 <CurriculumNavTree
-                courses={courses}
-                selectedCourseId={selectedCourseId}
-                selectedProjectId={selectedProjectId}
-                expandedCourseIds={expandedCourseIds}
-                canEdit={canEdit}
-                isAdmin={isAdmin}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onSelectCourse={handleSelectCourse}
-                onSelectProject={handleSelectProject}
-                onToggleCourse={handleToggleCourse}
-                onAddCourse={() => { setCourseToEdit(null); setIsCourseModalOpen(true); }}
-                onEditCourse={(c) => { setCourseToEdit(c); setIsCourseModalOpen(true); }}
-                onDeleteCourse={(c) => { setCourseToDelete(c); setIsDeleteCourseModalOpen(true); }}
-                onAddProject={(c) => { setPreselectedCourseId(c.id); setProjectToEdit(null); setIsProjectModalOpen(true); }}
-                onEditProject={(p) => { setProjectToEdit(p); setIsProjectModalOpen(true); }}
-                onDeleteProject={(p) => { setProjectToDelete(p); setIsDeleteProjectModalOpen(true); }}
-            />
+                    courses={courses}
+                    selectedCourseId={selectedCourseId}
+                    selectedProjectId={selectedProjectId}
+                    expandedCourseIds={expandedCourseIds}
+                    canEdit={canEdit}
+                    isAdmin={isAdmin}
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    onSelectCourse={handleSelectCourse}
+                    onSelectProject={handleSelectProject}
+                    onToggleCourse={handleToggleCourse}
+                    onAddCourse={() => { setCourseToEdit(null); setIsCourseModalOpen(true); }}
+                    onEditCourse={(c) => { setCourseToEdit(c); setIsCourseModalOpen(true); }}
+                    onDeleteCourse={(c) => { setCourseToDelete(c); setIsDeleteCourseModalOpen(true); }}
+                    onAddProject={(c) => { setPreselectedCourseId(c.id); setProjectToEdit(null); setIsProjectModalOpen(true); }}
+                    onEditProject={(p) => { setProjectToEdit(p); setIsProjectModalOpen(true); }}
+                    onDeleteProject={(p) => { setProjectToDelete(p); setIsDeleteProjectModalOpen(true); }}
+                />
             </div>
 
             {/* Right panel — detail view */}
@@ -494,6 +519,7 @@ const Curriculum: React.FC = () => {
                     selectedCourse={selectedCourse}
                     selectedProject={selectedProject}
                     canEdit={canEdit}
+                    validations={user?.user_role === "student" ? validations : undefined}
                     expandedStepIds={expandedStepIds}
                     onToggleStep={handleToggleStep}
                     onAddProject={(c) => { setPreselectedCourseId(c.id); setProjectToEdit(null); setIsProjectModalOpen(true); }}
@@ -504,13 +530,14 @@ const Curriculum: React.FC = () => {
                     onAddSkillToStep={handleOpenSkillStepModal}
                     onEditSkill={(sk, cId) => {
                         setSkillToEdit({ id: sk.id, name: sk.name, description: sk.description ?? "", courseId: cId.toString() });
+                        setSkillModalCourseId(cId);
                         setIsSkillModalOpen(true);
                     }}
                     onDeleteSkill={(sk, cId) => { setSkillToDelete({ skill: sk, courseId: cId }); setIsDeleteSkillModalOpen(true); }}
                     onUnlinkSkillFromStep={handleUnlinkSkillFromStep}
-                    onLinkExistingSkill={handleOpenStepAssociation}
                     onAddSkillToCourse={(c) => {
-                        setSkillToEdit({ name: "", description: "", courseId: c.id.toString() });
+                        setSkillToEdit(null);
+                        setSkillModalCourseId(c.id);
                         setIsSkillModalOpen(true);
                     }}
                     onUnlinkSkillFromCourse={handleUnlinkSkillFromCourse}
@@ -537,12 +564,10 @@ const Curriculum: React.FC = () => {
                 isOpen={isProjectModalOpen}
                 onClose={() => { setIsProjectModalOpen(false); setProjectToEdit(null); setPreselectedCourseId(null); }}
                 onSave={handleSaveProject}
-                existingCourses={courses.map((c) => ({ id: c.id.toString(), name: c.name }))}
-                existingSteps={allStepsFlat.map((s) => ({ id: s.id.toString(), name: s.name }))}
                 initialData={projectToEdit
                     ? projectToEdit
                     : preselectedCourseId
-                    ? ({ course_id: preselectedCourseId } as Partial<Project> as any)
+                    ? ({ course_id: preselectedCourseId } as any)
                     : null}
             />
             <DeleteConfirmationModal
@@ -557,12 +582,10 @@ const Curriculum: React.FC = () => {
                 isOpen={isStepModalOpen}
                 onClose={() => { setIsStepModalOpen(false); setStepToEdit(null); setPreselectedProjectId(null); }}
                 onSave={handleSaveStep}
-                existingProjects={allProjectsFlat.map((p) => ({ id: p.id.toString(), name: p.name }))}
-                existingSkills={allSkills.map((s) => ({ id: s.id.toString(), name: s.name }))}
                 initialData={stepToEdit
                     ? stepToEdit
                     : preselectedProjectId
-                    ? ({ project_id: preselectedProjectId } as Partial<Step> as any)
+                    ? ({ project_id: preselectedProjectId } as any)
                     : null}
             />
             <DeleteConfirmationModal
@@ -575,10 +598,14 @@ const Curriculum: React.FC = () => {
 
             <SkillModal
                 isOpen={isSkillModalOpen}
-                onClose={() => { setIsSkillModalOpen(false); setSkillToEdit(null); }}
+                onClose={() => { setIsSkillModalOpen(false); setSkillToEdit(null); setSkillModalCourseId(null); }}
                 onSave={handleSaveSkill}
-                existingCourses={courses.map((c) => ({ id: c.id.toString(), name: c.name }))}
-                existingSteps={[]}
+                onAssociate={(skillIds) => handleAssociateSkillsToCourse(skillIds, skillModalCourseId!)}
+                onCreateSkill={handleCreateSkillForCourse}
+                availableSkills={allSkills}
+                currentSkillIds={selectedCourse ? (selectedCourse.linkedSkills ?? []).map((s) => s.id) : []}
+                courseId={skillModalCourseId}
+                courseName={selectedCourse?.name}
                 skillToEdit={skillToEdit}
             />
             <DeleteConfirmationModal
@@ -587,16 +614,6 @@ const Curriculum: React.FC = () => {
                 onConfirm={handleConfirmDeleteSkill}
                 itemName={skillToDelete?.skill.name ?? ""}
                 itemType="la compétence"
-            />
-
-            <StepAssociationModal
-                isOpen={isStepAssocModalOpen}
-                onClose={() => setIsStepAssocModalOpen(false)}
-                onSave={handleSaveStepAssociations}
-                skillName={selectedSkillForStepLink?.name ?? ""}
-                existingProjects={allProjectsFlat.map((p) => ({ id: p.id, name: p.name }))}
-                existingSteps={allStepsFlat.map((s) => ({ id: s.id, name: s.name, projectId: s.project_id }))}
-                currentStepIds={selectedSkillForStepLink?.linkedSteps?.map((s) => s.id) ?? []}
             />
 
             <SkillStepAssociationModal

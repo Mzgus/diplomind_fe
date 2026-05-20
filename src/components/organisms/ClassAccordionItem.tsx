@@ -9,9 +9,15 @@ interface Student {
     name: string;
 }
 
+interface CourseItem {
+    id: number;
+    name: string;
+}
+
 interface ClassWithDetails extends Class {
     studentCount: number | string;
     students: Student[];
+    courses: CourseItem[];
 }
 
 interface ClassAccordionItemProps {
@@ -67,29 +73,50 @@ const ClassAccordionItem: React.FC<ClassAccordionItemProps> = ({
 
             {/* Contenu dépliable */}
             {isExpanded && (
-                <div className="border-t border-border p-4 space-y-4">
+                <div className="border-t border-border p-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Élèves */}
+                        <div>
+                            <h3 className="text-sm font-semibold text-text-main mb-2">
+                                Élèves associés :
+                            </h3>
+                            {cls.students && cls.students.length > 0 ? (
+                                <div className="flex flex-wrap w-full gap-2">
+                                    {cls.students.map((student) => (
+                                        <LinkedStudentCard
+                                            key={student.id}
+                                            student={student}
+                                            canEdit={canEdit}
+                                            onDelete={(s) => onDeleteStudent(s, cls.id)}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-text-muted italic">Aucun élève associé</p>
+                            )}
+                        </div>
 
-                    {/* Élèves sur toute la largeur */}
-                    <div>
-                        <h3 className="text-sm font-semibold text-text-main mb-2">
-                            Élèves associés :
-                        </h3>
-                        {cls.students && cls.students.length > 0 ? (
-                            <div className="flex flex-wrap w-full">
-                                {cls.students.map((student) => (
-                                    <LinkedStudentCard
-                                        key={student.id}
-                                        student={student}
-                                        canEdit={canEdit}
-                                        onDelete={(s) => onDeleteStudent(s, cls.id)}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-text-muted italic">Aucun élève associé</p>
-                        )}
+                        {/* Cours */}
+                        <div>
+                            <h3 className="text-sm font-semibold text-text-main mb-2">
+                                Cours associés :
+                            </h3>
+                            {cls.courses && cls.courses.length > 0 ? (
+                                <div className="flex flex-wrap gap-2 w-full">
+                                    {cls.courses.map((course) => (
+                                        <div
+                                            key={course.id}
+                                            className="bg-primary/5 text-primary border border-primary/20 px-3 py-1 rounded-full text-sm font-medium"
+                                        >
+                                            {course.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-text-muted italic">Aucun cours associé</p>
+                            )}
+                        </div>
                     </div>
-
                 </div>
             )}
         </div>

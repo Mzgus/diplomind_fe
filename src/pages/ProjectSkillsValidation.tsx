@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useLocation } from "react-router-dom";
 import SkillValidationModal from "../components/organisms/SkillValidationModal";
 import ValidationMatrix from "../components/organisms/ValidationMatrix";
@@ -8,6 +8,7 @@ import { StepsService } from "../_services/steps.service";
 import { ClassesService } from "../_services/classes.service";
 import { CoursesService } from "../_services/courses.service";
 import { ValidationsService } from "../_services/validations.service";
+import { AuthContext } from "../context/AuthContext";
 
 // --- Status Mapping (Frontend FR ↔ Backend EN) ---
 const STATUS_TO_BACKEND: Record<string, string> = {
@@ -66,11 +67,14 @@ const ProjectSkillsValidation: React.FC = () => {
         preselectedSkillId?: number;
         preselectedStepId?: number;
     } | null;
+    const { user } = useContext(AuthContext);
+    const isTeacher = user?.user_role === "teacher";
 
     // --- Data State ---
     const [projects, setProjects] = useState<Project[]>([]);
     const [classes, setClasses] = useState<ClassItem[]>([]);
     const [courses, setCourses] = useState<CourseItem[]>([]);
+    const [allCoursesLookup, setAllCoursesLookup] = useState<CourseItem[]>([]);
     const [stepsWithSkills, setStepsWithSkills] = useState<StepWithSkills[]>([]);
     const [students, setStudents] = useState<Student[]>([]);
     const [validations, setValidations] = useState<Record<string, { status: string; comment: string }>>({});
@@ -86,26 +90,25 @@ const ProjectSkillsValidation: React.FC = () => {
     const [loadingMatrix, setLoadingMatrix] = useState(false);
     const [selectedCell, setSelectedCell] = useState<{ studentId: number; skillId: number } | null>(null);
 
-    // --- 1. Fetch initial dropdown data ---
+    // --- 1. Fetch initial dropdown data (classes + global courses lookup) ---
     useEffect(() => {
+        if (!user) return;
         const fetchInitial = async () => {
             try {
                 setLoading(true);
                 const [classesRes, coursesRes] = await Promise.all([
-                    ClassesService.getAllClasses(),
+                    isTeacher
+                        ? ClassesService.getTeacherClasses(user.user_id)
+                        : ClassesService.getAllClasses(),
                     CoursesService.getAllCourses(),
                 ]);
                 const cl = Array.isArray(classesRes.data) ? classesRes.data : [];
-                const co = Array.isArray(coursesRes.data) ? coursesRes.data : [];
+                const co: CourseItem[] = Array.isArray(coursesRes.data)
+                    ? coursesRes.data.map((c: any) => ({ id: c.id, name: c.name }))
+                    : [];
                 setClasses(cl);
-                setCourses(co);
-
+                setAllCoursesLookup(co);
                 if (cl.length > 0) setSelectedClassId(String(cl[0].id));
-                if (state?.preselectedCourseId) {
-                    setSelectedCourseId(String(state.preselectedCourseId));
-                } else if (co.length > 0) {
-                    setSelectedCourseId(String(co[0].id));
-                }
             } catch (err) {
                 console.error("Failed to fetch initial data:", err);
             } finally {
@@ -113,7 +116,38 @@ const ProjectSkillsValidation: React.FC = () => {
             }
         };
         fetchInitial();
-    }, [state]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.user_id]);
+
+    // --- 2. Quand la classe change → recharger les cours liés à cette classe ---
+    useEffect(() => {
+        if (!selectedClassId || allCoursesLookup.length === 0) return;
+        const fetchClassCourses = async () => {
+            try {
+                const res = await CoursesService.getClassCourses(Number(selectedClassId));
+                const classCourseLinks: { course_id: number; class_id: number }[] = Array.isArray(res.data) ? res.data : [];
+                const filtered: CourseItem[] = classCourseLinks
+                    .map((link) => allCoursesLookup.find((c) => c.id === link.course_id))
+                    .filter((c): c is CourseItem => c !== undefined);
+                setCourses(filtered);
+
+                // Préselection : respecter state.preselectedCourseId si disponible dans cette classe
+                if (state?.preselectedCourseId && filtered.some((c) => c.id === state.preselectedCourseId)) {
+                    setSelectedCourseId(String(state.preselectedCourseId));
+                } else if (filtered.length > 0) {
+                    setSelectedCourseId(String(filtered[0].id));
+                } else {
+                    setSelectedCourseId("");
+                    setProjects([]);
+                }
+            } catch (err) {
+                console.error("Failed to fetch courses for class:", err);
+                setCourses([]);
+                setSelectedCourseId("");
+            }
+        };
+        fetchClassCourses();
+    }, [selectedClassId, allCoursesLookup]);
 
     // --- 2. Quand le cours change → fetch les projets du cours ---
     useEffect(() => {

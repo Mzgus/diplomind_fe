@@ -11,6 +11,7 @@ interface CurriculumDetailPanelProps {
     selectedCourse: CurriculumCourse | null;
     selectedProject: CurriculumProject | null;
     canEdit: boolean;
+    validations?: Record<number, { status: string; comment?: string; validated_at?: string }>;
     expandedStepIds: Set<number>;
     onToggleStep: (stepId: number) => void;
     // Course-level actions
@@ -24,7 +25,6 @@ interface CurriculumDetailPanelProps {
     onEditSkill: (skill: SkillWithSteps, courseId: number) => void;
     onDeleteSkill: (skill: Skill, courseId: number) => void;
     onUnlinkSkillFromStep: (stepId: number, skillId: number, courseId: number) => void;
-    onLinkExistingSkill: (skill: SkillWithSteps) => void;
     onAddSkillToCourse: (course: CurriculumCourse) => void;
     onUnlinkSkillFromCourse: (courseId: number, skillId: number) => void;
 }
@@ -33,6 +33,7 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
     selectedCourse,
     selectedProject,
     canEdit,
+    validations,
     expandedStepIds,
     onToggleStep,
     onAddProject,
@@ -44,7 +45,6 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
     onEditSkill,
     onDeleteSkill,
     onUnlinkSkillFromStep,
-    onLinkExistingSkill,
     onAddSkillToCourse,
     onUnlinkSkillFromCourse,
 }) => {
@@ -110,13 +110,11 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
                                 onClick={() => onSelectProject(selectedCourse.id, project.id)}
                                 className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-surface hover:border-primary hover:bg-primary/5 transition-all text-left group"
                             >
-                                {/* Cube icon */}
                                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
                                     <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                     </svg>
                                 </div>
-
                                 <div className="flex-1 min-w-0">
                                     <p className="font-semibold text-text-main group-hover:text-primary transition-colors">
                                         {project.name}
@@ -125,7 +123,6 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
                                         <p className="text-sm text-text-muted truncate mt-0.5">{project.description}</p>
                                     )}
                                 </div>
-
                                 <div className="flex items-center gap-3 flex-shrink-0">
                                     <span className="px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium border border-primary/20">
                                         {project.linkedSteps.length} étape{project.linkedSteps.length !== 1 ? "s" : ""}
@@ -142,7 +139,7 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
                 {/* Skills list */}
                 <div className="mt-8 space-y-3">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-text-main">Compétences</h3>
+                        <h3 className="text-lg font-semibold text-text-main">Compétences du cours</h3>
                         {canEdit && (
                             <Button onClick={() => onAddSkillToCourse(selectedCourse)}>
                                 + Ajouter une compétence
@@ -162,14 +159,12 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
                                 key={skill.id}
                                 className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-surface hover:border-primary hover:bg-primary/5 transition-all text-left group"
                             >
-                                {/* Academic cap icon */}
                                 <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
                                     <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                                     </svg>
                                 </div>
-
                                 <div className="flex-1 min-w-0">
                                     <p className="font-semibold text-text-main group-hover:text-primary transition-colors">
                                         {skill.name}
@@ -178,7 +173,6 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
                                         <p className="text-sm text-text-muted truncate mt-0.5">{skill.description}</p>
                                     )}
                                 </div>
-
                                 {canEdit && (
                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                                         <button
@@ -205,7 +199,7 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
                                             type="button"
                                             onClick={() => onDeleteSkill(skill, selectedCourse.id)}
                                             className="p-2 text-danger-text hover:bg-danger-bg border border-transparent hover:border-danger-border rounded-full transition-colors"
-                                            title="Supprimer la compétence de la base de données"
+                                            title="Supprimer la compétence"
                                         >
                                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -249,7 +243,8 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
                 )}
             </div>
 
-            {/* Steps + skills */}
+            <h3 className="text-lg font-semibold text-text-main mb-4">Étapes du projet</h3>
+
             {sortedSteps.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-border p-12 text-center text-text-muted">
                     {canEdit
@@ -263,52 +258,110 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
 
                     {sortedSteps.map((step) => {
                         const isExpanded = expandedStepIds.has(step.id);
+                        const isStepValidated = !!validations && step.skills.length > 0 && step.skills.every(
+                            (s) => validations[s.id]?.status === "validated"
+                        );
+
                         return (
                             <div key={step.id} className="relative pl-12">
                                 {/* Timeline dot */}
-                                <div className="absolute left-[16px] top-5 h-3 w-3 rounded-full bg-border border-2 border-surface" />
+                                <div className={`absolute left-[16px] top-5 h-3 w-3 rounded-full border-2 border-surface transition-colors ${isExpanded ? "bg-primary" : "bg-border"} ${isStepValidated ? "bg-emerald-500 border-emerald-500/20" : ""}`} />
 
                                 {/* Step card */}
-                                <div className="rounded-xl border border-border bg-surface overflow-hidden">
-                                    {/* Step header (clickable to expand) */}
-                                    <button
-                                        type="button"
-                                        onClick={() => onToggleStep(step.id)}
-                                        className="w-full flex items-center justify-between p-4 hover:bg-background transition-colors text-left"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-sm font-bold text-text-muted min-w-[24px]">
+                                <div className={`rounded-xl border bg-surface overflow-hidden transition-colors ${isExpanded ? "border-primary/40" : "border-border"} ${isStepValidated ? "border-emerald-500/20 bg-emerald-500/5" : ""}`}>
+                                    {/* Step header */}
+                                    <div className="flex items-center gap-2 p-4">
+                                        {/* Toggle zone — clic pour déployer */}
+                                        <button
+                                            type="button"
+                                            onClick={() => onToggleStep(step.id)}
+                                            className="flex-1 flex items-center gap-3 text-left min-w-0 hover:opacity-80 transition-opacity"
+                                        >
+                                            <span className="text-sm font-bold text-text-muted min-w-[28px] flex-shrink-0">
                                                 #{step.step_order || "–"}
                                             </span>
-                                            <div>
-                                                <p className="font-semibold text-text-main">{step.name}</p>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <p className="font-semibold text-text-main">{step.name}</p>
+                                                    {isStepValidated && (
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                                            Validée
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <p className="text-xs text-text-muted mt-0.5">
                                                     {step.skills.length} compétence{step.skills.length !== 1 ? "s" : ""}
+                                                    {step.description && (
+                                                        <span className="ml-2 opacity-70">· {step.description.length > 60 ? step.description.slice(0, 60) + "…" : step.description}</span>
+                                                    )}
                                                 </p>
                                             </div>
-                                        </div>
-                                        <svg
-                                            className={`h-4 w-4 text-text-muted transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
+                                        </button>
 
-                                    {/* Expanded: step detail + skills */}
+                                        {/* Action buttons — stoppent la propagation */}
+                                        {canEdit && (
+                                            <div className="flex items-center gap-1 flex-shrink-0">
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); onAddSkillToStep(step, courseId); }}
+                                                    className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-primary hover:bg-primary hover:text-white border border-primary/30 rounded-full transition-colors"
+                                                    title="Ajouter une compétence"
+                                                >
+                                                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                    </svg>
+                                                    Compétence
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); onEditStep(step); }}
+                                                    className="p-1.5 text-text-muted hover:text-text-main hover:bg-background border border-transparent hover:border-border rounded-full transition-colors"
+                                                    title="Modifier l'étape"
+                                                >
+                                                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                    </svg>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); onDeleteStep(step); }}
+                                                    className="p-1.5 text-danger-text hover:bg-danger-bg border border-transparent hover:border-danger-border rounded-full transition-colors"
+                                                    title="Supprimer l'étape"
+                                                >
+                                                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* Chevron */}
+                                        <button
+                                            type="button"
+                                            onClick={() => onToggleStep(step.id)}
+                                            className="p-1 flex-shrink-0"
+                                            aria-label={isExpanded ? "Réduire" : "Déployer"}
+                                        >
+                                            <svg
+                                                className={`h-4 w-4 text-text-muted transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    {/* Expanded: skills list */}
                                     {isExpanded && (
-                                        <div className="border-t border-border p-3">
+                                        <div className="border-t border-border px-4 py-3">
                                             <CurriculumStepSection
                                                 step={step}
                                                 courseId={courseId}
                                                 canEdit={canEdit}
-                                                onEditStep={onEditStep}
-                                                onDeleteStep={onDeleteStep}
-                                                onAddSkillToStep={onAddSkillToStep}
+                                                validations={validations}
                                                 onEditSkill={onEditSkill}
                                                 onDeleteSkill={onDeleteSkill}
                                                 onUnlinkSkillFromStep={onUnlinkSkillFromStep}
-                                                onLinkExistingSkill={onLinkExistingSkill}
                                                 onValidateSkill={canEdit ? handleValidateSkill : undefined}
                                             />
                                         </div>
