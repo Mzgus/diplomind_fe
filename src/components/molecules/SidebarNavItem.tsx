@@ -7,19 +7,23 @@ interface SidebarNavItemProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: React.ForwardRefExoticComponent<any>;
   label: string;
+  isCollapsed?: boolean;
 }
 
-const SidebarNavItem: React.FC<SidebarNavItemProps> = ({ to, icon, label }) => {
+const SidebarNavItem: React.FC<SidebarNavItemProps> = ({ to, icon, label, isCollapsed }) => {
   return (
     <NavLink
       to={to}
+      title={isCollapsed ? label : ""}
       className={({ isActive }) =>
-        `flex items-center gap-4 px-4 py-3 text-white transition-colors hover:bg-sidebar-active/50 rounded-lg ${isActive ? "bg-sidebar-active" : "bg-transparent"
+        `flex items-center ${isCollapsed ? "justify-center px-0" : "gap-4 px-4"} py-3 text-white transition-all duration-300 hover:bg-sidebar-active/50 rounded-lg ${isActive ? "bg-sidebar-active" : "bg-transparent"
         }`
       }
     >
-      <SidebarIcon IconComponent={icon} />
-      <span className="font-medium">{label}</span>
+      <div className="flex-shrink-0">
+        <SidebarIcon IconComponent={icon} />
+      </div>
+      {!isCollapsed && <span className="font-medium whitespace-nowrap overflow-hidden text-ellipsis transition-opacity duration-300">{label}</span>}
     </NavLink>
   );
 };
