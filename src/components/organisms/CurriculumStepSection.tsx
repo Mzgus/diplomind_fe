@@ -15,7 +15,6 @@ interface CurriculumStepSectionProps {
 const STATUS_LABEL: Record<string, string> = {
     validated: "Validé",
     rejected: "Non validé",
-    partially_validated: "Partiellement validé",
     pending: "Non évalué",
 };
 

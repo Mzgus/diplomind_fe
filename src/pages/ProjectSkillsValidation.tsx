@@ -14,14 +14,12 @@ import { AuthContext } from "../context/AuthContext";
 const STATUS_TO_BACKEND: Record<string, string> = {
     "Validé": "validated",
     "Non validé": "rejected",
-    "Partiellement validé": "partially_validated",
     "Non évalué": "pending",
 };
 
 const STATUS_TO_FRONTEND: Record<string, string> = {
     "validated": "Validé",
     "rejected": "Non validé",
-    "partially_validated": "Partiellement validé",
     "pending": "Non évalué",
 };
 

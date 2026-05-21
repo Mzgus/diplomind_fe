@@ -12,8 +12,6 @@ const getStatusStyle = (status?: string): string => {
             return "bg-success-bg text-success-text border-success-border hover:bg-success-border";
         case "Non validé":
             return "bg-danger-bg text-danger-text border-danger-border hover:bg-danger-border";
-        case "Partiellement validé":
-            return "bg-warning-bg text-warning-text border-warning-border hover:bg-warning-border";
         default:
             return "bg-background text-text-muted border-border hover:bg-border";
     }
@@ -31,12 +29,6 @@ const getStatusIcon = (status?: string): React.ReactNode => {
             return (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            );
-        case "Partiellement validé":
-            return (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             );
         default:
