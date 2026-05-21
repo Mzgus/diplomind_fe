@@ -56,7 +56,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-4 focus:outline-none hover:opacity-80 transition-opacity"
+        className="cursor-pointer flex items-center gap-4 focus:outline-none hover:opacity-80 transition-opacity"
       >
         <div className="hidden sm:flex items-center gap-2">
           <span className="font-medium text-text-main">{userName}</span>
@@ -93,9 +93,9 @@ const UserProfile: React.FC<UserProfileProps> = ({
                     className="w-full text-left flex items-center gap-3 px-4 py-3 text-sm text-text-muted hover:bg-background/50 transition-colors duration-200"
                   >
                     <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-border">
-                      <img 
-                        src={profile.profile_picture || `https://ui-avatars.com/api/?name=${profile.first_name}+${profile.last_name}`} 
-                        alt={profile.last_name} 
+                      <img
+                        src={profile.profile_picture || `https://ui-avatars.com/api/?name=${profile.first_name}+${profile.last_name}`}
+                        alt={profile.last_name}
                         className="w-full h-full object-cover"
                       />
                     </div>

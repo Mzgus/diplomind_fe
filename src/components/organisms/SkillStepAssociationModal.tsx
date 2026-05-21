@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
 import Button from "../atoms/Buttons/Button";
 import InputGroup from "../molecules/InputGroup";
@@ -10,38 +10,27 @@ interface SkillItem {
     description?: string;
 }
 
-interface SkillModalProps {
+interface SkillStepAssociationModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (skillData: { id?: number; name: string; description: string; courseId: string }) => void;
-    onAssociate: (skillIds: number[], courseId: number) => void;
-    onCreateSkill: (name: string, description: string, courseId: number) => Promise<number | null>;
+    stepName: string;
+    courseId: number;
     availableSkills: SkillItem[];
     currentSkillIds: number[];
-    courseId: number | null;
-    courseName?: string;
-    skillToEdit?: { id?: number; name: string; description: string; courseId: string } | null;
+    onSave: (skillIds: number[]) => void;
+    onCreateSkill: (name: string, description: string, courseId: number) => Promise<number | null>;
 }
 
-const SkillModal: React.FC<SkillModalProps> = ({
+const SkillStepAssociationModal: React.FC<SkillStepAssociationModalProps> = ({
     isOpen,
     onClose,
-    onSave,
-    onAssociate,
-    onCreateSkill,
+    stepName,
+    courseId,
     availableSkills,
     currentSkillIds,
-    courseId,
-    courseName = "",
-    skillToEdit = null,
+    onSave,
+    onCreateSkill,
 }) => {
-    const isEditMode = Boolean(skillToEdit);
-
-    // States for Edit Mode
-    const [editName, setEditName] = useState("");
-    const [editDescription, setEditDescription] = useState("");
-
-    // States for Create/Associate Mode
     const [selectedSkillIds, setSelectedSkillIds] = useState<number[]>([]);
     const [newSkillName, setNewSkillName] = useState("");
     const [newSkillDescription, setNewSkillDescription] = useState("");
@@ -50,18 +39,13 @@ const SkillModal: React.FC<SkillModalProps> = ({
 
     useEffect(() => {
         if (isOpen) {
-            if (isEditMode && skillToEdit) {
-                setEditName(skillToEdit.name);
-                setEditDescription(skillToEdit.description);
-            } else {
-                setSelectedSkillIds([...currentSkillIds]);
-                setNewSkillName("");
-                setNewSkillDescription("");
-                setIsCreating(false);
-                setSearchQuery("");
-            }
+            setSelectedSkillIds([...currentSkillIds]);
+            setNewSkillName("");
+            setNewSkillDescription("");
+            setIsCreating(false);
+            setSearchQuery("");
         }
-    }, [isOpen, skillToEdit, isEditMode, currentSkillIds]);
+    }, [isOpen, currentSkillIds]);
 
     const handleToggleSkill = (skillId: number) => {
         if (selectedSkillIds.includes(skillId)) {
@@ -72,12 +56,11 @@ const SkillModal: React.FC<SkillModalProps> = ({
     };
 
     const handleCreateSkill = async () => {
-        if (!newSkillName.trim() || courseId === null) return;
+        if (!newSkillName.trim()) return;
         setIsCreating(true);
         try {
             const newId = await onCreateSkill(newSkillName.trim(), newSkillDescription.trim(), courseId);
             if (newId) {
-                // If created successfully, auto-select it
                 setSelectedSkillIds((prev) => [...prev, newId]);
                 setNewSkillName("");
                 setNewSkillDescription("");
@@ -89,105 +72,29 @@ const SkillModal: React.FC<SkillModalProps> = ({
         }
     };
 
-    const handleSubmitEdit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (skillToEdit) {
-            onSave({
-                id: skillToEdit.id,
-                name: editName,
-                description: editDescription,
-                courseId: skillToEdit.courseId,
-            });
-        }
-    };
-
-    const handleSubmitAssociate = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (courseId !== null) {
-            onAssociate(selectedSkillIds, courseId);
-        }
+        onSave(selectedSkillIds);
+        onClose();
     };
 
     const getSkillName = (skillId: number) =>
         availableSkills.find((s) => s.id === skillId)?.name || "Compétence inconnue";
 
-    const filteredSkills = useMemo(() => {
-        return availableSkills.filter(
-            (s) =>
-                s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                (s.description ?? "").toLowerCase().includes(searchQuery.toLowerCase())
-        );
-    }, [availableSkills, searchQuery]);
+    const filteredSkills = availableSkills.filter(
+        (s) =>
+            s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (s.description ?? "").toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
-    // ── Render Edit Mode ──
-    if (isEditMode) {
-        return (
-            <Modal isOpen={isOpen} onClose={onClose}>
-                <div className="w-full max-w-lg rounded-xl bg-surface text-text-main shadow-2xl overflow-hidden flex flex-col border border-border">
-                    {/* Header */}
-                    <div className="flex justify-between items-center p-6 pb-0">
-                        <h2 className="text-2xl font-bold">Éditer la compétence</h2>
-                        <button
-                            onClick={onClose}
-                            className="text-text-muted hover:text-text-main focus:outline-none"
-                            type="button"
-                        >
-                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-
-                    <form onSubmit={handleSubmitEdit} className="p-6 flex flex-col gap-5">
-                        <InputGroup
-                            id="skill-name"
-                            label="Nom de la compétence"
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            required
-                        />
-                        <TextAreaGroup
-                            id="skill-description"
-                            label="Description"
-                            value={editDescription}
-                            onChange={(e) => setEditDescription(e.target.value)}
-                            required
-                        />
-
-                        <div className="flex justify-end gap-3 pt-4 border-t border-border">
-                            <Button
-                                type="button"
-                                onClick={onClose}
-                                className="bg-secondary hover:bg-secondary-hover px-6 py-2 rounded-full text-white"
-                            >
-                                Annuler
-                            </Button>
-                            <Button
-                                type="submit"
-                                className="bg-primary hover:bg-primary-hover px-6 py-2 rounded-full text-white"
-                            >
-                                Mettre à jour
-                            </Button>
-                        </div>
-                    </form>
-                </div>
-            </Modal>
-        );
-    }
-
-    // ── Render Create/Associate Mode ──
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
             <div className="w-full max-w-6xl rounded-xl bg-surface text-text-main shadow-2xl overflow-hidden flex flex-col border border-border">
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 pb-4 border-b border-border">
                     <div>
-                        <h2 className="text-2xl font-bold">Compétences du cours</h2>
-                        {courseName && (
-                            <p className="text-sm text-text-muted mt-1">
-                                Cours : <span className="font-semibold text-text-main">{courseName}</span>
-                            </p>
-                        )}
+                        <h2 className="text-2xl font-bold">Compétences de l'étape</h2>
+                        <p className="text-sm text-text-muted mt-1">Étape : <span className="font-semibold text-text-main">{stepName}</span></p>
                     </div>
                     <button
                         onClick={onClose}
@@ -200,14 +107,14 @@ const SkillModal: React.FC<SkillModalProps> = ({
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmitAssociate} className="p-6 flex flex-col gap-5">
+                <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
                     {/* Two-column layout */}
-                    <div className="flex flex-col md:flex-row gap-6">
+                    <div className="flex gap-6">
                         {/* Left — Available skills list */}
                         <div className="flex-1">
                             <div className="border border-border rounded-lg overflow-hidden flex flex-col h-[440px]">
                                 <div className="p-3 border-b border-border bg-background">
-                                    <h3 className="font-semibold text-text-main mb-2">Compétences existantes</h3>
+                                    <h3 className="font-semibold text-text-main mb-2">Compétences disponibles</h3>
                                     {/* Search */}
                                     <input
                                         type="text"
@@ -220,7 +127,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
                                 <div className="flex-1 overflow-y-auto">
                                     {filteredSkills.length === 0 ? (
                                         <div className="p-4 text-text-muted italic text-sm text-center">
-                                            Aucune compétence disponible dans la base de données (ou toutes sont déjà liées).
+                                            Aucune compétence disponible dans ce cours.
                                         </div>
                                     ) : (
                                         filteredSkills.map((skill) => {
@@ -264,13 +171,13 @@ const SkillModal: React.FC<SkillModalProps> = ({
                             <div className="border border-border rounded-lg bg-background h-[440px] flex flex-col overflow-hidden">
                                 <div className="p-4 border-b border-border">
                                     <h3 className="font-semibold text-text-main">Créer une nouvelle compétence</h3>
-                                    <p className="text-xs text-text-muted mt-0.5">Elle sera enregistrée et automatiquement associée au cours.</p>
+                                    <p className="text-xs text-text-muted mt-0.5">Elle sera ajoutée au cours et cochée automatiquement.</p>
                                 </div>
                                 <div className="flex-1 p-4 overflow-y-auto">
                                     <InputGroup
                                         id="new-skill-name"
                                         label="Nom de la compétence"
-                                        placeholder="Ex: Utiliser Git et Github..."
+                                        placeholder="Ex: Maîtriser les bases de React..."
                                         value={newSkillName}
                                         onChange={(e) => setNewSkillName(e.target.value)}
                                     />
@@ -289,7 +196,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
                                         disabled={isCreating || !newSkillName.trim()}
                                         className="flex-1 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-full disabled:opacity-50"
                                     >
-                                        {isCreating ? "Création..." : "Créer et associer"}
+                                        {isCreating ? "Création..." : "Créer et cocher"}
                                     </Button>
                                     <Button
                                         type="button"
@@ -307,7 +214,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
                     {selectedSkillIds.length > 0 && (
                         <div className="border border-primary/30 bg-primary/5 rounded-lg p-4">
                             <h3 className="font-semibold mb-2 text-text-main text-sm">
-                                Compétences à associer : {selectedSkillIds.length}
+                                Compétences sélectionnées : {selectedSkillIds.length}
                             </h3>
                             <div className="flex flex-wrap gap-2">
                                 {selectedSkillIds.map((skillId) => (
@@ -342,12 +249,7 @@ const SkillModal: React.FC<SkillModalProps> = ({
                         </Button>
                         <Button
                             type="submit"
-                            disabled={selectedSkillIds.length === 0}
-                            className={`px-8 py-2 rounded-full text-white ${
-                                selectedSkillIds.length === 0
-                                    ? "bg-primary/40 cursor-not-allowed"
-                                    : "bg-primary hover:bg-primary-hover"
-                            }`}
+                            className="bg-primary hover:bg-primary-hover px-8 py-2 rounded-full text-white"
                         >
                             Valider ({selectedSkillIds.length})
                         </Button>
@@ -358,4 +260,4 @@ const SkillModal: React.FC<SkillModalProps> = ({
     );
 };
 
-export default SkillModal;
+export default SkillStepAssociationModal;

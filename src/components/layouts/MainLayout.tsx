@@ -26,7 +26,7 @@ const MainLayout: React.FC = () => {
       />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto">
           {/* Les routes enfants (comme Home, Dashboard, etc.) seront rendues ici */}
           <Outlet />
         </main>

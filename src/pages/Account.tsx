@@ -1,12 +1,14 @@
 import React, { useContext, useState } from "react";
 import InfoField from "../components/molecules/InfoField";
-import Button from "../components/atoms/Button";
+import Button from "../components/atoms/Buttons/Button";
 import StatusBadge from "../components/atoms/StatusBadge";
 import { AuthContext } from "../context/AuthContext";
 import { UsersService } from "../_services/users.service";
 
 const Account: React.FC = () => {
-  const { user } = useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) return null;
+  const { user } = context;
 
   const [showPwdForm, setShowPwdForm] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -39,8 +41,19 @@ const Account: React.FC = () => {
       setNewPassword("");
       setConfirmPassword("");
       setShowPwdForm(false);
-    } catch {
-      setFeedback({ type: "error", msg: "Erreur lors du changement de mot de passe." });
+    } catch (err: any) {
+      let errorMsg = "Erreur lors du changement de mot de passe.";
+      if (err.response) {
+        // Le serveur a répondu avec un code d'erreur (4xx, 5xx)
+        errorMsg = err.response.data?.error || err.response.data?.message || (typeof err.response.data === "string" ? err.response.data : errorMsg);
+      } else if (err.request) {
+        // La requête a été envoyée mais aucune réponse n'a été reçue
+        errorMsg = "Le serveur ne répond pas. Veuillez vérifier votre connexion.";
+      } else {
+        // Erreur lors de la configuration de la requête
+        errorMsg = err.message || errorMsg;
+      }
+      setFeedback({ type: "error", msg: errorMsg });
     } finally {
       setLoading(false);
     }
@@ -52,7 +65,7 @@ const Account: React.FC = () => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-text-main mb-6">Mon Compte</h1>
+      <h1 className="text-3xl font-bold text-text-main mb-6 p-6">Mon Compte</h1>
       <div className="bg-surface p-8 pt-5 rounded-xl shadow-md max-w-2xl mx-auto border border-border">
         <div className="mb-4">
           <StatusBadge type="role" value={roleKey} />
@@ -120,4 +133,3 @@ const Account: React.FC = () => {
 };
 
 export default Account;
-

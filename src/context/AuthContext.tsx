@@ -4,7 +4,7 @@ import { Endpoints } from "../_services/endpoints.services";
 import { AuthService } from "../_services/auth.service";
 import type { UserSheet } from "../types";
 
-interface CustomJwtPayload extends JwtPayload {
+export interface CustomJwtPayload extends JwtPayload {
   user_id: number;
   user_lastname: string;
   user_firstname: string;
@@ -13,7 +13,18 @@ interface CustomJwtPayload extends JwtPayload {
   user_email: string;
 }
 
-export const AuthContext = createContext<any>(null);
+interface AuthContextType {
+  user: CustomJwtPayload | null;
+  login: (token: string) => void;
+  logout: () => void;
+  loading: boolean;
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  availableProfiles: UserSheet[];
+  selectProfile: (user_sheet_id: number) => Promise<void>;
+}
+
+export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<CustomJwtPayload | null>(null);
@@ -119,4 +130,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+import { useContext } from "react";
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };

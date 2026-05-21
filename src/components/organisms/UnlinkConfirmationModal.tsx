@@ -2,29 +2,32 @@ import React from "react";
 import Modal from "./Modal";
 import Button from "../atoms/Buttons/Button";
 
-interface DeleteConfirmationModalProps {
+interface UnlinkConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  itemName: string;
-  itemType: string;
+  profileName: string;
+  accountEmail: string;
 }
 
-const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
+const UnlinkConfirmationModal: React.FC<UnlinkConfirmationModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
-  itemName,
-  itemType,
+  profileName,
+  accountEmail
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="w-full max-w-md rounded-xl bg-surface p-8 shadow-lg text-text-main border border-border">
         <h3 className="text-xl font-bold text-center mb-4">
-          Confirmation de suppression
+          Dissocier le profil
         </h3>
-        <p className="text-center mb-8">
-          Êtes-vous sûr de vouloir supprimer {itemType} "{itemName}" ?
+        <p className="text-center text-sm mb-6 text-text-secondary">
+          Êtes-vous sûr de vouloir dissocier le profil <span className="font-semibold text-text-main">"{profileName}"</span> du compte <span className="font-semibold text-text-main">"{accountEmail}"</span> ?
+        </p>
+        <p className="text-center text-xs text-text-muted mb-8 italic">
+          Le profil ne sera pas supprimé et pourra être associé à nouveau plus tard.
         </p>
         <div className="flex justify-center gap-4">
           <Button
@@ -35,7 +38,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
           </Button>
           <Button
             onClick={onConfirm}
-            className="bg-danger-bg hover:bg-danger-border text-white w-1/2"
+            className="bg-primary hover:bg-primary-hover text-white w-1/2"
           >
             Confirmer
           </Button>
@@ -45,4 +48,4 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
   );
 };
 
-export default DeleteConfirmationModal;
+export default UnlinkConfirmationModal;

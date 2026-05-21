@@ -66,3 +66,42 @@ export interface Validation {
 export interface StepWithSkills extends Step {
   skills: Skill[];
 }
+
+// Extended types for Skills UI
+export interface StepWithProject extends Step {
+  projectName?: string;
+}
+
+export interface SkillWithSteps extends Skill {
+  linkedSteps?: StepWithProject[];
+}
+
+export interface CourseWithSkills extends Course {
+  skills?: SkillWithSteps[];
+  skillsLoaded?: boolean;
+}
+
+export interface SkillValidation {
+  skill_id: number;
+  status: string;
+  comment?: string;
+  validated_at?: string;
+}
+
+// ─── Curriculum composite types ─────────────────────────────────────────────
+// Used by Curriculum.tsx and its sub-components.
+// The hierarchy is: CurriculumCourse > CurriculumProject > CurriculumStep > SkillWithSteps
+
+export interface CurriculumStep extends Step {
+  skills: SkillWithSteps[];
+}
+
+export interface CurriculumProject extends Project {
+  linkedSteps: CurriculumStep[];
+}
+
+export interface CurriculumCourse extends Course {
+  linkedProjects: CurriculumProject[];
+  linkedSkills: Skill[];
+}
+
