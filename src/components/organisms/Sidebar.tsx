@@ -7,6 +7,7 @@ import {
   AcademicCapIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  CheckBadgeIcon,
 } from "@heroicons/react/24/solid";
 import SidebarNavItem from "../molecules/SidebarNavItem";
 import { AuthContext } from "../../context/AuthContext";
@@ -30,6 +31,12 @@ const navigationGroup2: NavItem[] = [
     name: "Classes",
     href: "/classes",
     icon: AcademicCapIcon,
+    roles: ["admin", "teacher"],
+  },
+  {
+    name: "Validation",
+    href: "/project-skills-validation",
+    icon: CheckBadgeIcon,
     roles: ["admin", "teacher"],
   },
   {

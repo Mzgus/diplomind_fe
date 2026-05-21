@@ -73,8 +73,8 @@ const ProjectSkillsValidation: React.FC = () => {
     // --- Data State ---
     const [projects, setProjects] = useState<Project[]>([]);
     const [classes, setClasses] = useState<ClassItem[]>([]);
+    const [allClassesLookup, setAllClassesLookup] = useState<ClassItem[]>([]);
     const [courses, setCourses] = useState<CourseItem[]>([]);
-    const [allCoursesLookup, setAllCoursesLookup] = useState<CourseItem[]>([]);
     const [stepsWithSkills, setStepsWithSkills] = useState<StepWithSkills[]>([]);
     const [students, setStudents] = useState<Student[]>([]);
     const [validations, setValidations] = useState<Record<string, { status: string; comment: string }>>({});
@@ -90,7 +90,7 @@ const ProjectSkillsValidation: React.FC = () => {
     const [loadingMatrix, setLoadingMatrix] = useState(false);
     const [selectedCell, setSelectedCell] = useState<{ studentId: number; skillId: number } | null>(null);
 
-    // --- 1. Fetch initial dropdown data (classes + global courses lookup) ---
+    // --- 1. Fetch initial dropdown data (global lookups) ---
     useEffect(() => {
         if (!user) return;
         const fetchInitial = async () => {
@@ -100,15 +100,25 @@ const ProjectSkillsValidation: React.FC = () => {
                     isTeacher
                         ? ClassesService.getTeacherClasses(user.user_id)
                         : ClassesService.getAllClasses(),
-                    CoursesService.getAllCourses(),
+                    isTeacher
+                        ? CoursesService.getUserCourses(user.user_id)
+                        : CoursesService.getAllCourses(),
                 ]);
                 const cl = Array.isArray(classesRes.data) ? classesRes.data : [];
                 const co: CourseItem[] = Array.isArray(coursesRes.data)
-                    ? coursesRes.data.map((c: any) => ({ id: c.id, name: c.name }))
+                    ? coursesRes.data.map((c: { id: number; name: string }) => ({ id: c.id, name: c.name }))
                     : [];
-                setClasses(cl);
-                setAllCoursesLookup(co);
-                if (cl.length > 0) setSelectedClassId(String(cl[0].id));
+                setAllClassesLookup(cl);
+                setCourses(co);
+
+                // Preselect Course
+                if (state?.preselectedCourseId && co.some((c) => c.id === state.preselectedCourseId)) {
+                    setSelectedCourseId(String(state.preselectedCourseId));
+                } else if (co.length > 0) {
+                    setSelectedCourseId(String(co[0].id));
+                } else {
+                    setSelectedCourseId("");
+                }
             } catch (err) {
                 console.error("Failed to fetch initial data:", err);
             } finally {
@@ -119,44 +129,40 @@ const ProjectSkillsValidation: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user?.user_id]);
 
-    // --- 2. Quand la classe change → recharger les cours liés à cette classe ---
+    // --- 2. Quand le cours change → fetch les classes associées et les projets du cours ---
     useEffect(() => {
-        if (!selectedClassId || allCoursesLookup.length === 0) return;
-        const fetchClassCourses = async () => {
-            try {
-                const res = await CoursesService.getClassCourses(Number(selectedClassId));
-                const classCourseLinks: { course_id: number; class_id: number }[] = Array.isArray(res.data) ? res.data : [];
-                const filtered: CourseItem[] = classCourseLinks
-                    .map((link) => allCoursesLookup.find((c) => c.id === link.course_id))
-                    .filter((c): c is CourseItem => c !== undefined);
-                setCourses(filtered);
+        if (!selectedCourseId || allClassesLookup.length === 0) {
+            setClasses([]);
+            setSelectedClassId("");
+            setProjects([]);
+            setSelectedProjectId("");
+            return;
+        }
 
-                // Préselection : respecter state.preselectedCourseId si disponible dans cette classe
-                if (state?.preselectedCourseId && filtered.some((c) => c.id === state.preselectedCourseId)) {
-                    setSelectedCourseId(String(state.preselectedCourseId));
-                } else if (filtered.length > 0) {
-                    setSelectedCourseId(String(filtered[0].id));
+        const fetchCourseData = async () => {
+            try {
+                const [classesRes, projectsRes] = await Promise.all([
+                    CoursesService.getCourseClasses(Number(selectedCourseId)),
+                    ProjectsService.getProjectsByCourse(Number(selectedCourseId)),
+                ]);
+
+                // 2.a Process Classes
+                const courseClassLinks: { course_id: number; class_id: number }[] = Array.isArray(classesRes.data) ? classesRes.data : [];
+                const filteredClasses: ClassItem[] = courseClassLinks
+                    .map((link) => allClassesLookup.find((c) => c.id === link.class_id))
+                    .filter((c): c is ClassItem => c !== undefined);
+                setClasses(filteredClasses);
+
+                if (filteredClasses.length > 0) {
+                    setSelectedClassId(String(filteredClasses[0].id));
                 } else {
-                    setSelectedCourseId("");
-                    setProjects([]);
+                    setSelectedClassId("");
                 }
-            } catch (err) {
-                console.error("Failed to fetch courses for class:", err);
-                setCourses([]);
-                setSelectedCourseId("");
-            }
-        };
-        fetchClassCourses();
-    }, [selectedClassId, allCoursesLookup]);
 
-    // --- 2. Quand le cours change → fetch les projets du cours ---
-    useEffect(() => {
-        if (!selectedCourseId) return;
-        const fetchProjects = async () => {
-            try {
-                const res = await ProjectsService.getProjectsByCourse(Number(selectedCourseId));
-                const p: Project[] = Array.isArray(res.data) ? res.data : [];
+                // 2.b Process Projects
+                const p: Project[] = Array.isArray(projectsRes.data) ? projectsRes.data : [];
                 setProjects(p);
+
                 if (p.length > 0) {
                     if (state?.preselectedProjectId && p.some((proj) => proj.id === state.preselectedProjectId)) {
                         setSelectedProjectId(String(state.preselectedProjectId));
@@ -168,13 +174,15 @@ const ProjectSkillsValidation: React.FC = () => {
                     setStepsWithSkills([]);
                 }
             } catch (err) {
-                console.error("Failed to fetch projects for course:", err);
+                console.error("Failed to fetch course data:", err);
+                setClasses([]);
+                setSelectedClassId("");
                 setProjects([]);
                 setSelectedProjectId("");
             }
         };
-        fetchProjects();
-    }, [selectedCourseId, state]);
+        fetchCourseData();
+    }, [selectedCourseId, allClassesLookup, state]);
 
     // --- 3. Quand le projet change → fetch étapes + compétences ---
     useEffect(() => {
@@ -246,7 +254,7 @@ const ProjectSkillsValidation: React.FC = () => {
                         try {
                             const res = await ValidationsService.getUserValidations(student.id);
                             const userValidations = Array.isArray(res.data) ? res.data : [];
-                            userValidations.forEach((v: any) => {
+                            userValidations.forEach((v: { skill_id: number; status: string; comment?: string }) => {
                                 const key = `${student.id}_${v.skill_id}`;
                                 newValidations[key] = {
                                     status: STATUS_TO_FRONTEND[v.status] || v.status,
@@ -345,37 +353,26 @@ const ProjectSkillsValidation: React.FC = () => {
             {/* Header */}
             <div className="max-w-full mx-auto mb-8">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                    {/* Titre + sélection projet */}
+                    {/* Titre */}
                     <div>
                         <h1 className="text-3xl font-bold text-text-main tracking-tight">
                             Validation des Compétences
                         </h1>
-                        <div className="flex items-center gap-2 mt-2">
-                            <span className="text-text-muted">Projet :</span>
-                            <select
-                                value={selectedProjectId}
-                                onChange={(e) => setSelectedProjectId(e.target.value)}
-                                className="bg-transparent font-medium text-text-main border-b border-border focus:border-primary focus:outline-none py-1 pr-8 cursor-pointer hover:border-text-muted transition-colors"
-                            >
-                                {projects.map((project) => (
-                                    <option key={project.id} value={project.id}>
-                                        {project.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
                     </div>
 
                     {/* Filtres */}
                     <ValidationFilters
                         searchQuery={searchQuery}
                         onSearchChange={(e) => setSearchQuery(e.target.value)}
-                        selectedClassId={selectedClassId}
-                        onClassChange={(e) => setSelectedClassId(e.target.value)}
-                        classes={classes}
                         selectedCourseId={selectedCourseId}
                         onCourseChange={(e) => setSelectedCourseId(e.target.value)}
                         courses={courses}
+                        selectedClassId={selectedClassId}
+                        onClassChange={(e) => setSelectedClassId(e.target.value)}
+                        classes={classes}
+                        selectedProjectId={selectedProjectId}
+                        onProjectChange={(e) => setSelectedProjectId(e.target.value)}
+                        projects={projects}
                     />
                 </div>
 
