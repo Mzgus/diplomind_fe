@@ -387,7 +387,7 @@ const Curriculum: React.FC = () => {
         setSkillModalCourseId(null);
     };
 
-    const handleCreateSkillForCourse = async (name: string, description: string, courseId: number): Promise<number | null> => {
+    const handleCreateSkillForCourse = async (name: string, description: string, _courseId: number): Promise<number | null> => {
         try {
             const res = await SkillsService.createSkill({ name, description });
             const newId = res.data.id;
@@ -475,12 +475,6 @@ const Curriculum: React.FC = () => {
         [selectedCourse, selectedProjectId]
     );
 
-    // Compétences non encore liées au cours sélectionné (pour l'onglet "Associer")
-    const availableSkillsForCourse = useMemo(() => {
-        if (!selectedCourse) return allSkills;
-        const linkedIds = new Set((selectedCourse.linkedSkills ?? []).map((s) => s.id));
-        return allSkills.filter((s) => !linkedIds.has(s.id));
-    }, [allSkills, selectedCourse]);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Render
