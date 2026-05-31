@@ -4,9 +4,10 @@ import FormField from "../molecules/FormField";
 
 interface LoginFormProps {
   onSubmit: (formData: any) => void;
+  error?: string | null;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, error }) => {
   const [email, setEmail] = useState("");
   const [pwd, setPassword] = useState("");
 
@@ -27,6 +28,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
         <h2 className="text-2xl font-bold mb-6 text-center text-text-main">
           Connexion
         </h2>
+        {error && (
+          <p className="mb-4 rounded-lg bg-red-100 px-4 py-3 text-sm text-red-700 border border-red-300">
+            {error}
+          </p>
+        )}
         <div className="space-y-5">
           <FormField
             label="Email :"

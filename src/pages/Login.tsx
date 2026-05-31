@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Endpoints } from "../_services/endpoints.services";
 import LoginForm from "../components/organisms/LoginForm";
 import { AuthContext } from "../context/AuthContext";
@@ -8,8 +8,10 @@ import { AuthService } from "../_services/auth.service";
 function Login() {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = (formData: any) => {
+    setError(null);
     Endpoints.login(formData)
       .then(async (res) => {
         const token = res.data.token;
@@ -29,10 +31,11 @@ function Login() {
       })
       .catch((err) => {
         console.error("Login failed", err);
+        setError("Identifiants invalides. Veuillez réessayer.");
       });
   };
 
-  return <LoginForm onSubmit={handleLogin} />;
+  return <LoginForm onSubmit={handleLogin} error={error} />;
 }
 
 export default Login;
