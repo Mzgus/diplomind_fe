@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useContext, useMemo, useCallback } from "react";
 import { AuthContext } from "../context/AuthContext";
 import CurriculumNavTree from "../components/organisms/CurriculumNavTree";
 import CurriculumDetailPanel from "../components/organisms/CurriculumDetailPanel";
@@ -84,10 +84,6 @@ async function enrichCourses(rawCourses: Course[]): Promise<CurriculumCourse[]> 
 
 const Curriculum: React.FC = () => {
     const authContext = useContext(AuthContext);
-    if (!authContext) return null;
-    const { user } = authContext;
-    const isAdmin = user?.user_role === "admin";
-    const canEdit = user?.user_role !== "student";
 
     // ── data ─────────────────────────────────────────────────────────────────
     const [courses, setCourses] = useState<CurriculumCourse[]>([]);
@@ -133,11 +129,16 @@ const Curriculum: React.FC = () => {
     const [isSkillStepModalOpen, setIsSkillStepModalOpen] = useState(false);
     const [skillStepTarget, setSkillStepTarget] = useState<SkillStepTarget | null>(null);
 
+    const user = authContext?.user;
+    const isAdmin = user?.user_role === "admin";
+    const canEdit = user?.user_role !== "student";
+
+
     // ─────────────────────────────────────────────────────────────────────────
     // Fetch
     // ─────────────────────────────────────────────────────────────────────────
 
-    const fetchAll = async () => {
+    const fetchAll = useCallback(async () => {
         if (!user) return;
         try {
             setLoading(true);
@@ -151,7 +152,7 @@ const Curriculum: React.FC = () => {
             }
 
             // Fetch student validations if applicable
-            let valMap: Record<number, { status: string; comment?: string; validated_at?: string }> = {};
+            const valMap: Record<number, { status: string; comment?: string; validated_at?: string }> = {};
             if (user.user_role === "student") {
                 try {
                     const valRes = await ValidationsService.getUserValidations(user.user_id);
@@ -181,7 +182,7 @@ const Curriculum: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user, isAdmin]);
 
     const refreshCourse = async (courseId: number) => {
         try {
@@ -195,7 +196,7 @@ const Curriculum: React.FC = () => {
 
     useEffect(() => {
         fetchAll();
-    }, [user]);
+    }, [fetchAll]);
 
     // ─────────────────────────────────────────────────────────────────────────
     // Selection & toggle helpers
@@ -214,14 +215,22 @@ const Curriculum: React.FC = () => {
     const handleToggleCourse = (courseId: number) =>
         setExpandedCourseIds((prev) => {
             const next = new Set(prev);
-            next.has(courseId) ? next.delete(courseId) : next.add(courseId);
+            if (next.has(courseId)) {
+                next.delete(courseId);
+            } else {
+                next.add(courseId);
+            }
             return next;
         });
 
     const handleToggleStep = (stepId: number) =>
         setExpandedStepIds((prev) => {
             const next = new Set(prev);
-            next.has(stepId) ? next.delete(stepId) : next.add(stepId);
+            if (next.has(stepId)) {
+                next.delete(stepId);
+            } else {
+                next.add(stepId);
+            }
             return next;
         });
 
@@ -387,6 +396,7 @@ const Curriculum: React.FC = () => {
         setSkillModalCourseId(null);
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleCreateSkillForCourse = async (name: string, description: string, _courseId: number): Promise<number | null> => {
         try {
             const res = await SkillsService.createSkill({ name, description });
@@ -479,6 +489,8 @@ const Curriculum: React.FC = () => {
     // ─────────────────────────────────────────────────────────────────────────
     // Render
     // ─────────────────────────────────────────────────────────────────────────
+
+    if (!authContext || !user) return null;
 
     if (loading) return <div className="p-6 text-text-muted">Chargement...</div>;
 

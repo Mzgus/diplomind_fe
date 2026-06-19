@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useState, useEffect, type ReactNode } from "react";
 import { jwtDecode, type JwtPayload } from "jwt-decode";
 import { Endpoints } from "../_services/endpoints.services";

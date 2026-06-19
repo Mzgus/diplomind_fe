@@ -24,7 +24,7 @@ function Login() {
           } else {
             navigate("/");
           }
-        } catch (e) {
+        } catch {
           // If fetching profiles fails, default to home (or error)
           navigate("/");
         }

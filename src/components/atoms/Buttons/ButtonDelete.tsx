@@ -1,7 +1,6 @@
 import React from "react";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-}
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 const ButtonDelete = ({ className, title="Supprimer", ...props }: ButtonProps) => {
   const baseStyles =

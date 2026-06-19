@@ -14,14 +14,14 @@ import { AuditService } from "../_services/audit.service";
 
 const Home: React.FC = () => {
   const context = useContext(AuthContext);
-  if (!context) return null;
-  const { user } = context;
   const [loading, setLoading] = useState(true);
   
   // Data states
   const [studentData, setStudentData] = useState<any>({ projects: [], validatedSteps: [], stats: { validatedSkills: 0, pendingValidations: 0, activeProjects: 0 } });
   const [teacherData, setTeacherData] = useState<any>({ classes: [], pendingValidations: [], stats: { totalStudents: 0, activeClasses: 0, pendingCount: 0 } });
   const [adminData, setAdminData] = useState<any>({ auditLog: [], systemStatus: { dbStatus: "online", apiLatency: 0, uptime: "0d 0h 0m" }, stats: { totalUsers: 0, totalCourses: 0, totalProjects: 0 } });
+
+  const user = context?.user;
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -51,7 +51,7 @@ const Home: React.FC = () => {
 
           // Get projects and their steps
           let projectsWithProgress: any[] = [];
-          let validatedStepsList: any[] = [];
+          const validatedStepsList: any[] = [];
 
           if (userCoursesRes.data.length > 0) {
             const projectsPromises = userCoursesRes.data.map((c: any) => ProjectsService.getProjectsByCourse(c.id));
@@ -161,6 +161,8 @@ const Home: React.FC = () => {
 
     fetchDashboardData();
   }, [user]);
+
+  if (!context) return null;
 
   if (loading) return <div className="p-6 text-text-main">Chargement du tableau de bord...</div>;
   if (!user) return null;

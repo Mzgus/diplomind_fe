@@ -7,14 +7,14 @@ import { UsersService } from "../_services/users.service";
 
 const Account: React.FC = () => {
   const context = useContext(AuthContext);
-  if (!context) return null;
-  const { user } = context;
-
   const [showPwdForm, setShowPwdForm] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; msg: string } | null>(null);
   const [loading, setLoading] = useState(false);
+
+  if (!context) return null;
+  const { user } = context;
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();

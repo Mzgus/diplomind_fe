@@ -221,7 +221,7 @@ const Users: React.FC = () => {
     };
 
     fetchProfileDetails();
-  }, [selectedAccountId, allAccounts]);
+  }, [selectedAccount]);
 
   // Set default selection to the first account if none selected
   useEffect(() => {

@@ -1,7 +1,6 @@
 import React from "react";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-}
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 const ButtonEdit = ({ className, title="Éditer", ...props }: ButtonProps) => {
   const baseStyles =
