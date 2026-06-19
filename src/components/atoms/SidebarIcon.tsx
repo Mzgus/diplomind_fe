@@ -1,8 +1,7 @@
 import React from "react";
 
 interface SidebarIconProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  IconComponent: React.ForwardRefExoticComponent<any>;
+  IconComponent: React.ComponentType<any>;
   className?: string;
 }
 

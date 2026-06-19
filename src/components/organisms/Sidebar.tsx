@@ -16,8 +16,7 @@ import { useSidebar } from "../../context/SidebarContext";
 interface NavItem {
   name: string;
   href: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon: React.ForwardRefExoticComponent<any>;
+  icon: React.ComponentType<any>;
   roles?: string[]; // undefined = visible to all authenticated users
 }
 

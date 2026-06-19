@@ -4,8 +4,7 @@ import SidebarIcon from "../atoms/SidebarIcon";
 
 interface SidebarNavItemProps {
   to: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon: React.ForwardRefExoticComponent<any>;
+  icon: React.ComponentType<any>;
   label: string;
   isCollapsed?: boolean;
 }
