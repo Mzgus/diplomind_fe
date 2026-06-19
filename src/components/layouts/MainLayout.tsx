@@ -1,15 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Outlet } from "react-router-dom";
 import TopNavbar from "../organisms/TopNavbar";
 import Sidebar from "../organisms/Sidebar";
 
+import { AuthContext } from "../../context/AuthContext";
+
 const MainLayout: React.FC = () => {
-  // Les données utilisateur sont maintenant gérées dans le layout principal
+  const { user, availableProfiles, selectProfile } = useContext(AuthContext);
+
+  // Fallback data if user is somehow null in a protected route (shouldn't happen with RequireAuth)
   const userData = {
-    name: "Franchomme Maxime",
-    profileType: "Admin",
-    avatar:
-      "https://www.parcanimalierlabarben.com/wp-content/uploads/2023/07/fiche_loutre_carre.jpg",
+    name: user ? `${user.user_firstname} ${user.user_lastname}` : "Utilisateur",
+    profileType: user?.user_role || "User",
+    avatar: user?.user_profilepicture || "",
   };
 
   return (
@@ -18,10 +21,12 @@ const MainLayout: React.FC = () => {
         userName={userData.name}
         avatarUrl={userData.avatar}
         profileType={userData.profileType}
+        availableProfiles={availableProfiles}
+        onSwitchProfile={selectProfile}
       />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto">
           {/* Les routes enfants (comme Home, Dashboard, etc.) seront rendues ici */}
           <Outlet />
         </main>

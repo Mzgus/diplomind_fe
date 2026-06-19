@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
-import Button from "../atoms/Button";
+import Button from "../atoms/Buttons/Button";
 import InputGroup from "../molecules/InputGroup";
 import TextAreaGroup from "../molecules/TextAreaGroup";
 
@@ -8,7 +8,7 @@ interface CourseModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (courseData: any) => void;
-    courseToEdit?: { id: string; name: string; description: string } | null;
+    courseToEdit?: { id: number; name: string; description: string } | null;
 }
 
 const CourseModal: React.FC<CourseModalProps> = ({

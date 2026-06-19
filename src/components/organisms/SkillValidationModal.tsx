@@ -88,7 +88,7 @@ const SkillValidationModal: React.FC<SkillValidationModalProps> = ({
                             Statut de validation
                         </label>
                         <div className="grid grid-cols-1 gap-2">
-                            {["Validé", "Partiellement validé", "Non validé", "Non évalué"].map((option) => (
+                            {["Validé", "Non validé", "Non évalué"].map((option) => (
                                 <label
                                     key={option}
                                     className={`flex items-center justify-between p-3 text-text-main bg-surface border rounded-lg cursor-pointer hover:bg-background ${status === option ? "border-primary ring-1 ring-primary bg-primary/10" : "border-border"

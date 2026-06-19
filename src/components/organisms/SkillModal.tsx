@@ -1,169 +1,355 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Modal from "./Modal";
-import Button from "../atoms/Button";
+import Button from "../atoms/Buttons/Button";
 import InputGroup from "../molecules/InputGroup";
 import TextAreaGroup from "../molecules/TextAreaGroup";
-import SelectGroup from "../molecules/SelectGroup";
 
-interface SkillData {
-    id?: string;
+interface SkillItem {
+    id: number;
     name: string;
-    description: string;
-    courseId: string;
+    description?: string;
 }
 
 interface SkillModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (skillData: SkillData) => void;
-    existingCourses: { id: string; name: string }[];
-    existingSteps: { id: string; name: string }[];
-    skillToEdit?: SkillData | null;
+    onSave: (skillData: { id?: number; name: string; description: string; courseId: string }) => void;
+    onAssociate: (skillIds: number[], courseId: number) => void;
+    onCreateSkill: (name: string, description: string, courseId: number) => Promise<number | null>;
+    availableSkills: SkillItem[];
+    currentSkillIds: number[];
+    courseId: number | null;
+    courseName?: string;
+    skillToEdit?: { id?: number; name: string; description: string; courseId: string } | null;
 }
 
 const SkillModal: React.FC<SkillModalProps> = ({
     isOpen,
     onClose,
     onSave,
-    existingCourses,
-    // existingSteps,
+    onAssociate,
+    onCreateSkill,
+    availableSkills,
+    currentSkillIds,
+    courseId,
+    courseName = "",
     skillToEdit = null,
 }) => {
-    // State pour la compétence
-    const [skillName, setSkillName] = useState("");
-    const [skillDescription, setSkillDescription] = useState("");
-    const [selectedCourseId, setSelectedCourseId] = useState("");
+    const isEditMode = Boolean(skillToEdit);
 
-    // Reset or populate state when modal opens/closes
+    // States for Edit Mode
+    const [editName, setEditName] = useState("");
+    const [editDescription, setEditDescription] = useState("");
+
+    // States for Create/Associate Mode
+    const [selectedSkillIds, setSelectedSkillIds] = useState<number[]>([]);
+    const [newSkillName, setNewSkillName] = useState("");
+    const [newSkillDescription, setNewSkillDescription] = useState("");
+    const [isCreating, setIsCreating] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+
     useEffect(() => {
         if (isOpen) {
-            if (skillToEdit) {
-                // Edit mode - populate with existing data
-                setSkillName(skillToEdit.name);
-                setSkillDescription(skillToEdit.description);
-                setSelectedCourseId(skillToEdit.courseId);
+            if (isEditMode && skillToEdit) {
+                setEditName(skillToEdit.name);
+                setEditDescription(skillToEdit.description);
             } else {
-                // Create mode - reset fields
-                setSkillName("");
-                setSkillDescription("");
-                setSelectedCourseId("");
+                setSelectedSkillIds([...currentSkillIds]);
+                setNewSkillName("");
+                setNewSkillDescription("");
+                setIsCreating(false);
+                setSearchQuery("");
             }
         }
-    }, [isOpen, skillToEdit]);
+    }, [isOpen, skillToEdit, isEditMode, currentSkillIds]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        const skillData: SkillData = {
-            id: skillToEdit?.id,
-            name: skillName,
-            description: skillDescription,
-            courseId: selectedCourseId,
-        };
-
-        onSave(skillData);
+    const handleToggleSkill = (skillId: number) => {
+        if (selectedSkillIds.includes(skillId)) {
+            setSelectedSkillIds(selectedSkillIds.filter((id) => id !== skillId));
+        } else {
+            setSelectedSkillIds([...selectedSkillIds, skillId]);
+        }
     };
 
+    const handleCreateSkill = async () => {
+        if (!newSkillName.trim() || courseId === null) return;
+        setIsCreating(true);
+        try {
+            const newId = await onCreateSkill(newSkillName.trim(), newSkillDescription.trim(), courseId);
+            if (newId) {
+                // If created successfully, auto-select it
+                setSelectedSkillIds((prev) => [...prev, newId]);
+                setNewSkillName("");
+                setNewSkillDescription("");
+            }
+        } catch (err) {
+            console.error("Failed to create skill", err);
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
+    const handleSubmitEdit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (skillToEdit) {
+            onSave({
+                id: skillToEdit.id,
+                name: editName,
+                description: editDescription,
+                courseId: skillToEdit.courseId,
+            });
+        }
+    };
+
+    const handleSubmitAssociate = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (courseId !== null) {
+            onAssociate(selectedSkillIds, courseId);
+        }
+    };
+
+    const getSkillName = (skillId: number) =>
+        availableSkills.find((s) => s.id === skillId)?.name || "Compétence inconnue";
+
+    const filteredSkills = useMemo(() => {
+        return availableSkills.filter(
+            (s) =>
+                s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (s.description ?? "").toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [availableSkills, searchQuery]);
+
+    // ── Render Edit Mode ──
+    if (isEditMode) {
+        return (
+            <Modal isOpen={isOpen} onClose={onClose}>
+                <div className="w-full max-w-lg rounded-xl bg-surface text-text-main shadow-2xl overflow-hidden flex flex-col border border-border">
+                    {/* Header */}
+                    <div className="flex justify-between items-center p-6 pb-0">
+                        <h2 className="text-2xl font-bold">Éditer la compétence</h2>
+                        <button
+                            onClick={onClose}
+                            className="text-text-muted hover:text-text-main focus:outline-none"
+                            type="button"
+                        >
+                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleSubmitEdit} className="p-6 flex flex-col gap-5">
+                        <InputGroup
+                            id="skill-name"
+                            label="Nom de la compétence"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            required
+                        />
+                        <TextAreaGroup
+                            id="skill-description"
+                            label="Description"
+                            value={editDescription}
+                            onChange={(e) => setEditDescription(e.target.value)}
+                            required
+                        />
+
+                        <div className="flex justify-end gap-3 pt-4 border-t border-border">
+                            <Button
+                                type="button"
+                                onClick={onClose}
+                                className="bg-secondary hover:bg-secondary-hover px-6 py-2 rounded-full text-white"
+                            >
+                                Annuler
+                            </Button>
+                            <Button
+                                type="submit"
+                                className="bg-primary hover:bg-primary-hover px-6 py-2 rounded-full text-white"
+                            >
+                                Mettre à jour
+                            </Button>
+                        </div>
+                    </form>
+                </div>
+            </Modal>
+        );
+    }
+
+    // ── Render Create/Associate Mode ──
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <div className="w-full max-w-5xl rounded-xl bg-surface text-text-main shadow-2xl overflow-hidden flex flex-col">
+            <div className="w-full max-w-6xl rounded-xl bg-surface text-text-main shadow-2xl overflow-hidden flex flex-col border border-border">
                 {/* Header */}
-                <div className="flex justify-between items-center p-6 pb-0">
-                    <h2 className="text-2xl font-bold">
-                        {skillToEdit ? "Éditer la compétence" : "Créer une compétence"}
-                    </h2>
+                <div className="flex justify-between items-center p-6 pb-4 border-b border-border">
+                    <div>
+                        <h2 className="text-2xl font-bold">Compétences du cours</h2>
+                        {courseName && (
+                            <p className="text-sm text-text-muted mt-1">
+                                Cours : <span className="font-semibold text-text-main">{courseName}</span>
+                            </p>
+                        )}
+                    </div>
                     <button
                         onClick={onClose}
                         className="text-text-muted hover:text-text-main focus:outline-none"
+                        type="button"
                     >
-                        <svg
-                            className="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                            />
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-6">
-                    <div className="flex flex-col md:flex-row gap-8">
-                        {/* Colonne Gauche : Info Compétence */}
+                <form onSubmit={handleSubmitAssociate} className="p-6 flex flex-col gap-5">
+                    {/* Two-column layout */}
+                    <div className="flex flex-col md:flex-row gap-6">
+                        {/* Left — Available skills list */}
                         <div className="flex-1">
-                            <InputGroup
-                                id="skill-name"
-                                label="Nom compétence"
-                                placeholder="Nom compétence..."
-                                value={skillName}
-                                onChange={(e) => setSkillName(e.target.value)}
-                                required
-                            />
-                            <TextAreaGroup
-                                id="skill-description"
-                                label="Description compétence"
-                                placeholder="Description compétence..."
-                                value={skillDescription}
-                                onChange={(e) => setSkillDescription(e.target.value)}
-                                required
-                            />
+                            <div className="border border-border rounded-lg overflow-hidden flex flex-col h-[440px]">
+                                <div className="p-3 border-b border-border bg-background">
+                                    <h3 className="font-semibold text-text-main mb-2">Compétences existantes</h3>
+                                    {/* Search */}
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Rechercher une compétence..."
+                                        className="w-full px-3 py-1.5 bg-surface border border-border rounded-lg text-sm text-text-main placeholder-text-muted focus:outline-none focus:border-primary"
+                                    />
+                                </div>
+                                <div className="flex-1 overflow-y-auto">
+                                    {filteredSkills.length === 0 ? (
+                                        <div className="p-4 text-text-muted italic text-sm text-center">
+                                            Aucune compétence disponible dans la base de données (ou toutes sont déjà liées).
+                                        </div>
+                                    ) : (
+                                        filteredSkills.map((skill) => {
+                                            const isSelected = selectedSkillIds.includes(skill.id);
+                                            return (
+                                                <label
+                                                    key={skill.id}
+                                                    className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors border-b border-border/50 last:border-b-0 ${
+                                                        isSelected ? "bg-primary/5" : "hover:bg-background"
+                                                    }`}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isSelected}
+                                                        onChange={() => handleToggleSkill(skill.id)}
+                                                        className="mt-0.5 h-4 w-4 text-primary rounded focus:ring-primary flex-shrink-0"
+                                                    />
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className={`font-medium text-sm ${isSelected ? "text-primary" : "text-text-main"}`}>
+                                                            {skill.name}
+                                                        </div>
+                                                        {skill.description && (
+                                                            <div className="text-xs text-text-muted mt-0.5 truncate">
+                                                                {skill.description}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {isSelected && (
+                                                        <span className="flex-shrink-0 w-2 h-2 bg-primary rounded-full mt-1.5" />
+                                                    )}
+                                                </label>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Colonne Droite : Associations */}
+                        {/* Right — Create new skill */}
                         <div className="flex-1">
-                            <SelectGroup
-                                id="associate-course"
-                                label="Associer à un cours"
-                                value={selectedCourseId}
-                                onChange={(e) => setSelectedCourseId(e.target.value)}
-                            >
-                                <option value="" disabled>
-                                    Sélectionner un cours...
-                                </option>
-                                {existingCourses.map((course) => (
-                                    <option key={course.id} value={course.id}>
-                                        {course.name}
-                                    </option>
-                                ))}
-                            </SelectGroup>
-
-                            {/* <SelectGroup
-                                id="associate-step"
-                                label="Associer à une étape"
-                                value={selectedStepId}
-                                onChange={(e) => setSelectedStepId(e.target.value)}
-                            >
-                                <option value="" disabled>
-                                    Sélectionner une étape...
-                                </option>
-                                {existingSteps.map((step) => (
-                                    <option key={step.id} value={step.id}>
-                                        {step.name}
-                                    </option>
-                                ))}
-                            </SelectGroup> */}
+                            <div className="border border-border rounded-lg bg-background h-[440px] flex flex-col overflow-hidden">
+                                <div className="p-4 border-b border-border">
+                                    <h3 className="font-semibold text-text-main">Créer une nouvelle compétence</h3>
+                                    <p className="text-xs text-text-muted mt-0.5">Elle sera enregistrée et automatiquement associée au cours.</p>
+                                </div>
+                                <div className="flex-1 p-4 overflow-y-auto">
+                                    <InputGroup
+                                        id="new-skill-name"
+                                        label="Nom de la compétence"
+                                        placeholder="Ex: Utiliser Git et Github..."
+                                        value={newSkillName}
+                                        onChange={(e) => setNewSkillName(e.target.value)}
+                                    />
+                                    <TextAreaGroup
+                                        id="new-skill-description"
+                                        label="Description"
+                                        placeholder="Description de la compétence..."
+                                        value={newSkillDescription}
+                                        onChange={(e) => setNewSkillDescription(e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex gap-2 p-4 border-t border-border">
+                                    <Button
+                                        type="button"
+                                        onClick={handleCreateSkill}
+                                        disabled={isCreating || !newSkillName.trim()}
+                                        className="flex-1 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-full disabled:opacity-50"
+                                    >
+                                        {isCreating ? "Création..." : "Créer et associer"}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        onClick={() => { setNewSkillName(""); setNewSkillDescription(""); }}
+                                        className="flex-1 bg-secondary hover:bg-secondary-hover text-white px-4 py-2 rounded-full"
+                                    >
+                                        Vider
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
+                    {/* Selected skills summary */}
+                    {selectedSkillIds.length > 0 && (
+                        <div className="border border-primary/30 bg-primary/5 rounded-lg p-4">
+                            <h3 className="font-semibold mb-2 text-text-main text-sm">
+                                Compétences à associer : {selectedSkillIds.length}
+                            </h3>
+                            <div className="flex flex-wrap gap-2">
+                                {selectedSkillIds.map((skillId) => (
+                                    <span
+                                        key={skillId}
+                                        className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-sm"
+                                    >
+                                        <span className="text-text-main font-medium">{getSkillName(skillId)}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleToggleSkill(skillId)}
+                                            className="text-text-muted hover:text-danger-text transition-colors"
+                                        >
+                                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Footer */}
-                    <div className="flex justify-end gap-4 mt-4 pt-4 border-t border-border">
-                        <Button
-                            type="submit"
-                            className="bg-primary hover:bg-primary-hover px-8 py-2 rounded-full text-white"
-                        >
-                            {skillToEdit ? "Mettre à jour" : "Créer"}
-                        </Button>
+                    <div className="flex justify-end gap-4 pt-2 border-t border-border">
                         <Button
                             type="button"
                             onClick={onClose}
                             className="bg-secondary hover:bg-secondary-hover text-white px-8 py-2 rounded-full"
                         >
                             Annuler
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={selectedSkillIds.length === 0}
+                            className={`px-8 py-2 rounded-full text-white ${
+                                selectedSkillIds.length === 0
+                                    ? "bg-primary/40 cursor-not-allowed"
+                                    : "bg-primary hover:bg-primary-hover"
+                            }`}
+                        >
+                            Valider ({selectedSkillIds.length})
                         </Button>
                     </div>
                 </form>

@@ -1,6 +1,6 @@
 import React from "react";
 import Modal from "./Modal";
-import Button from "../atoms/Button";
+import Button from "../atoms/Buttons/Button";
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
