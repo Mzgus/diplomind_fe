@@ -138,3 +138,23 @@
   --color-warning-text: var(--warning-text);
   --color-warning-border: var(--warning-border);
 }
+
+/* ── Mobile Animations ─────────────────────────────────────────────────── */
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

@@ -8,6 +8,7 @@ import StepModal from "../components/organisms/StepModal";
 import SkillModal from "../components/organisms/SkillModal";
 import SkillStepAssociationModal from "../components/organisms/SkillStepAssociationModal";
 import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationModal";
+import useIsMobile from "../hooks/useIsMobile";
 
 import { CoursesService } from "../_services/courses.service";
 import { ProjectsService } from "../_services/projects.service";
@@ -90,10 +91,13 @@ const Curriculum: React.FC = () => {
     const canEdit = user?.user_role !== "student";
 
     // ── data ─────────────────────────────────────────────────────────────────
+    const isMobile = useIsMobile();
+
+    // ── data ─────────────────────────────────────────────────────────────────
     const [courses, setCourses] = useState<CurriculumCourse[]>([]);
     const [allSkills, setAllSkills] = useState<Skill[]>([]);
     const [loading, setLoading] = useState(true);
-    const [validations, setValidations] = useState<Record<number, { status: string; comment?: string; validated_at?: string }>>({});
+    const [validations, setValidations] = useState<Record<number, { status: string; comment?: string; validated_at?: string }>>({}); 
 
     // ── UI selection state ────────────────────────────────────────────────────
     const [searchQuery, setSearchQuery] = useState("");
@@ -475,6 +479,16 @@ const Curriculum: React.FC = () => {
         [selectedCourse, selectedProjectId]
     );
 
+    // ── Mobile back handler ──────────────────────────────────────────────────
+    const handleMobileBack = () => {
+        setSelectedCourseId(null);
+        setSelectedProjectId(null);
+    };
+
+    // On mobile, show NavTree when nothing is selected, DetailPanel otherwise
+    const showNavTree = isMobile ? selectedCourseId === null : true;
+    const showDetailPanel = isMobile ? selectedCourseId !== null : true;
+
 
     // ─────────────────────────────────────────────────────────────────────────
     // Render
@@ -483,60 +497,65 @@ const Curriculum: React.FC = () => {
     if (loading) return <div className="p-6 text-text-muted">Chargement...</div>;
 
     return (
-        <div className="flex h-full overflow-hidden">
-            {/* Left panel — navigation tree (1/3) */}
-            <div className="w-1/3 flex-shrink-0 h-full">
-                <CurriculumNavTree
-                    courses={courses}
-                    selectedCourseId={selectedCourseId}
-                    selectedProjectId={selectedProjectId}
-                    expandedCourseIds={expandedCourseIds}
-                    canEdit={canEdit}
-                    isAdmin={isAdmin}
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                    onSelectCourse={handleSelectCourse}
-                    onSelectProject={handleSelectProject}
-                    onToggleCourse={handleToggleCourse}
-                    onAddCourse={() => { setCourseToEdit(null); setIsCourseModalOpen(true); }}
-                    onEditCourse={(c) => { setCourseToEdit(c); setIsCourseModalOpen(true); }}
-                    onDeleteCourse={(c) => { setCourseToDelete(c); setIsDeleteCourseModalOpen(true); }}
-                    onAddProject={(c) => { setPreselectedCourseId(c.id); setProjectToEdit(null); setIsProjectModalOpen(true); }}
-                    onEditProject={(p) => { setProjectToEdit(p); setIsProjectModalOpen(true); }}
-                    onDeleteProject={(p) => { setProjectToDelete(p); setIsDeleteProjectModalOpen(true); }}
-                />
-            </div>
+        <div className="flex flex-col lg:flex-row h-full overflow-hidden">
+            {/* Left panel — navigation tree (full width on mobile, 1/3 on desktop) */}
+            {showNavTree && (
+                <div className="w-full lg:w-1/3 flex-shrink-0 h-full">
+                    <CurriculumNavTree
+                        courses={courses}
+                        selectedCourseId={selectedCourseId}
+                        selectedProjectId={selectedProjectId}
+                        expandedCourseIds={expandedCourseIds}
+                        canEdit={canEdit}
+                        isAdmin={isAdmin}
+                        searchQuery={searchQuery}
+                        onSearchChange={setSearchQuery}
+                        onSelectCourse={handleSelectCourse}
+                        onSelectProject={handleSelectProject}
+                        onToggleCourse={handleToggleCourse}
+                        onAddCourse={() => { setCourseToEdit(null); setIsCourseModalOpen(true); }}
+                        onEditCourse={(c) => { setCourseToEdit(c); setIsCourseModalOpen(true); }}
+                        onDeleteCourse={(c) => { setCourseToDelete(c); setIsDeleteCourseModalOpen(true); }}
+                        onAddProject={(c) => { setPreselectedCourseId(c.id); setProjectToEdit(null); setIsProjectModalOpen(true); }}
+                        onEditProject={(p) => { setProjectToEdit(p); setIsProjectModalOpen(true); }}
+                        onDeleteProject={(p) => { setProjectToDelete(p); setIsDeleteProjectModalOpen(true); }}
+                    />
+                </div>
+            )}
 
-            {/* Right panel — detail view */}
-            <div className="flex-1 overflow-y-auto">
-                <CurriculumDetailPanel
-                    selectedCourse={selectedCourse}
-                    selectedProject={selectedProject}
-                    canEdit={canEdit}
-                    validations={user?.user_role === "student" ? validations : undefined}
-                    expandedStepIds={expandedStepIds}
-                    onToggleStep={handleToggleStep}
-                    onAddProject={(c) => { setPreselectedCourseId(c.id); setProjectToEdit(null); setIsProjectModalOpen(true); }}
-                    onSelectProject={handleSelectProject}
-                    onAddStep={(p) => { setPreselectedProjectId(p.id); setStepToEdit(null); setIsStepModalOpen(true); }}
-                    onEditStep={(s) => { setStepToEdit(s); setPreselectedProjectId(s.project_id); setIsStepModalOpen(true); }}
-                    onDeleteStep={(s) => { setStepToDelete(s); setIsDeleteStepModalOpen(true); }}
-                    onAddSkillToStep={handleOpenSkillStepModal}
-                    onEditSkill={(sk, cId) => {
-                        setSkillToEdit({ id: sk.id, name: sk.name, description: sk.description ?? "", courseId: cId.toString() });
-                        setSkillModalCourseId(cId);
-                        setIsSkillModalOpen(true);
-                    }}
-                    onDeleteSkill={(sk, cId) => { setSkillToDelete({ skill: sk, courseId: cId }); setIsDeleteSkillModalOpen(true); }}
-                    onUnlinkSkillFromStep={handleUnlinkSkillFromStep}
-                    onAddSkillToCourse={(c) => {
-                        setSkillToEdit(null);
-                        setSkillModalCourseId(c.id);
-                        setIsSkillModalOpen(true);
-                    }}
-                    onUnlinkSkillFromCourse={handleUnlinkSkillFromCourse}
-                />
-            </div>
+            {/* Right panel — detail view (full width on mobile, flex-1 on desktop) */}
+            {showDetailPanel && (
+                <div className="flex-1 overflow-y-auto">
+                    <CurriculumDetailPanel
+                        selectedCourse={selectedCourse}
+                        selectedProject={selectedProject}
+                        canEdit={canEdit}
+                        validations={user?.user_role === "student" ? validations : undefined}
+                        expandedStepIds={expandedStepIds}
+                        onToggleStep={handleToggleStep}
+                        onBack={isMobile ? handleMobileBack : undefined}
+                        onAddProject={(c) => { setPreselectedCourseId(c.id); setProjectToEdit(null); setIsProjectModalOpen(true); }}
+                        onSelectProject={handleSelectProject}
+                        onAddStep={(p) => { setPreselectedProjectId(p.id); setStepToEdit(null); setIsStepModalOpen(true); }}
+                        onEditStep={(s) => { setStepToEdit(s); setPreselectedProjectId(s.project_id); setIsStepModalOpen(true); }}
+                        onDeleteStep={(s) => { setStepToDelete(s); setIsDeleteStepModalOpen(true); }}
+                        onAddSkillToStep={handleOpenSkillStepModal}
+                        onEditSkill={(sk, cId) => {
+                            setSkillToEdit({ id: sk.id, name: sk.name, description: sk.description ?? "", courseId: cId.toString() });
+                            setSkillModalCourseId(cId);
+                            setIsSkillModalOpen(true);
+                        }}
+                        onDeleteSkill={(sk, cId) => { setSkillToDelete({ skill: sk, courseId: cId }); setIsDeleteSkillModalOpen(true); }}
+                        onUnlinkSkillFromStep={handleUnlinkSkillFromStep}
+                        onAddSkillToCourse={(c) => {
+                            setSkillToEdit(null);
+                            setSkillModalCourseId(c.id);
+                            setIsSkillModalOpen(true);
+                        }}
+                        onUnlinkSkillFromCourse={handleUnlinkSkillFromCourse}
+                    />
+                </div>
+            )}
 
             {/* ── Modals ── */}
 

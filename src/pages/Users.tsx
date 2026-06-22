@@ -6,9 +6,11 @@ import DeleteConfirmationModal from "../components/organisms/DeleteConfirmationM
 import UnlinkConfirmationModal from "../components/organisms/UnlinkConfirmationModal";
 import UserModal from "../components/organisms/UserModal";
 import UserSheetModal from "../components/organisms/UserSheetModal";
+import BottomSheet from "../components/organisms/BottomSheet";
 import { UsersService } from "../_services/users.service";
 import { ClassesService } from "../_services/classes.service";
 import { CoursesService } from "../_services/courses.service";
+import useIsMobile from "../hooks/useIsMobile";
 import type { Class } from "../types";
 
 interface AccountDisplay {
@@ -30,6 +32,8 @@ interface AccountDisplay {
 }
 
 const Users: React.FC = () => {
+  const isMobile = useIsMobile();
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -499,17 +503,20 @@ const Users: React.FC = () => {
   }));
 
   return (
-    <div className="p-6 h-[calc(100vh-100px)] min-h-[600px] flex flex-col overflow-hidden">
-      <h1 className="text-3xl font-bold mb-6 text-text-main flex-shrink-0">Comptes Utilisateurs</h1>
+    <div className="p-4 md:p-6 h-[calc(100vh-64px)] lg:h-[calc(100vh-100px)] min-h-[400px] lg:min-h-[600px] flex flex-col overflow-hidden">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-text-main flex-shrink-0">Comptes Utilisateurs</h1>
 
-      {/* Split Pane layout with fixed heights */}
-      <div className="flex flex-col lg:flex-row gap-8 flex-1 min-h-0">
-        {/* Left Side: Accounts list */}
+      {/* Split Pane layout */}
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 flex-1 min-h-0">
+        {/* Left Side: Accounts list — full width on mobile */}
         <div className="w-full lg:w-2/3 h-full flex flex-col min-h-0">
           <AccountsTable
             accounts={allAccounts}
             selectedAccountId={selectedAccountId}
-            onSelectAccount={setSelectedAccountId}
+            onSelectAccount={(id) => {
+              setSelectedAccountId(id);
+              if (isMobile) setIsBottomSheetOpen(true);
+            }}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onAddAccount={() => {
@@ -522,8 +529,8 @@ const Users: React.FC = () => {
           />
         </div>
 
-        {/* Right Side: Profiles sidebar */}
-        <div className="w-full lg:w-1/3 h-full flex flex-col min-h-0">
+        {/* Right Side: Profiles sidebar — hidden on mobile, shown in BottomSheet instead */}
+        <div className="hidden lg:flex w-full lg:w-1/3 h-full flex-col min-h-0">
           <ProfilesSidebar
             selectedAccount={selectedAccount}
             classesMap={classesMap}
@@ -543,6 +550,28 @@ const Users: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* Mobile BottomSheet for Profiles */}
+      {isMobile && (
+        <BottomSheet
+          isOpen={isBottomSheetOpen}
+          onClose={() => setIsBottomSheetOpen(false)}
+          title="Profils Associés"
+        >
+          <ProfilesSidebar
+            selectedAccount={selectedAccount}
+            classesMap={classesMap}
+            coursesMap={coursesMap}
+            onEditSheet={(sheet) => { setIsBottomSheetOpen(false); handleEditSheet(sheet); }}
+            onDeleteSheet={(sheet) => { setIsBottomSheetOpen(false); handleOpenDeleteSheet(sheet); }}
+            onUnlinkSheet={(sheet) => { setIsBottomSheetOpen(false); handleOpenUnlinkSheet(sheet); }}
+            onToggleSheetActive={handleToggleSheetActive}
+            onCreateSheet={() => { setIsBottomSheetOpen(false); setItemToEditSheet(null); setIsSheetModalOpen(true); }}
+            onLinkSheet={() => { setIsBottomSheetOpen(false); setIsLinkModalOpen(true); }}
+            onReorderSheets={handleReorderSheets}
+          />
+        </BottomSheet>
+      )}
 
       {/* Modals */}
       <UserModal

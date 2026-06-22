@@ -25,7 +25,7 @@ const TopNavbar: React.FC<TopBarProps> = ({
   const { isOpen, toggleOpen } = useSidebar();
 
   return (
-    <header className="w-full bg-topbar border-b border-border z-40 relative">
+    <header className="w-full bg-topbar border-b border-border z-50 relative">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-4">
@@ -45,7 +45,7 @@ const TopNavbar: React.FC<TopBarProps> = ({
             <BrandLogo />
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <ThemeToggle />
             
             <UserProfile

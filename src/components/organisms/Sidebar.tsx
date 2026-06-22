@@ -64,16 +64,16 @@ const Sidebar: React.FC = () => {
     <>
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden transition-opacity"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      <aside 
+      <aside
         className={`
-          fixed inset-y-0 left-0 z-50 flex flex-col bg-sidebar p-4 transition-all duration-300 ease-in-out
-          lg:relative lg:translate-x-0
+          fixed top-16 bottom-0 left-0 z-40 flex flex-col bg-sidebar p-4 transition-all duration-300 ease-in-out
+          lg:relative lg:top-0 lg:translate-x-0
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           ${isCollapsed ? "lg:w-20" : "lg:w-72"}
           w-72

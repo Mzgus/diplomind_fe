@@ -83,11 +83,10 @@ const CurriculumNavTree: React.FC<CurriculumNavTreeProps> = ({
                         <div key={course.id}>
                             {/* Course row */}
                             <div
-                                className={`group flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors ${
-                                    isCourseSelected && !selectedProjectId
+                                className={`group flex items-center gap-2 px-3 py-3 lg:py-2 cursor-pointer transition-colors ${isCourseSelected && !selectedProjectId
                                         ? "bg-primary/10 text-primary"
                                         : "hover:bg-background"
-                                }`}
+                                    }`}
                                 onClick={() => {
                                     onSelectCourse(course.id);
                                     if (!isExpanded) onToggleCourse(course.id);
@@ -96,7 +95,7 @@ const CurriculumNavTree: React.FC<CurriculumNavTreeProps> = ({
                                 {/* Chevron */}
                                 <button
                                     type="button"
-                                    className="flex-shrink-0 p-0.5 rounded text-text-muted hover:text-text-main transition-colors"
+                                    className="flex-shrink-0 p-2 lg:p-0.5 rounded text-text-muted hover:text-text-main transition-colors"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onToggleCourse(course.id);
@@ -127,13 +126,13 @@ const CurriculumNavTree: React.FC<CurriculumNavTreeProps> = ({
                                 {/* Action buttons — visible on hover if canEdit */}
                                 {canEdit && (
                                     <div
-                                        className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                                        className="flex gap-1 opacity-0 group-hover:opacity-100 max-lg:opacity-100 transition-opacity flex-shrink-0"
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         <button
                                             type="button"
                                             onClick={() => onAddProject(course)}
-                                            className="p-1 rounded text-primary hover:bg-primary/10 transition-colors"
+                                            className="p-2 lg:p-1 rounded text-primary hover:bg-primary/10 transition-colors"
                                             title="Ajouter un projet"
                                         >
                                             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -143,7 +142,7 @@ const CurriculumNavTree: React.FC<CurriculumNavTreeProps> = ({
                                         <button
                                             type="button"
                                             onClick={() => onEditCourse(course)}
-                                            className="p-1 rounded text-text-muted hover:text-text-main hover:bg-background transition-colors"
+                                            className="p-2 lg:p-1 rounded text-text-muted hover:text-text-main hover:bg-background transition-colors"
                                             title="Modifier le cours"
                                         >
                                             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -154,7 +153,7 @@ const CurriculumNavTree: React.FC<CurriculumNavTreeProps> = ({
                                             <button
                                                 type="button"
                                                 onClick={() => onDeleteCourse(course)}
-                                                className="p-1 rounded text-danger-text hover:bg-danger-bg transition-colors"
+                                                className="p-2 lg:p-1 rounded text-danger-text hover:bg-danger-bg transition-colors"
                                                 title="Supprimer le cours"
                                             >
                                                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -172,11 +171,10 @@ const CurriculumNavTree: React.FC<CurriculumNavTreeProps> = ({
                                 return (
                                     <div
                                         key={project.id}
-                                        className={`group flex items-center gap-2 pl-10 pr-3 py-1.5 cursor-pointer transition-colors ${
-                                            isProjectSelected
+                                        className={`group flex items-center gap-2 pl-10 pr-3 py-1.5 cursor-pointer transition-colors ${isProjectSelected
                                                 ? "bg-primary/10 border-l-4 border-primary text-primary font-semibold"
                                                 : "bg-background/80 hover:bg-background border-l-4 border-transparent"
-                                        }`}
+                                            }`}
                                         onClick={() => onSelectProject(course.id, project.id)}
                                     >
                                         {/* Cube icon */}
@@ -200,13 +198,13 @@ const CurriculumNavTree: React.FC<CurriculumNavTreeProps> = ({
                                         {/* Action buttons — hover */}
                                         {canEdit && (
                                             <div
-                                                className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                                                className="flex gap-1 opacity-0 group-hover:opacity-100 max-lg:opacity-100 transition-opacity flex-shrink-0"
                                                 onClick={(e) => e.stopPropagation()}
                                             >
                                                 <button
                                                     type="button"
                                                     onClick={() => onEditProject(project)}
-                                                    className="p-1 rounded text-text-muted hover:text-text-main hover:bg-surface transition-colors"
+                                                    className="p-2 rounded text-text-muted hover:text-text-main hover:bg-surface transition-colors"
                                                     title="Modifier le projet"
                                                 >
                                                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

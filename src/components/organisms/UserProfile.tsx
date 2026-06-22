@@ -66,7 +66,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-72 bg-surface rounded-xl shadow-xl z-50 border border-border overflow-hidden">
+        <div className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-surface rounded-xl shadow-xl z-50 border border-border overflow-hidden">
           <div className="py-1">
             <Link
               to="/account"

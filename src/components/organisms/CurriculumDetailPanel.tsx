@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import CurriculumStepSection from "./CurriculumStepSection";
 import Button from "../atoms/Buttons/Button";
+import MobileBackButton from "../atoms/MobileBackButton";
 import type {
     CurriculumCourse, CurriculumProject, CurriculumStep,
     SkillWithSteps, Skill,
@@ -27,6 +28,7 @@ interface CurriculumDetailPanelProps {
     onUnlinkSkillFromStep: (stepId: number, skillId: number, courseId: number) => void;
     onAddSkillToCourse: (course: CurriculumCourse) => void;
     onUnlinkSkillFromCourse: (courseId: number, skillId: number) => void;
+    onBack?: () => void;
 }
 
 const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
@@ -47,6 +49,7 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
     onUnlinkSkillFromStep,
     onAddSkillToCourse,
     onUnlinkSkillFromCourse,
+    onBack,
 }) => {
     const navigate = useNavigate();
 
@@ -64,7 +67,7 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
     // ── 1. Nothing selected ────────────────────────────────────────────────────
     if (!selectedCourse) {
         return (
-            <div className="flex flex-col items-center justify-center h-full text-text-muted gap-4 select-none">
+            <div className="flex flex-col items-center justify-center h-full text-text-muted gap-4 select-none p-4">
                 <svg className="h-16 w-16 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
@@ -76,7 +79,8 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
     // ── 2. Course selected, no project ────────────────────────────────────────
     if (!selectedProject) {
         return (
-            <div className="p-8 h-full overflow-y-auto">
+            <div className="p-4 md:p-8 h-full overflow-y-auto">
+                {onBack && <MobileBackButton onClick={onBack} label="Retour aux cours" />}
                 {/* Course header */}
                 <div className="mb-8">
                     <h2 className="text-3xl font-bold text-text-main">{selectedCourse.name}</h2>
@@ -174,7 +178,7 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
                                     )}
                                 </div>
                                 {canEdit && (
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 max-lg:opacity-100 transition-opacity flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             type="button"
                                             onClick={() => onEditSkill(skill as any, selectedCourse.id)}
@@ -223,7 +227,8 @@ const CurriculumDetailPanel: React.FC<CurriculumDetailPanelProps> = ({
     const courseId = selectedCourse.id;
 
     return (
-        <div className="p-8 h-full overflow-y-auto">
+        <div className="p-4 md:p-8 h-full overflow-y-auto">
+            {onBack && <MobileBackButton onClick={onBack} label="Retour aux cours" />}
             {/* Project header */}
             <div className="flex items-start justify-between gap-4 mb-8">
                 <div>
